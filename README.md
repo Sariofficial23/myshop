@@ -4,8 +4,8 @@ SaaS-система учёта для магазинов телефонов, б�
 работающая внутри **Telegram Mini App**: продажи, склад, IMEI/серийные номера, приходы,
 перемещения, инвентаризация, касса, рассрочки, гарантии и отчёты.
 
-> **Статус:** ✅ Этап 1 — инфраструктура (monorepo, frontend, backend, database, Docker,
-> environment, health checks). План этапов — [docs/ROADMAP.md](docs/ROADMAP.md).
+> **Статус:** ✅ Этап 1 — инфраструктура · ✅ Этап 2 — вход через Telegram, компании, филиалы,
+> сотрудники и роли (RBAC). План этапов — [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Стек
 
@@ -62,7 +62,9 @@ pnpm db:seed
 pnpm dev
 ```
 
-- Web: http://localhost:3001 — главная страница показывает состояние сервера и базы данных.
+- Web: http://localhost:3001 — вне Telegram показывается экран «Вход для разработки»
+  с демо-сотрудниками (Owner, Manager, Seller, Warehouse), если `AUTH_DEV_LOGIN_ENABLED=true`
+  и `NEXT_PUBLIC_DEV_LOGIN=true` (так в `.env.example`).
 - API health: http://localhost:3000/api/health и http://localhost:3000/api/health/ready
 - Swagger UI: http://localhost:3000/api/docs
 
@@ -101,22 +103,39 @@ docker compose --profile bot up --build     # + Telegram-бот (нужен TELE
 
 Полный список с комментариями — [.env.example](.env.example).
 
-| Переменная                          | Где           | Описание                                              |
-| ----------------------------------- | ------------- | ----------------------------------------------------- |
-| `DATABASE_URL`                      | api, database | PostgreSQL для приложения (Supabase — Session pooler) |
-| `DIRECT_URL`                        | database      | PostgreSQL для миграций                               |
-| `DATABASE_POOL_MAX`                 | api           | Размер пула соединений (по умолчанию 10)              |
-| `PORT`                              | api           | Порт API (Render задаёт сам)                          |
-| `CORS_ORIGINS`                      | api           | Разрешённые origin фронтенда через запятую            |
-| `SWAGGER_ENABLED`                   | api           | Swagger в production (по умолчанию выключен)          |
-| `TRUST_PROXY`                       | api           | `true` за прокси (Render)                             |
-| `THROTTLE_TTL_MS`, `THROTTLE_LIMIT` | api           | Rate limiting                                         |
-| `TELEGRAM_BOT_TOKEN`                | bot           | Токен от @BotFather (секрет)                          |
-| `MINI_APP_URL`                      | bot           | HTTPS-адрес фронтенда                                 |
-| `NEXT_PUBLIC_API_URL`               | web           | URL API (публичный, попадает в браузер)               |
-| `NEXT_PUBLIC_DEFAULT_LOCALE`        | web           | `ru` или `uz`                                         |
+| Переменная                           | Где           | Описание                                              |
+| ------------------------------------ | ------------- | ----------------------------------------------------- |
+| `DATABASE_URL`                       | api, database | PostgreSQL для приложения (Supabase — Session pooler) |
+| `DIRECT_URL`                         | database      | PostgreSQL для миграций                               |
+| `DATABASE_POOL_MAX`                  | api           | Размер пула соединений (по умолчанию 10)              |
+| `PORT`                               | api           | Порт API (Render задаёт сам)                          |
+| `CORS_ORIGINS`                       | api           | Разрешённые origin фронтенда через запятую            |
+| `SWAGGER_ENABLED`                    | api           | Swagger в production (по умолчанию выключен)          |
+| `TRUST_PROXY`                        | api           | `true` за прокси (Render)                             |
+| `THROTTLE_TTL_MS`, `THROTTLE_LIMIT`  | api           | Rate limiting                                         |
+| `JWT_ACCESS_SECRET`                  | api           | Секрет подписи JWT, ≥ 32 символов (секрет)            |
+| `JWT_ACCESS_TTL_SECONDS`             | api           | Время жизни access token (по умолчанию 900)           |
+| `REFRESH_TOKEN_TTL_DAYS`             | api           | Время жизни сессии (по умолчанию 30)                  |
+| `TELEGRAM_INIT_DATA_MAX_AGE_SECONDS` | api           | Максимальный возраст initData (по умолчанию 86400)    |
+| `AUTH_DEV_LOGIN_ENABLED`             | api           | Вход по демо-пользователям (запрещён в production)    |
+| `TELEGRAM_BOT_TOKEN`                 | api, bot      | Токен от @BotFather (секрет): проверка initData, бот  |
+| `MINI_APP_URL`                       | bot           | HTTPS-адрес фронтенда                                 |
+| `NEXT_PUBLIC_API_URL`                | web           | URL API (публичный, попадает в браузер)               |
+| `NEXT_PUBLIC_DEFAULT_LOCALE`         | web           | `ru` или `uz`                                         |
+| `NEXT_PUBLIC_DEV_LOGIN`              | web           | Показать экран входа для разработки                   |
 
 API валидирует окружение при старте и не запустится с некорректной конфигурацией.
+
+## Вход и роли
+
+- **В Telegram:** Mini App передаёт подписанный `initData` → API проверяет подпись токеном бота
+  → находит сотрудника → выдаёт access token (JWT, 15 мин) и refresh token (30 дней, ротируется).
+  `telegram_id`, присланный клиентом без подписи, никогда не принимается.
+- **Новый пользователь** видит свой Telegram ID (чтобы владелец добавил его как сотрудника)
+  или создаёт свой магазин — становится владельцем.
+- **Роли:** OWNER, MANAGER, SELLER, WAREHOUSE. Права проверяются на backend на каждом запросе;
+  продавцу можно дополнительно выдать право на возвраты и др.
+- **Изоляция:** все данные фильтруются по компании из сессии; продавец и склад видят только свои филиалы.
 
 ## Деплой
 

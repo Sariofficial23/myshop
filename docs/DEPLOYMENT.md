@@ -107,18 +107,23 @@ pnpm db:status
 
 В той же форме → **Environment Variables** → _Add Environment Variable_ (или позже: _Environment_ в меню сервиса):
 
-| Key                 | Value                                     | Комментарий                                                          |
-| ------------------- | ----------------------------------------- | -------------------------------------------------------------------- |
-| `NODE_VERSION`      | `22`                                      | Версия Node.js для сборки и запуска                                  |
-| `NODE_ENV`          | `production`                              |                                                                      |
-| `DATABASE_URL`      | Session pooler URI + `?sslmode=no-verify` | из шага 1.2 — **секрет**                                             |
-| `DIRECT_URL`        | Session pooler URI + `?sslmode=require`   | из шага 1.2 — **секрет**                                             |
-| `DATABASE_POOL_MAX` | `5`                                       | Supabase free ограничивает число подключений к пулеру                |
-| `CORS_ORIGINS`      | `http://localhost:3001`                   | Временно. После шага 3 заменим на URL Vercel                         |
-| `TRUST_PROXY`       | `true`                                    | Render стоит перед приложением как прокси — нужно для rate limit     |
-| `SWAGGER_ENABLED`   | `true`                                    | Swagger UI на `/api/docs`. Поставьте `false`, если не нужен публично |
+| Key                  | Value                                     | Комментарий                                                          |
+| -------------------- | ----------------------------------------- | -------------------------------------------------------------------- |
+| `NODE_VERSION`       | `22`                                      | Версия Node.js для сборки и запуска                                  |
+| `NODE_ENV`           | `production`                              |                                                                      |
+| `DATABASE_URL`       | Session pooler URI + `?sslmode=no-verify` | из шага 1.2 — **секрет**                                             |
+| `DIRECT_URL`         | Session pooler URI + `?sslmode=require`   | из шага 1.2 — **секрет**                                             |
+| `DATABASE_POOL_MAX`  | `5`                                       | Supabase free ограничивает число подключений к пулеру                |
+| `CORS_ORIGINS`       | `http://localhost:3001`                   | Временно. После шага 3 заменим на URL Vercel                         |
+| `TRUST_PROXY`        | `true`                                    | Render стоит перед приложением как прокси — нужно для rate limit     |
+| `SWAGGER_ENABLED`    | `true`                                    | Swagger UI на `/api/docs`. Поставьте `false`, если не нужен публично |
+| `JWT_ACCESS_SECRET`  | нажмите **Generate**                      | Секрет подписи токенов входа (≥ 32 символов) — **секрет**            |
+| `TELEGRAM_BOT_TOKEN` | токен бота из шага 5.1                    | Нужен для входа через Telegram — **секрет**                          |
 
 `PORT` задавать **не нужно** — Render передаёт его сам, API слушает `0.0.0.0:$PORT`.
+
+> ⚠️ Без `JWT_ACCESS_SECRET` API (начиная с этапа 2) не запустится — это сделано намеренно.
+> `AUTH_DEV_LOGIN_ENABLED` на Render **не добавляйте**: в production вход без Telegram запрещён.
 
 ### 2.3 Health check
 
@@ -226,8 +231,9 @@ DATABASE_URL='<Session pooler URI>?sslmode=no-verify' pnpm db:seed
 
 ## 5. Telegram — бот и Mini App
 
-Полная интеграция (проверка подписи `initData`, вход по Telegram, production-авторизация,
-webhook-режим бота) — **этап 9**. Сейчас можно подготовить бота и подключить Mini App.
+С этапа 2 вход в MyShop работает через Telegram: API проверяет подпись `initData`
+токеном бота. Для этого на Render должен быть задан `TELEGRAM_BOT_TOKEN` (шаг 2.2).
+Полное оформление Mini App (тема Telegram, кнопки, webhook-режим бота) — **этап 9**.
 
 ### 5.1 Создать бота
 
@@ -243,6 +249,17 @@ webhook-режим бота) — **этап 9**. Сейчас можно под�
 - **Bot Settings → Menu Button** → URL `https://myshop.vercel.app`, текст `Открыть MyShop`.
 
 Теперь Mini App открывается кнопкой меню в чате с ботом.
+
+### 5.2.1 Первый вход
+
+1. Откройте бота в Telegram → кнопка меню **Открыть MyShop**.
+2. Вы новый пользователь — MyShop покажет ваш **Telegram ID** и форму **«Создать свой магазин»**.
+3. Введите название магазина и первого филиала → вы **владелец** (OWNER).
+4. Сотрудники: пусть каждый откроет бота — увидит свой Telegram ID. Добавьте его в
+   **Ещё → Сотрудники → Добавить сотрудника**, выберите роль и филиалы.
+
+> Вне Telegram (просто в браузере) production-сайт показывает «Откройте MyShop через Telegram» —
+> это ожидаемо: без подписи Telegram войти нельзя.
 
 ### 5.3 Запуск бота (команды /start и /help)
 

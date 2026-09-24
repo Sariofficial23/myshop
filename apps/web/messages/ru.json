@@ -3,10 +3,47 @@
     "name": "MyShop",
     "tagline": "Учёт магазина электроники прямо в Telegram"
   },
+  "nav": {
+    "home": "Главная",
+    "more": "Ещё"
+  },
+  "common": {
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "edit": "Изменить",
+    "add": "Добавить",
+    "back": "Назад",
+    "loading": "Загрузка…",
+    "retry": "Повторить",
+    "saved": "Сохранено",
+    "inactive": "Отключён",
+    "active": "Активен",
+    "optional": "необязательно"
+  },
+  "auth": {
+    "loading": "Вход в MyShop…",
+    "openInTelegram": "Откройте MyShop через Telegram",
+    "openInTelegramHint": "Найдите бота MyShop в Telegram и нажмите кнопку «Открыть MyShop». Вход произойдёт автоматически.",
+    "devLoginTitle": "Вход для разработки",
+    "devLoginHint": "Демо-пользователи. Доступно только локально.",
+    "logout": "Выйти",
+    "noMembershipTitle": "Вас ещё нет в магазине",
+    "noMembershipHint": "Попросите владельца или менеджера добавить вас как сотрудника и указать ваш Telegram ID:",
+    "createShopTitle": "Или создайте свой магазин",
+    "createShopHint": "Вы станете владельцем и сможете добавить филиалы и сотрудников.",
+    "companyName": "Название магазина",
+    "companyNamePlaceholder": "Например, Techno House",
+    "branchName": "Первый филиал",
+    "branchNamePlaceholder": "Например, Чиланзар",
+    "createShop": "Создать магазин",
+    "switchCompany": "Компания"
+  },
   "home": {
-    "title": "Добро пожаловать в MyShop",
-    "subtitle": "Продажи, склад, IMEI, касса и отчёты — в одном простом приложении.",
-    "stageNotice": "Базовая инфраструктура готова. Разделы продаж, склада и отчётов появятся на следующих этапах."
+    "greeting": "Здравствуйте, {name}!",
+    "roleIn": "{role} · {company}",
+    "yourBranches": "Ваши филиалы",
+    "allBranches": "Все филиалы компании",
+    "stageNotice": "Готово: вход, компания, филиалы и сотрудники. Товары, склад и продажи появятся на следующих этапах."
   },
   "system": {
     "title": "Состояние системы",
@@ -18,6 +55,67 @@
     "version": "Версия {version}",
     "latency": "{ms} мс",
     "retry": "Проверить снова"
+  },
+  "more": {
+    "title": "Ещё",
+    "company": "Компания",
+    "branches": "Филиалы",
+    "users": "Сотрудники",
+    "language": "Язык",
+    "telegramId": "Telegram ID: {id}"
+  },
+  "company": {
+    "title": "Компания",
+    "name": "Название",
+    "currency": "Валюта",
+    "currencyHint": "Код ISO 4217, например UZS или USD",
+    "timezone": "Часовой пояс",
+    "readOnly": "Изменять настройки компании может только владелец."
+  },
+  "branches": {
+    "title": "Филиалы",
+    "add": "Добавить филиал",
+    "new": "Новый филиал",
+    "name": "Название",
+    "address": "Адрес",
+    "phone": "Телефон",
+    "isActive": "Филиал работает",
+    "empty": "Филиалов пока нет",
+    "showInactive": "Показать отключённые"
+  },
+  "users": {
+    "title": "Сотрудники",
+    "add": "Добавить сотрудника",
+    "new": "Новый сотрудник",
+    "editTitle": "Сотрудник",
+    "firstName": "Имя",
+    "lastName": "Фамилия",
+    "phone": "Телефон",
+    "telegramId": "Telegram ID",
+    "telegramIdHint": "По нему сотрудник входит в MyShop. Он показан на экране входа у сотрудника.",
+    "telegramLinked": "Telegram привязан",
+    "role": "Роль",
+    "branches": "Доступ к филиалам",
+    "allBranches": "Все филиалы",
+    "allBranchesHint": "Включая филиалы, которые появятся позже",
+    "extraPermissions": "Дополнительные права",
+    "isActive": "Может входить в систему",
+    "you": "вы",
+    "notLoggedIn": "ещё не входил",
+    "readOnly": "Вы не можете изменять этого сотрудника.",
+    "empty": "Сотрудников пока нет"
+  },
+  "roles": {
+    "OWNER": "Владелец",
+    "MANAGER": "Менеджер",
+    "SELLER": "Продавец",
+    "WAREHOUSE": "Склад"
+  },
+  "permissions": {
+    "returns_create": "Оформлять возвраты",
+    "products_manage": "Управлять товарами",
+    "reports_view": "Смотреть отчёты",
+    "cash_manage": "Работать с кассой"
   },
   "locale": {
     "label": "Язык",
@@ -41,6 +139,25 @@
     "DUPLICATE_IMEI": "Такой IMEI уже есть в системе.",
     "SALE_NOT_FOUND": "Продажа не найдена.",
     "RETURN_LIMIT_EXCEEDED": "Нельзя вернуть больше товара, чем было продано.",
+    "INVALID_INIT_DATA": "Не удалось подтвердить вход через Telegram. Откройте MyShop заново из бота.",
+    "INIT_DATA_EXPIRED": "Сессия Telegram устарела. Закройте и снова откройте MyShop.",
+    "TELEGRAM_AUTH_NOT_CONFIGURED": "Вход через Telegram ещё не настроен на сервере.",
+    "NO_MEMBERSHIP": "Вы ещё не добавлены ни в один магазин.",
+    "ACCOUNT_DISABLED": "Ваш доступ отключён. Обратитесь к владельцу магазина.",
+    "INVALID_REFRESH_TOKEN": "Сессия истекла. Войдите снова.",
+    "DEV_LOGIN_DISABLED": "Вход для разработки отключён.",
+    "COMPANY_NOT_FOUND": "Компания не найдена.",
+    "BRANCH_NOT_FOUND": "Филиал не найден.",
+    "BRANCH_ACCESS_DENIED": "У вас нет доступа к этому филиалу.",
+    "DUPLICATE_BRANCH_NAME": "Филиал с таким названием уже есть.",
+    "USER_NOT_FOUND": "Сотрудник не найден.",
+    "USER_ALREADY_MEMBER": "Этот пользователь Telegram уже работает в вашем магазине.",
+    "TELEGRAM_ID_TAKEN": "Этот Telegram ID уже привязан к другому пользователю.",
+    "BRANCH_REQUIRED": "Выберите хотя бы один филиал.",
+    "ROLE_ASSIGNMENT_FORBIDDEN": "Вы не можете назначать эту роль или изменять этого сотрудника.",
+    "LAST_OWNER": "В магазине должен остаться хотя бы один владелец.",
+    "CANNOT_MODIFY_SELF": "Нельзя изменить свою роль, доступ или статус.",
+    "ALREADY_REGISTERED": "Вы уже работаете в магазине.",
     "NETWORK_ERROR": "Нет связи с сервером. Проверьте интернет.",
     "UNKNOWN": "Что-то пошло не так. Попробуйте ещё раз."
   }

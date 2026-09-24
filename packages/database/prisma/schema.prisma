@@ -6,8 +6,8 @@
 //  - остатки товара меняются только через документированные операции
 //    (PURCHASE, SALE, RETURN, TRANSFER, WRITE_OFF, INVENTORY_ADJUSTMENT).
 //
-// ЭТАП 1: базовые сущности арендатора — Company и Branch.
-// Пользователи, товары, документы и движения товара добавляются на следующих этапах.
+// ЭТАП 1: Company, Branch.
+// ЭТАП 2: User, Membership (роль в компании), MembershipBranch (доступ к филиалам), Session.
 
 generator client {
   provider     = "prisma-client"
@@ -30,7 +30,8 @@ model Company {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  branches Branch[]
+  branches    Branch[]
+  memberships Membership[]
 
   @@index([createdAt])
   @@map("companies")
@@ -47,9 +48,104 @@ model Branch {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  company Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  company            Company            @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  membershipBranches MembershipBranch[]
 
   @@unique([companyId, name])
   @@index([companyId, isActive])
   @@map("branches")
+}
+
+/// Роль сотрудника внутри компании.
+enum Role {
+  OWNER
+  MANAGER
+  SELLER
+  WAREHOUSE
+}
+
+/// Человек. Один пользователь может работать в нескольких компаниях (через Membership).
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  /// Telegram user id. Вход в систему — только через проверенный Telegram initData.
+  telegramId   BigInt?  @unique @map("telegram_id")
+  firstName    String   @map("first_name") @db.VarChar(100)
+  lastName     String?  @map("last_name") @db.VarChar(100)
+  username     String?  @db.VarChar(64)
+  phone        String?  @db.VarChar(32)
+  languageCode String?  @map("language_code") @db.VarChar(8)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  memberships Membership[]
+  sessions    Session[]
+
+  @@index([phone])
+  @@map("users")
+}
+
+/// Сотрудник компании: пользователь + роль + права + доступ к филиалам.
+model Membership {
+  id               String    @id @default(uuid()) @db.Uuid
+  companyId        String    @map("company_id") @db.Uuid
+  userId           String    @map("user_id") @db.Uuid
+  role             Role
+  /// Дополнительные права сверх роли (например, возвраты для продавца).
+  extraPermissions String[]  @default([]) @map("extra_permissions")
+  /// true — доступ ко всем филиалам компании, false — только к перечисленным в MembershipBranch.
+  allBranches      Boolean   @default(false) @map("all_branches")
+  isActive         Boolean   @default(true) @map("is_active")
+  lastLoginAt      DateTime? @map("last_login_at") @db.Timestamptz(3)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  company  Company            @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  user     User               @relation(fields: [userId], references: [id], onDelete: Restrict)
+  branches MembershipBranch[]
+  sessions Session[]
+
+  @@unique([companyId, userId])
+  @@index([userId])
+  @@index([companyId, role])
+  @@map("memberships")
+}
+
+/// Доступ сотрудника к конкретному филиалу.
+model MembershipBranch {
+  membershipId String   @map("membership_id") @db.Uuid
+  branchId     String   @map("branch_id") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  membership Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  branch     Branch     @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@id([membershipId, branchId])
+  @@index([branchId])
+  @@map("membership_branches")
+}
+
+/// Сессия входа. Хранит только хэш refresh token; токены ротируются при каждом обновлении.
+model Session {
+  id               String    @id @default(uuid()) @db.Uuid
+  userId           String    @map("user_id") @db.Uuid
+  membershipId     String    @map("membership_id") @db.Uuid
+  refreshTokenHash String    @unique @map("refresh_token_hash") @db.Char(64)
+  expiresAt        DateTime  @map("expires_at") @db.Timestamptz(3)
+  revokedAt        DateTime? @map("revoked_at") @db.Timestamptz(3)
+  /// Сессия, созданная при ротации этой. Повторное использование старого токена = компрометация.
+  replacedById     String?   @map("replaced_by_id") @db.Uuid
+  userAgent        String?   @map("user_agent") @db.VarChar(500)
+  ip               String?   @db.VarChar(64)
+  lastUsedAt       DateTime  @default(now()) @map("last_used_at") @db.Timestamptz(3)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  membership Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revokedAt])
+  @@index([membershipId])
+  @@index([expiresAt])
+  @@map("sessions")
 }

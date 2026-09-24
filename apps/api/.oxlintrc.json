@@ -20,6 +20,12 @@
       {
         "allow": ["reflect-metadata", "dotenv/config"]
       }
+    ],
+    "vitest/expect-expect": [
+      "error",
+      {
+        "assertFunctionNames": ["expect", "request.**.expect", "http.**.expect", "*.expect"]
+      }
     ]
   },
   "env": {
