@@ -104,7 +104,31 @@ Health-эндпоинты исключены из rate limiting.
 - Соглашения: `uuid` PK, `snake_case` таблицы/колонки через `@@map/@map`,
   `created_at`/`updated_at` (`timestamptz`) у всех важных сущностей, индексы по `company_id`.
 - `DATABASE_URL` — runtime (пул приложения), `DIRECT_URL` — миграции.
-- Этап 1: `Company`, `Branch`. Модели следующих этапов — см. [ROADMAP.md](ROADMAP.md).
+- Этап 1: `Company`, `Branch`. Этап 2: `User`, `Membership`, `MembershipBranch`, `Session`.
+  Модели следующих этапов — см. [ROADMAP.md](ROADMAP.md).
+- `User` — человек (глобально, по `telegram_id`); `Membership` — его роль в конкретной компании.
+  Один пользователь может работать в нескольких магазинах и переключаться между ними.
+
+## Авторизация и доступ (этап 2)
+
+```
+Telegram Mini App ── initData (подписан Telegram) ──► POST /api/auth/telegram
+                                                        │ HMAC-SHA256(bot token) + auth_date
+                                                        ▼
+                         User(telegram_id) → Membership(company, role) → Session
+                                                        │
+          ◄── accessToken (JWT 15 мин: sub, sid) + refreshToken (30 дней, ротация) ──┘
+
+Каждый запрос: Bearer JWT → JwtAuthGuard → Session + Membership из БД → AuthContext
+               → PermissionsGuard (@RequirePermissions) → сервис (фильтр по ctx.companyId)
+```
+
+- `AuthContext` (`apps/api/src/auth/auth-context.ts`): `companyId`, `role`, `permissions`,
+  `allBranches`, `branchIds`. Сервисы **обязаны** фильтровать данные по `ctx.companyId`
+  и проверять филиал через `assertBranchAccess` / `accessibleBranchWhere`.
+- Права ролей и дополнительные права — `packages/shared/src/permissions.ts`
+  (один источник для backend и frontend; frontend только скрывает кнопки).
+- Эндпоинты без авторизации помечаются `@Public()` (health, вход).
 
 ## Безопасность (заложено на этапе 1)
 
@@ -116,5 +140,5 @@ Health-эндпоинты исключены из rate limiting.
 - `X-Request-Id` для трассировки
 - Docker-образы запускаются от непривилегированного пользователя `node`
 
-Этапы 2 и 9 добавят JWT, проверку подписи Telegram `initData`, RBAC-guards,
-company/branch scoping и audit log.
+Этап 2 добавил JWT-сессии, проверку подписи Telegram `initData`, RBAC-guards,
+изоляцию компаний и доступ к филиалам. Audit log — этап 8.

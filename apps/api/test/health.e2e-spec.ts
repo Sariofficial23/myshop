@@ -1,22 +1,16 @@
 import type { NestExpressApplication } from '@nestjs/platform-express';
-import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { AppModule } from '../src/app.module.js';
-import { configureApp } from '../src/app.setup.js';
+import { createTestApp } from './helpers.js';
 
 /**
- * Требует запущенный PostgreSQL и DATABASE_URL (см. apps/api/.env.example).
+ * Требует запущенный PostgreSQL и DATABASE_URL (см. корневой .env.example).
  */
 describe('Health & platform (e2e)', () => {
   let app: NestExpressApplication;
 
   beforeAll(async () => {
-    process.env.CORS_ORIGINS = 'http://localhost:3001';
-    const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
-    app = moduleRef.createNestApplication<NestExpressApplication>();
-    configureApp(app);
-    await app.init();
+    app = await createTestApp();
   });
 
   afterAll(async () => {

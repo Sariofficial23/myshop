@@ -1,13 +1,14 @@
 import path from 'node:path';
-import { loadEnvConfig } from '@next/env';
+import { config as loadDotenv } from 'dotenv';
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
 const monorepoRoot = path.resolve(process.cwd(), '../..');
 
-// Локально переменные берутся из корневого .env монорепозитория.
+// Локально переменные берутся из корневого .env монорепозитория (уже заданные не перезаписываются).
 // На Vercel они задаются в Project Settings → Environment Variables.
-loadEnvConfig(monorepoRoot);
+// (@next/env здесь не подходит: Next.js уже загрузил env для apps/web и кеширует результат.)
+loadDotenv({ path: path.join(monorepoRoot, '.env'), quiet: true });
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 

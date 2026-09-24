@@ -3,10 +3,47 @@
     "name": "MyShop",
     "tagline": "Elektronika do‘koni hisobi — to‘g‘ridan-to‘g‘ri Telegramda"
   },
+  "nav": {
+    "home": "Bosh sahifa",
+    "more": "Yana"
+  },
+  "common": {
+    "save": "Saqlash",
+    "cancel": "Bekor qilish",
+    "edit": "O‘zgartirish",
+    "add": "Qo‘shish",
+    "back": "Orqaga",
+    "loading": "Yuklanmoqda…",
+    "retry": "Qayta urinish",
+    "saved": "Saqlandi",
+    "inactive": "O‘chirilgan",
+    "active": "Faol",
+    "optional": "ixtiyoriy"
+  },
+  "auth": {
+    "loading": "MyShop’ga kirilmoqda…",
+    "openInTelegram": "MyShop’ni Telegram orqali oching",
+    "openInTelegramHint": "Telegram’da MyShop botini toping va «MyShop’ni ochish» tugmasini bosing. Kirish avtomatik bo‘ladi.",
+    "devLoginTitle": "Dasturchilar uchun kirish",
+    "devLoginHint": "Demo foydalanuvchilar. Faqat lokal muhitda.",
+    "logout": "Chiqish",
+    "noMembershipTitle": "Siz hali do‘konga qo‘shilmagansiz",
+    "noMembershipHint": "Do‘kon egasi yoki menejeridan sizni xodim sifatida qo‘shishni va Telegram ID’ingizni kiritishni so‘rang:",
+    "createShopTitle": "Yoki o‘z do‘koningizni yarating",
+    "createShopHint": "Siz egasi bo‘lasiz va filiallar hamda xodimlarni qo‘sha olasiz.",
+    "companyName": "Do‘kon nomi",
+    "companyNamePlaceholder": "Masalan, Techno House",
+    "branchName": "Birinchi filial",
+    "branchNamePlaceholder": "Masalan, Chilonzor",
+    "createShop": "Do‘kon yaratish",
+    "switchCompany": "Kompaniya"
+  },
   "home": {
-    "title": "MyShop’ga xush kelibsiz",
-    "subtitle": "Savdo, ombor, IMEI, kassa va hisobotlar — bitta oddiy ilovada.",
-    "stageNotice": "Asosiy infratuzilma tayyor. Savdo, ombor va hisobot bo‘limlari keyingi bosqichlarda qo‘shiladi."
+    "greeting": "Assalomu alaykum, {name}!",
+    "roleIn": "{role} · {company}",
+    "yourBranches": "Filiallaringiz",
+    "allBranches": "Kompaniyaning barcha filiallari",
+    "stageNotice": "Tayyor: kirish, kompaniya, filiallar va xodimlar. Mahsulotlar, ombor va savdo keyingi bosqichlarda qo‘shiladi."
   },
   "system": {
     "title": "Tizim holati",
@@ -18,6 +55,67 @@
     "version": "Versiya {version}",
     "latency": "{ms} ms",
     "retry": "Qayta tekshirish"
+  },
+  "more": {
+    "title": "Yana",
+    "company": "Kompaniya",
+    "branches": "Filiallar",
+    "users": "Xodimlar",
+    "language": "Til",
+    "telegramId": "Telegram ID: {id}"
+  },
+  "company": {
+    "title": "Kompaniya",
+    "name": "Nomi",
+    "currency": "Valyuta",
+    "currencyHint": "ISO 4217 kodi, masalan UZS yoki USD",
+    "timezone": "Vaqt mintaqasi",
+    "readOnly": "Kompaniya sozlamalarini faqat egasi o‘zgartira oladi."
+  },
+  "branches": {
+    "title": "Filiallar",
+    "add": "Filial qo‘shish",
+    "new": "Yangi filial",
+    "name": "Nomi",
+    "address": "Manzil",
+    "phone": "Telefon",
+    "isActive": "Filial ishlayapti",
+    "empty": "Hozircha filiallar yo‘q",
+    "showInactive": "O‘chirilganlarni ko‘rsatish"
+  },
+  "users": {
+    "title": "Xodimlar",
+    "add": "Xodim qo‘shish",
+    "new": "Yangi xodim",
+    "editTitle": "Xodim",
+    "firstName": "Ism",
+    "lastName": "Familiya",
+    "phone": "Telefon",
+    "telegramId": "Telegram ID",
+    "telegramIdHint": "Xodim MyShop’ga shu orqali kiradi. U xodimning kirish ekranida ko‘rsatiladi.",
+    "telegramLinked": "Telegram bog‘langan",
+    "role": "Rol",
+    "branches": "Filiallarga kirish",
+    "allBranches": "Barcha filiallar",
+    "allBranchesHint": "Keyinchalik qo‘shiladigan filiallar ham",
+    "extraPermissions": "Qo‘shimcha huquqlar",
+    "isActive": "Tizimga kira oladi",
+    "you": "siz",
+    "notLoggedIn": "hali kirmagan",
+    "readOnly": "Siz bu xodimni o‘zgartira olmaysiz.",
+    "empty": "Hozircha xodimlar yo‘q"
+  },
+  "roles": {
+    "OWNER": "Egasi",
+    "MANAGER": "Menejer",
+    "SELLER": "Sotuvchi",
+    "WAREHOUSE": "Omborchi"
+  },
+  "permissions": {
+    "returns_create": "Qaytarishni rasmiylashtirish",
+    "products_manage": "Mahsulotlarni boshqarish",
+    "reports_view": "Hisobotlarni ko‘rish",
+    "cash_manage": "Kassa bilan ishlash"
   },
   "locale": {
     "label": "Til",
@@ -41,6 +139,25 @@
     "DUPLICATE_IMEI": "Bunday IMEI tizimda allaqachon bor.",
     "SALE_NOT_FOUND": "Savdo topilmadi.",
     "RETURN_LIMIT_EXCEEDED": "Sotilganidan ko‘p mahsulotni qaytarib bo‘lmaydi.",
+    "INVALID_INIT_DATA": "Telegram orqali kirishni tasdiqlab bo‘lmadi. MyShop’ni botdan qayta oching.",
+    "INIT_DATA_EXPIRED": "Telegram sessiyasi eskirgan. MyShop’ni yopib, qayta oching.",
+    "TELEGRAM_AUTH_NOT_CONFIGURED": "Telegram orqali kirish serverda hali sozlanmagan.",
+    "NO_MEMBERSHIP": "Siz hali hech qaysi do‘konga qo‘shilmagansiz.",
+    "ACCOUNT_DISABLED": "Kirishingiz o‘chirilgan. Do‘kon egasiga murojaat qiling.",
+    "INVALID_REFRESH_TOKEN": "Sessiya tugadi. Qayta kiring.",
+    "DEV_LOGIN_DISABLED": "Dasturchilar uchun kirish o‘chirilgan.",
+    "COMPANY_NOT_FOUND": "Kompaniya topilmadi.",
+    "BRANCH_NOT_FOUND": "Filial topilmadi.",
+    "BRANCH_ACCESS_DENIED": "Bu filialga kirish huquqingiz yo‘q.",
+    "DUPLICATE_BRANCH_NAME": "Bunday nomli filial allaqachon bor.",
+    "USER_NOT_FOUND": "Xodim topilmadi.",
+    "USER_ALREADY_MEMBER": "Bu Telegram foydalanuvchisi do‘koningizda allaqachon ishlaydi.",
+    "TELEGRAM_ID_TAKEN": "Bu Telegram ID boshqa foydalanuvchiga bog‘langan.",
+    "BRANCH_REQUIRED": "Kamida bitta filialni tanlang.",
+    "ROLE_ASSIGNMENT_FORBIDDEN": "Siz bu rolni tayinlay olmaysiz yoki bu xodimni o‘zgartira olmaysiz.",
+    "LAST_OWNER": "Do‘konda kamida bitta egasi qolishi kerak.",
+    "CANNOT_MODIFY_SELF": "O‘z rolingiz, kirish huquqingiz yoki holatingizni o‘zgartirib bo‘lmaydi.",
+    "ALREADY_REGISTERED": "Siz allaqachon do‘konda ishlaysiz.",
     "NETWORK_ERROR": "Server bilan aloqa yo‘q. Internetni tekshiring.",
     "UNKNOWN": "Nimadir xato ketdi. Qayta urinib ko‘ring."
   }
