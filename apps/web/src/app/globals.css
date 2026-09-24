@@ -1,0 +1,22 @@
+@import 'tailwindcss';
+
+/* Tailwind должен видеть классы общих UI-компонентов */
+@source '../../../../packages/ui/src';
+
+@theme {
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  @apply bg-slate-50 text-slate-900 antialiased;
+  -webkit-tap-highlight-color: transparent;
+}

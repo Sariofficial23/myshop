@@ -1,0 +1,47 @@
+{
+  "app": {
+    "name": "MyShop",
+    "tagline": "Elektronika do‘koni hisobi — to‘g‘ridan-to‘g‘ri Telegramda"
+  },
+  "home": {
+    "title": "MyShop’ga xush kelibsiz",
+    "subtitle": "Savdo, ombor, IMEI, kassa va hisobotlar — bitta oddiy ilovada.",
+    "stageNotice": "Asosiy infratuzilma tayyor. Savdo, ombor va hisobot bo‘limlari keyingi bosqichlarda qo‘shiladi."
+  },
+  "system": {
+    "title": "Tizim holati",
+    "api": "Server",
+    "database": "Ma’lumotlar bazasi",
+    "ok": "Ishlayapti",
+    "error": "Mavjud emas",
+    "checking": "Tekshirilmoqda…",
+    "version": "Versiya {version}",
+    "latency": "{ms} ms",
+    "retry": "Qayta tekshirish"
+  },
+  "locale": {
+    "label": "Til",
+    "ru": "Русский",
+    "uz": "O‘zbekcha"
+  },
+  "errors": {
+    "VALIDATION_ERROR": "Maydonlar to‘g‘ri to‘ldirilganini tekshiring.",
+    "BAD_REQUEST": "Noto‘g‘ri so‘rov.",
+    "NOT_FOUND": "Yozuv topilmadi.",
+    "CONFLICT": "Bunday yozuv allaqachon mavjud yoki o‘zgartirilgan.",
+    "RATE_LIMITED": "So‘rovlar juda ko‘p. Biroz kutib, qayta urinib ko‘ring.",
+    "INTERNAL_ERROR": "Serverda ichki xatolik. Keyinroq urinib ko‘ring.",
+    "SERVICE_UNAVAILABLE": "Xizmat vaqtincha ishlamayapti. Keyinroq urinib ko‘ring.",
+    "UNAUTHORIZED": "Tizimga kirish kerak.",
+    "FORBIDDEN": "Bu amal uchun sizda ruxsat yo‘q.",
+    "PRODUCT_NOT_FOUND": "Mahsulot topilmadi.",
+    "INSUFFICIENT_STOCK": "Omborda mahsulot yetarli emas.",
+    "IMEI_NOT_FOUND": "IMEI / seriya raqami topilmadi.",
+    "IMEI_ALREADY_SOLD": "Bu IMEI allaqachon sotilgan.",
+    "DUPLICATE_IMEI": "Bunday IMEI tizimda allaqachon bor.",
+    "SALE_NOT_FOUND": "Savdo topilmadi.",
+    "RETURN_LIMIT_EXCEEDED": "Sotilganidan ko‘p mahsulotni qaytarib bo‘lmaydi.",
+    "NETWORK_ERROR": "Server bilan aloqa yo‘q. Internetni tekshiring.",
+    "UNKNOWN": "Nimadir xato ketdi. Qayta urinib ko‘ring."
+  }
+}

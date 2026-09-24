@@ -1,0 +1,30 @@
+# Render Blueprint (НЕОБЯЗАТЕЛЬНО). Пошаговый ручной деплой без Blueprint —
+# в docs/DEPLOYMENT.md. Этот файл описывает те же настройки декларативно.
+services:
+  - type: web
+    name: myshop-api
+    runtime: node
+    region: frankfurt
+    plan: free
+    rootDir: .
+    buildCommand: pnpm install --frozen-lockfile --prod=false && pnpm turbo run build --filter=@myshop/api && pnpm db:deploy
+    startCommand: node apps/api/dist/main.js
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: '22'
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: 'true'
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: DATABASE_POOL_MAX
+        value: '5'
+      - key: CORS_ORIGINS
+        sync: false
+      - key: SWAGGER_ENABLED
+        value: 'true'

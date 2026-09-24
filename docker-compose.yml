@@ -1,0 +1,82 @@
+# Локальная инфраструктура MyShop.
+#   docker compose up -d db            — только PostgreSQL (для pnpm dev)
+#   docker compose --profile app up    — PostgreSQL + API + Web (+ миграции)
+#   docker compose --profile bot up    — дополнительно Telegram-бот (нужен TELEGRAM_BOT_TOKEN)
+
+name: myshop
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: myshop
+      POSTGRES_PASSWORD: myshop
+      POSTGRES_DB: myshop
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U myshop -d myshop']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  migrate:
+    profiles: [app, bot]
+    build:
+      context: .
+      dockerfile: packages/database/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://myshop:myshop@db:5432/myshop?schema=public
+      DIRECT_URL: postgresql://myshop:myshop@db:5432/myshop?schema=public
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    profiles: [app, bot]
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://myshop:myshop@db:5432/myshop?schema=public
+      CORS_ORIGINS: http://localhost:3001
+      SWAGGER_ENABLED: 'true'
+      TRUST_PROXY: 'false'
+    ports:
+      - '3000:3000'
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  web:
+    profiles: [app, bot]
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:3000
+    restart: unless-stopped
+    ports:
+      - '3001:3000'
+    depends_on:
+      - api
+
+  bot:
+    profiles: [bot]
+    build:
+      context: .
+      dockerfile: apps/bot/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:?TELEGRAM_BOT_TOKEN is required}
+      MINI_APP_URL: ${MINI_APP_URL:?MINI_APP_URL is required}
+
+volumes:
+  pgdata:

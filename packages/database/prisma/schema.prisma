@@ -1,0 +1,55 @@
+// MyShop — схема базы данных (PostgreSQL).
+//
+// Правила:
+//  - у всех важных сущностей есть createdAt / updatedAt;
+//  - все данные бизнеса изолированы по companyId (multi-tenant);
+//  - остатки товара меняются только через документированные операции
+//    (PURCHASE, SALE, RETURN, TRANSFER, WRITE_OFF, INVENTORY_ADJUSTMENT).
+//
+// ЭТАП 1: базовые сущности арендатора — Company и Branch.
+// Пользователи, товары, документы и движения товара добавляются на следующих этапах.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Компания (арендатор). Корень изоляции данных.
+model Company {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @db.VarChar(200)
+  /// Код валюты ISO 4217, по умолчанию узбекский сум.
+  currency  String   @default("UZS") @db.Char(3)
+  timezone  String   @default("Asia/Tashkent") @db.VarChar(64)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  branches Branch[]
+
+  @@index([createdAt])
+  @@map("companies")
+}
+
+/// Филиал / торговая точка / склад компании.
+model Branch {
+  id        String   @id @default(uuid()) @db.Uuid
+  companyId String   @map("company_id") @db.Uuid
+  name      String   @db.VarChar(200)
+  address   String?  @db.VarChar(500)
+  phone     String?  @db.VarChar(32)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+
+  @@unique([companyId, name])
+  @@index([companyId, isActive])
+  @@map("branches")
+}

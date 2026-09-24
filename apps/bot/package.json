@@ -1,0 +1,30 @@
+{
+  "name": "@myshop/bot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MyShop Telegram bot (grammY): \u043e\u0442\u043a\u0440\u044b\u0432\u0430\u0435\u0442 Mini App, \u0431\u0435\u0437 \u0431\u0438\u0437\u043d\u0435\u0441-\u043b\u043e\u0433\u0438\u043a\u0438",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsx watch src/main.ts",
+    "start": "node dist/main.js",
+    "lint": "oxlint --deny-warnings src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.3",
+    "grammy": "^1.46.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "oxlint": "^1.58.0",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.2",
+    "vitest": "^4.1.11"
+  }
+}

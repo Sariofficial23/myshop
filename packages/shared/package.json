@@ -1,0 +1,30 @@
+{
+  "name": "@myshop/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Общие типы и константы MyShop (коды ошибок, роли, источники движения товара)",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "lint": "oxlint --deny-warnings src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "oxlint": "^1.58.0",
+    "typescript": "~6.0.2",
+    "vitest": "^4.1.2"
+  }
+}
