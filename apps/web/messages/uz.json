@@ -260,7 +260,10 @@
     "createdBy": "Yaratdi: {name}",
     "confirmedBy": "O‘tkazdi: {name}",
     "lineTotal": "{qty} × {price} = {total}",
-    "serialsRequired": "Kamida bitta raqam kiriting"
+    "serialsRequired": "Kamida bitta raqam kiriting",
+    "startHint": "Mahsulotni toping yoki shtrix-kodni skanerlang. Ro'yxatda bo'lmasa — shu yerning o'zida yangisini yarating.",
+    "details": "Yetkazib beruvchi va nakladnoy",
+    "addDetails": "+ Yetkazib beruvchi va nakladnoy raqami (ixtiyoriy)"
   },
   "suppliers": {
     "title": "Yetkazib beruvchilar",
@@ -657,6 +660,26 @@
     "unblock": "Blokdan chiqarish",
     "blockConfirm": "«{name}» bloklansinmi? Xodimlar ishlay olmaydi.",
     "activateMonth": "1 oyga faollashtirish"
+  },
+  "quickProduct": {
+    "title": "Yangi mahsulot",
+    "name": "Nomi",
+    "namePlaceholder": "Masalan, iPhone 16 128GB Black",
+    "kind": "Qanday hisoblanadi",
+    "kind_IMEI": "Telefon (IMEI)",
+    "kind_SERIAL": "Seriya №",
+    "kind_NONE": "Raqamsiz",
+    "kindHint_IMEI": "Telefonlar uchun: har bir qurilma o'z IMEI bo'yicha.",
+    "kindHint_SERIAL": "Seriya raqamli texnika uchun: televizor, noutbuk, quloqchin.",
+    "kindHint_NONE": "Aksessuarlar uchun: g'ilof, zaryadlovchi, kabel — dona bilan hisoblanadi.",
+    "salePrice": "Sotuv narxi",
+    "warranty": "Kafolat, oy",
+    "barcode": "Shtrix-kod",
+    "optional": "ixtiyoriy",
+    "cancel": "Bekor qilish",
+    "create": "+ Yangi mahsulot yaratish",
+    "createNamed": "+ «{name}» mahsulotini yaratish",
+    "submit": "Yaratish"
   },
   "errors": {
     "VALIDATION_ERROR": "Maydonlar to‘g‘ri to‘ldirilganini tekshiring.",

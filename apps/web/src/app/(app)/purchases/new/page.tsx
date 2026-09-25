@@ -1,5 +1,6 @@
 'use client';
 
+import { Permission } from '@myshop/shared';
 import { Button, Card, SelectField, TextField } from '@myshop/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ScanBarcode } from 'lucide-react';
@@ -12,7 +13,7 @@ import { PageHeader } from '@/components/page-header';
 import { SupplierSelect } from '@/components/stock/supplier-select';
 import { type PickedVariant, VariantPicker } from '@/components/stock/variant-picker';
 import { purchasesApi } from '@/lib/api/stock';
-import { useMe } from '@/lib/auth/auth-provider';
+import { useCan, useMe } from '@/lib/auth/auth-provider';
 import { parseMoneyInput } from '@/lib/format/money';
 import { findDuplicates, parseSerialList } from '@/lib/format/serials';
 import { useMoney } from '@/lib/hooks/use-money';
@@ -34,6 +35,7 @@ function lineQuantity(line: Line): number {
 export default function NewPurchasePage() {
   const t = useTranslations();
   const me = useMe();
+  const can = useCan();
   const router = useRouter();
   const money = useMoney();
   const queryClient = useQueryClient();
@@ -42,6 +44,7 @@ export default function NewPurchasePage() {
   const [documentNumber, setDocumentNumber] = useState('');
   const [lines, setLines] = useState<Line[]>([]);
   const [showErrors, setShowErrors] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
 
   const addLine = useCallback((picked: PickedVariant) => {
     setLines((current) =>
@@ -111,25 +114,22 @@ export default function NewPurchasePage() {
   return (
     <>
       <PageHeader title={t('purchases.new')} backHref="/purchases" backLabel={t('common.back')} />
-      <Card>
-        <div className="flex flex-col gap-3">
-          <SelectField
-            label={t('purchases.branch')}
-            value={branchId}
-            onChange={(e) => setBranchId(e.target.value)}
-            options={me.branches.map((b) => ({ value: b.id, label: b.name }))}
-          />
-          <SupplierSelect value={supplierId} onChange={setSupplierId} />
-          <TextField
-            label={`${t('purchases.documentNumber')} (${t('common.optional')})`}
-            value={documentNumber}
-            onChange={(e) => setDocumentNumber(e.target.value)}
-            maxLength={64}
-          />
-        </div>
-      </Card>
 
-      <h2 className="text-lg font-semibold">{t('purchases.items')}</h2>
+      {me.branches.length > 1 ? (
+        <SelectField
+          label={t('purchases.branch')}
+          value={branchId}
+          onChange={(e) => setBranchId(e.target.value)}
+          options={me.branches.map((b) => ({ value: b.id, label: b.name }))}
+        />
+      ) : null}
+
+      <VariantPicker onPick={addLine} allowCreate={can(Permission.PRODUCTS_MANAGE)} />
+      {lines.length === 0 ? (
+        <p className={showErrors ? 'text-sm text-red-600' : 'text-sm text-[#8e8e93]'}>
+          {showErrors ? t('purchases.noItems') : t('purchases.startHint')}
+        </p>
+      ) : null}
       {lines.map((line) => (
         <LineCard
           key={line.key}
@@ -139,26 +139,52 @@ export default function NewPurchasePage() {
           onRemove={() => setLines((current) => current.filter((l) => l.key !== line.key))}
         />
       ))}
-      <VariantPicker onPick={addLine} />
-      {showErrors && lines.length === 0 ? (
-        <p className="text-sm text-red-600">{t('purchases.noItems')}</p>
-      ) : null}
 
-      <Card>
-        <p className="text-lg font-bold">
-          {t('purchases.total', { value: money(total.toFixed(2)) })}
-        </p>
-        <p className="mt-1 text-sm text-slate-500">{t('purchases.confirmHint')}</p>
-        <div className="mt-3 flex flex-col gap-2">
-          <ErrorMessage error={save.error} />
-          <Button block disabled={save.isPending} onClick={() => submit(true)}>
-            {t('purchases.confirm')}
-          </Button>
-          <Button block variant="secondary" disabled={save.isPending} onClick={() => submit(false)}>
-            {t('purchases.saveDraft')}
-          </Button>
-        </div>
-      </Card>
+      {lines.length ? (
+        <>
+          {showDetails ? (
+            <Card title={t('purchases.details')}>
+              <div className="flex flex-col gap-3">
+                <SupplierSelect value={supplierId} onChange={setSupplierId} />
+                <TextField
+                  label={`${t('purchases.documentNumber')} (${t('common.optional')})`}
+                  value={documentNumber}
+                  onChange={(e) => setDocumentNumber(e.target.value)}
+                  maxLength={64}
+                />
+              </div>
+            </Card>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowDetails(true)}
+              className="min-h-11 self-start px-1 text-[15px] font-semibold text-brand-600"
+            >
+              {t('purchases.addDetails')}
+            </button>
+          )}
+          <Card>
+            <p className="text-lg font-bold">
+              {t('purchases.total', { value: money(total.toFixed(2)) })}
+            </p>
+            <p className="mt-1 text-sm text-slate-500">{t('purchases.confirmHint')}</p>
+            <div className="mt-3 flex flex-col gap-2">
+              <ErrorMessage error={save.error} />
+              <Button block disabled={save.isPending} onClick={() => submit(true)}>
+                {t('purchases.confirm')}
+              </Button>
+              <Button
+                block
+                variant="secondary"
+                disabled={save.isPending}
+                onClick={() => submit(false)}
+              >
+                {t('purchases.saveDraft')}
+              </Button>
+            </div>
+          </Card>
+        </>
+      ) : null}
     </>
   );
 }
