@@ -99,6 +99,7 @@ export async function as(app: NestExpressApplication, telegramId: bigint) {
     get: (url: string) => auth(request(server).get(url)),
     post: (url: string) => auth(request(server).post(url)),
     patch: (url: string) => auth(request(server).patch(url)),
+    delete: (url: string) => auth(request(server).delete(url)),
   };
 }
 

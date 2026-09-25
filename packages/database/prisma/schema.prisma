@@ -8,6 +8,7 @@
 //
 // ЭТАП 1: Company, Branch.
 // ЭТАП 2: User, Membership (роль в компании), MembershipBranch (доступ к филиалам), Session.
+// ЭТАП 3: Category, Brand, Product, ProductVariant, Barcode, SerialNumber (IMEI / серийные номера).
 
 generator client {
   provider     = "prisma-client"
@@ -30,8 +31,14 @@ model Company {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  branches    Branch[]
-  memberships Membership[]
+  branches      Branch[]
+  memberships   Membership[]
+  categories    Category[]
+  brands        Brand[]
+  products      Product[]
+  variants      ProductVariant[]
+  barcodes      Barcode[]
+  serialNumbers SerialNumber[]
 
   @@index([createdAt])
   @@map("companies")
@@ -50,6 +57,7 @@ model Branch {
 
   company            Company            @relation(fields: [companyId], references: [id], onDelete: Restrict)
   membershipBranches MembershipBranch[]
+  serialNumbers      SerialNumber[]
 
   @@unique([companyId, name])
   @@index([companyId, isActive])
@@ -148,4 +156,169 @@ model Session {
   @@index([membershipId])
   @@index([expiresAt])
   @@map("sessions")
+}
+
+// ─────────────────────────── Каталог (этап 3) ───────────────────────────
+
+enum ProductUnit {
+  PCS
+  SET
+  PAIR
+  M
+  KG
+}
+
+/// Тип уникального идентификатора единицы товара.
+enum SerialType {
+  IMEI
+  SERIAL
+}
+
+enum SerialStatus {
+  IN_STOCK
+  SOLD
+  RETURNED
+  TRANSFERRED
+  WRITTEN_OFF
+}
+
+/// Категория товаров (может быть вложенной: Техника → Телевизоры).
+model Category {
+  id        String   @id @default(uuid()) @db.Uuid
+  companyId String   @map("company_id") @db.Uuid
+  parentId  String?  @map("parent_id") @db.Uuid
+  name      String   @db.VarChar(120)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  company  Company    @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children Category[] @relation("CategoryTree")
+  products Product[]
+
+  @@unique([companyId, name])
+  @@index([companyId, parentId])
+  @@map("categories")
+}
+
+model Brand {
+  id        String   @id @default(uuid()) @db.Uuid
+  companyId String   @map("company_id") @db.Uuid
+  name      String   @db.VarChar(120)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  products Product[]
+
+  @@unique([companyId, name])
+  @@map("brands")
+}
+
+/// Товар (модель): "iPhone 15". Продаётся и учитывается на складе через варианты.
+model Product {
+  id             String      @id @default(uuid()) @db.Uuid
+  companyId      String      @map("company_id") @db.Uuid
+  categoryId     String?     @map("category_id") @db.Uuid
+  brandId        String?     @map("brand_id") @db.Uuid
+  name           String      @db.VarChar(200)
+  sku            String      @db.VarChar(64)
+  description    String?     @db.Text
+  unit           ProductUnit @default(PCS)
+  /// Порог "заканчивается" для отчёта низких остатков.
+  minimumStock   Int         @default(0) @map("minimum_stock")
+  /// null — обычный товар; IMEI / SERIAL — каждая единица учитывается по номеру.
+  serialType     SerialType? @map("serial_type")
+  warrantyMonths Int         @default(0) @map("warranty_months")
+  isActive       Boolean     @default(true) @map("is_active")
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  company  Company          @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  category Category?        @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  brand    Brand?           @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  variants ProductVariant[]
+
+  @@unique([companyId, sku])
+  @@index([companyId, isActive])
+  @@index([companyId, categoryId])
+  @@index([companyId, brandId])
+  @@index([companyId, name])
+  @@map("products")
+}
+
+/// Вариант товара: "128GB Black". Остатки, цены, штрихкоды и IMEI привязаны к варианту.
+model ProductVariant {
+  id         String   @id @default(uuid()) @db.Uuid
+  companyId  String   @map("company_id") @db.Uuid
+  productId  String   @map("product_id") @db.Uuid
+  sku        String   @db.VarChar(64)
+  /// Отображаемое название варианта, например "128GB Black". null — единственный вариант товара.
+  name       String?  @db.VarChar(200)
+  model      String?  @db.VarChar(100)
+  color      String?  @db.VarChar(60)
+  memory     String?  @db.VarChar(30)
+  storage    String?  @db.VarChar(30)
+  /// Прочие характеристики: { "diagonal": "55\"", "screen": "OLED" }.
+  attributes Json     @default("{}")
+  /// Текущая цена продажи. Обновляется документом прихода (этап 4).
+  salePrice  Decimal? @map("sale_price") @db.Decimal(14, 2)
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  company       Company        @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  product       Product        @relation(fields: [productId], references: [id], onDelete: Restrict)
+  barcodes      Barcode[]
+  serialNumbers SerialNumber[]
+
+  @@unique([companyId, sku])
+  @@index([productId])
+  @@map("product_variants")
+}
+
+/// Штрихкод варианта. Один код — один вариант в пределах компании.
+model Barcode {
+  id        String   @id @default(uuid()) @db.Uuid
+  companyId String   @map("company_id") @db.Uuid
+  variantId String   @map("variant_id") @db.Uuid
+  code      String   @db.VarChar(64)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  company Company        @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, code])
+  @@index([variantId])
+  @@map("barcodes")
+}
+
+/// Конкретная единица товара с IMEI / серийным номером.
+/// Создаётся только документом прихода (этап 4) — вручную добавить нельзя.
+/// Связи с приходом и продажей (purchaseId, saleId) добавляются на этапах 4–5.
+model SerialNumber {
+  id            String       @id @default(uuid()) @db.Uuid
+  companyId     String       @map("company_id") @db.Uuid
+  variantId     String       @map("variant_id") @db.Uuid
+  branchId      String       @map("branch_id") @db.Uuid
+  type          SerialType
+  number        String       @db.VarChar(64)
+  status        SerialStatus @default(IN_STOCK)
+  warrantyStart DateTime?    @map("warranty_start") @db.Timestamptz(3)
+  warrantyEnd   DateTime?    @map("warranty_end") @db.Timestamptz(3)
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  company Company        @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  branch  Branch         @relation(fields: [branchId], references: [id], onDelete: Restrict)
+
+  /// Нельзя дважды добавить один и тот же IMEI в компании.
+  @@unique([companyId, number])
+  @@index([variantId, status])
+  @@index([branchId, status])
+  @@map("serial_numbers")
 }

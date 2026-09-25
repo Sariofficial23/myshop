@@ -28,6 +28,33 @@ const STATUS_TO_CODE: Partial<Record<number, ErrorCode>> = {
   [HttpStatus.SERVICE_UNAVAILABLE]: ErrorCode.SERVICE_UNAVAILABLE,
 };
 
+/**
+ * Нарушение unique-индекса → понятный пользователю код.
+ * Имена индексов генерирует Prisma: <таблица>_<колонки>_key.
+ */
+const UNIQUE_CONSTRAINT_CODES: Record<string, ErrorCode> = {
+  branches_company_id_name_key: ErrorCode.DUPLICATE_BRANCH_NAME,
+  categories_company_id_name_key: ErrorCode.DUPLICATE_CATEGORY,
+  brands_company_id_name_key: ErrorCode.DUPLICATE_BRAND,
+  products_company_id_sku_key: ErrorCode.DUPLICATE_SKU,
+  product_variants_company_id_sku_key: ErrorCode.DUPLICATE_SKU,
+  barcodes_company_id_code_key: ErrorCode.DUPLICATE_BARCODE,
+  serial_numbers_company_id_number_key: ErrorCode.DUPLICATE_IMEI,
+  users_telegram_id_key: ErrorCode.TELEGRAM_ID_TAKEN,
+};
+
+/** Имя нарушенного unique-индекса (driver adapter) или список полей (классический движок). */
+export function uniqueConstraintName(
+  error: Prisma.PrismaClientKnownRequestError,
+): string | undefined {
+  const meta = error.meta as
+    | { driverAdapterError?: { cause?: { constraint?: { index?: string } } }; target?: unknown }
+    | undefined;
+  const index = meta?.driverAdapterError?.cause?.constraint?.index;
+  if (index) return index;
+  return typeof meta?.target === 'string' ? meta.target : undefined;
+}
+
 export function normalizeException(exception: unknown): NormalizedError {
   if (exception instanceof AppException) {
     return {
@@ -51,13 +78,17 @@ export function normalizeException(exception: unknown): NormalizedError {
 
   if (exception instanceof Prisma.PrismaClientKnownRequestError) {
     switch (exception.code) {
-      case 'P2002': // unique constraint
+      case 'P2002': {
+        // unique constraint
+        const constraint = uniqueConstraintName(exception);
         return {
           status: HttpStatus.CONFLICT,
-          code: ErrorCode.CONFLICT,
+          code:
+            (constraint ? UNIQUE_CONSTRAINT_CODES[constraint] : undefined) ?? ErrorCode.CONFLICT,
           message: 'Unique constraint violation',
-          details: { target: exception.meta?.target },
+          details: constraint ? { constraint } : undefined,
         };
+      }
       case 'P2025': // record not found
         return { status: HttpStatus.NOT_FOUND, code: ErrorCode.NOT_FOUND, message: 'Not found' };
       case 'P2003': // foreign key
