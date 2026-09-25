@@ -57,8 +57,15 @@ export interface PaymentInput {
   amount: string | Prisma.Decimal;
 }
 
-/** Сумма платежей должна точно совпадать с суммой к оплате (долги и рассрочка — этап 7). */
-export function validatePayments(total: Prisma.Decimal, payments: readonly PaymentInput[]) {
+/**
+ * Сумма платежей должна точно совпадать с суммой к оплате.
+ * В рассрочку (partial) — оплачивается только взнос: меньше суммы к оплате, можно 0.
+ */
+export function validatePayments(
+  total: Prisma.Decimal,
+  payments: readonly PaymentInput[],
+  { partial = false } = {},
+) {
   const normalized = payments.map((p) => ({ method: p.method, amount: money(D(p.amount)) }));
   if (normalized.some((p) => !p.amount.greaterThan(0))) {
     throw new AppException(
@@ -68,11 +75,12 @@ export function validatePayments(total: Prisma.Decimal, payments: readonly Payme
     );
   }
   const paid = normalized.reduce((sum, p) => sum.add(p.amount), D(0));
-  if (!paid.equals(total)) {
+  const ok = partial ? paid.lessThan(total) : paid.equals(total) && normalized.length > 0;
+  if (!ok) {
     throw new AppException(
       ErrorCode.PAYMENT_MISMATCH,
       HttpStatus.BAD_REQUEST,
-      'Payments do not match total',
+      partial ? 'Down payment must be less than total' : 'Payments do not match total',
       {
         total: total.toFixed(2),
         paid: paid.toFixed(2),

@@ -73,3 +73,31 @@ export function mixedRemainder(
     totalCents,
   );
 }
+
+/**
+ * Рассрочка: первоначальный взнос (можно 0) меньше суммы к оплате, срок 1–60 месяцев.
+ * Ежемесячный платёж округляется вверх — как на backend, последний месяц меньше.
+ */
+export function buildInstallment(
+  totalCents: number,
+  downPaymentRaw: string,
+  downPaymentMethod: PaymentMethod,
+  monthsRaw: string,
+): {
+  payments: Array<{ method: PaymentMethod; amount: string }>;
+  debtCents: number;
+  monthlyCents: number;
+  months: number;
+} | null {
+  const months = Number(monthsRaw);
+  if (!Number.isInteger(months) || months < 1 || months > 60 || totalCents <= 0) return null;
+  const down = downPaymentRaw.trim() === '' ? 0 : toCents(parseMoneyInput(downPaymentRaw));
+  if (down === null || down >= totalCents) return null;
+  const debtCents = totalCents - down;
+  return {
+    payments: down > 0 ? [{ method: downPaymentMethod, amount: fromCents(down) }] : [],
+    debtCents,
+    monthlyCents: Math.ceil(debtCents / months),
+    months,
+  };
+}

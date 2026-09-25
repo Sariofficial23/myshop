@@ -22,7 +22,7 @@
     "react/exhaustive-deps": "warn",
     "import/no-unassigned-import": [
       "warn",
-      { "allow": ["**/*.css", "@testing-library/jest-dom/vitest"] }
+      { "allow": ["**/*.css", "@fontsource-variable/*", "@testing-library/jest-dom/vitest"] }
     ]
   },
   "env": {

@@ -18,10 +18,10 @@ import {
   ApiPropertyOptional,
   ApiTags,
 } from '@nestjs/swagger';
-import { ErrorCode, Permission } from '@myshop/shared';
+import { DocumentPrefix, ErrorCode, formatDocumentNumber, Permission } from '@myshop/shared';
 import { Transform } from 'class-transformer';
 import { IsBoolean, IsOptional, IsString, Length, Matches, MaxLength } from 'class-validator';
-import type { AuthContext } from '../auth/auth-context.js';
+import { accessibleBranchWhere, type AuthContext } from '../auth/auth-context.js';
 import { CurrentAuth } from '../auth/decorators/current-auth.decorator.js';
 import { RequirePermissions } from '../auth/decorators/require-permissions.decorator.js';
 import { IncludeInactiveQuery } from '../catalog/catalog.dto.js';
@@ -83,7 +83,7 @@ const supplierSelect = {
   isActive: true,
 } as const;
 
-/** Поставщики (минимально для приходов). Полная карточка и история — этап 7. */
+/** Поставщики: список, карточка с историей приходов. */
 @Injectable()
 export class SuppliersService {
   constructor(private readonly prisma: PrismaService) {}
@@ -94,6 +94,61 @@ export class SuppliersService {
       select: supplierSelect,
       orderBy: { name: 'asc' },
     });
+  }
+
+  /** Карточка поставщика: проведённые приходы в доступных филиалах и их сумма. */
+  async card(ctx: AuthContext, id: string) {
+    const supplier = await this.prisma.supplier.findFirst({
+      where: { id, companyId: ctx.companyId },
+      select: supplierSelect,
+    });
+    if (!supplier) {
+      throw new AppException(
+        ErrorCode.SUPPLIER_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+        'Supplier not found',
+      );
+    }
+    const where = {
+      companyId: ctx.companyId,
+      supplierId: id,
+      branch: accessibleBranchWhere(ctx),
+    };
+    const [purchases, totals] = await Promise.all([
+      this.prisma.purchase.findMany({
+        where,
+        select: {
+          id: true,
+          number: true,
+          date: true,
+          status: true,
+          total: true,
+          documentNumber: true,
+          branch: { select: { id: true, name: true } },
+        },
+        orderBy: { date: 'desc' },
+        take: 20,
+      }),
+      this.prisma.purchase.aggregate({
+        where: { ...where, status: 'CONFIRMED' },
+        _sum: { total: true },
+        _count: true,
+        _max: { date: true },
+      }),
+    ]);
+    return {
+      ...supplier,
+      stats: {
+        purchasesCount: totals._count,
+        totalPurchased: totals._sum.total?.toFixed(2) ?? '0.00',
+        lastPurchaseAt: totals._max.date,
+      },
+      purchases: purchases.map((p) => ({
+        ...p,
+        total: p.total.toFixed(2),
+        displayNumber: formatDocumentNumber(DocumentPrefix.PURCHASE, p.number),
+      })),
+    };
   }
 
   create(ctx: AuthContext, dto: CreateSupplierDto) {
@@ -131,6 +186,13 @@ export class SuppliersController {
   @ApiOperation({ summary: 'Поставщики' })
   list(@CurrentAuth() ctx: AuthContext, @Query() query: IncludeInactiveQuery) {
     return this.suppliers.list(ctx, query.includeInactive);
+  }
+
+  @Get(':id')
+  @RequirePermissions(Permission.PURCHASES_MANAGE)
+  @ApiOperation({ summary: 'Карточка поставщика: приходы и их сумма' })
+  card(@CurrentAuth() ctx: AuthContext, @Param('id', new ParseUUIDPipe()) id: string) {
+    return this.suppliers.card(ctx, id);
   }
 
   @Post()

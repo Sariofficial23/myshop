@@ -26,6 +26,12 @@
       {
         "assertFunctionNames": ["expect", "request.**.expect", "http.**.expect", "*.expect"]
       }
+    ],
+    "eslint/no-underscore-dangle": [
+      "warn",
+      {
+        "allow": ["_count", "_sum", "_max", "_min", "_avg"]
+      }
     ]
   },
   "env": {

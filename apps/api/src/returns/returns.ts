@@ -150,6 +150,7 @@ const toResponse = (r: ReturnWithRelations, showCost: boolean) => ({
   displayNumber: formatDocumentNumber(DocumentPrefix.RETURN, r.number),
   sale: { ...r.sale, displayNumber: formatDocumentNumber(DocumentPrefix.SALE, r.sale.number) },
   refundTotal: r.refundTotal.toFixed(2),
+  debtReduction: r.debtReduction.toFixed(2),
   costTotal: showCost ? r.costTotal.toFixed(2) : undefined,
   refunds: r.refunds.map((p) => ({ ...p, amount: p.amount.toFixed(2) })),
   items: r.items.map(({ unitCost, ...item }) => ({
@@ -284,6 +285,15 @@ export class ReturnsService {
         (sum, l) => sum.add(l.item.unitCost.mul(l.quantity)),
         new Prisma.Decimal(0),
       );
+      // Продажа в рассрочку: возврат сначала гасит оставшийся долг, деньгами — только остальное
+      await tx.$queryRaw`SELECT id FROM installments WHERE sale_id = ${sale.id}::uuid FOR UPDATE`;
+      const installment = await tx.installment.findUnique({ where: { saleId: sale.id } });
+      const debt = installment
+        ? installment.total.sub(installment.paidAmount).sub(installment.reducedAmount)
+        : new Prisma.Decimal(0);
+      const debtReduction = Prisma.Decimal.min(refundTotal, debt);
+      const cashRefund = refundTotal.sub(debtReduction);
+
       const number = await nextDocumentNumber(tx, ctx.companyId, 'RETURN');
       const created = await tx.saleReturn.create({
         data: {
@@ -293,15 +303,16 @@ export class ReturnsService {
           number,
           reason: dto.reason ?? null,
           refundTotal,
+          debtReduction,
           costTotal: costTotal.toDecimalPlaces(2),
           createdById: ctx.userId,
-          ...(refundTotal.greaterThan(0)
+          ...(cashRefund.greaterThan(0)
             ? {
                 refunds: {
                   create: {
                     companyId: ctx.companyId,
                     method: dto.refundMethod,
-                    amount: refundTotal,
+                    amount: cashRefund,
                     paidById: ctx.userId,
                   },
                 },
@@ -356,6 +367,16 @@ export class ReturnsService {
         });
       }
 
+      if (installment && debtReduction.greaterThan(0)) {
+        await tx.installment.update({
+          where: { id: installment.id },
+          data: {
+            reducedAmount: { increment: debtReduction },
+            ...(debtReduction.equals(debt) ? { status: 'PAID' } : {}),
+          },
+        });
+      }
+
       const returnedAll = saleItems.every((item) => {
         const line = lines.find((l) => l.item.id === item.id);
         return item.returnedQuantity + (line?.quantity ?? 0) === item.quantity;
@@ -373,6 +394,7 @@ export class ReturnsService {
           saleId: sale.id,
           saleNumber: sale.number,
           refundTotal: refundTotal.toFixed(2),
+          debtReduction: debtReduction.toFixed(2),
           refundMethod: dto.refundMethod,
           items: lines.map((l) => ({
             saleItemId: l.item.id,

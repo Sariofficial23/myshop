@@ -11,6 +11,8 @@ export interface Customer {
   telegramId: string | null;
   notes: string | null;
   isActive: boolean;
+  /** Остаток долга по рассрочкам (в списке клиентов). */
+  debt?: string;
 }
 
 export interface CustomerInput {
@@ -74,6 +76,14 @@ export interface Sale {
   customer: { id: string; name: string; phone: string | null } | null;
   seller: { id: string; firstName: string; lastName: string | null };
   payments: SalePayment[];
+  installment: {
+    id: string;
+    total: string;
+    paidAmount: string;
+    remaining: string;
+    months: number;
+    status: 'ACTIVE' | 'PAID';
+  } | null;
   returns: Array<{
     id: string;
     number: number;
@@ -96,6 +106,7 @@ export interface SaleInput {
     serialNumbers?: string[];
   }>;
   payments: Array<{ method: PaymentMethod; amount: string }>;
+  installment?: { months: number; firstDueDate?: string };
 }
 
 export interface SerialInStock {

@@ -7,7 +7,8 @@
     "home": "Главная",
     "more": "Ещё",
     "stock": "Склад",
-    "sale": "Продажа"
+    "sale": "Продажа",
+    "reports": "Отчёты"
   },
   "common": {
     "save": "Сохранить",
@@ -46,11 +47,15 @@
     "roleIn": "{role} · {company}",
     "yourBranches": "Ваши филиалы",
     "allBranches": "Все филиалы компании",
-    "stageNotice": "Готово: вход, сотрудники, каталог, приходы, остатки, продажи, возвраты, перемещения, списания и инвентаризация. Касса, рассрочки и гарантии — на следующем этапе.",
+    "stageNotice": "Готово: продажи, склад, возвраты, перемещения, инвентаризация, касса, рассрочки и гарантия. Дашборд и отчёты — на следующем этапе.",
     "quickActions": "Быстрые действия",
-    "newPurchase": "Приход",
+    "newPurchase": "Приход товара",
     "lowStock": "Заканчиваются: {count}",
-    "newSale": "Продажа"
+    "newSale": "Новая продажа",
+    "overdueInstallments": "Просрочено: {count}",
+    "today": "Сегодня",
+    "todayStats": "Продаж: {sales} · товаров: {items}",
+    "reports": "Отчёты"
   },
   "system": {
     "title": "Состояние системы",
@@ -72,7 +77,10 @@
     "telegramId": "Telegram ID: {id}",
     "catalog": "Категории и бренды",
     "suppliers": "Поставщики",
-    "customers": "Клиенты"
+    "customers": "Клиенты",
+    "cash": "Касса",
+    "installments": "Рассрочки",
+    "warranty": "Гарантия"
   },
   "company": {
     "title": "Компания",
@@ -231,7 +239,10 @@
     "name": "Название",
     "phone": "Телефон",
     "contact": "Контактное лицо",
-    "empty": "Поставщиков пока нет"
+    "empty": "Поставщиков пока нет",
+    "purchasesCount": "Приходов",
+    "totalPurchased": "На сумму",
+    "lastPurchase": "Последний приход: {date}"
   },
   "catalog": {
     "title": "Категории и бренды",
@@ -327,7 +338,14 @@
     "warrantyUntil": "гарантия до {date}",
     "paid": "Оплачено",
     "profit": "Валовая прибыль",
-    "newSale": "Новая продажа"
+    "newSale": "Новая продажа",
+    "installmentCustomer": "Для рассрочки выберите или создайте клиента выше",
+    "months": "Срок, месяцев",
+    "firstDueDate": "Первый платёж",
+    "downPayment": "Первоначальный взнос",
+    "downPaymentMethod": "Взнос оплачен",
+    "installmentPlan": "В рассрочку {debt} на {months} мес. — примерно {monthly} в месяц",
+    "installmentInvalid": "Взнос должен быть меньше суммы к оплате, срок — от 1 до 60 месяцев"
   },
   "sales": {
     "title": "Продажи",
@@ -347,7 +365,15 @@
     "cancel": "Отмена",
     "save": "Сохранить",
     "notFound": "Клиент не найден",
-    "add": "+ Новый клиент"
+    "add": "+ Новый клиент",
+    "debt": "долг {value}",
+    "purchases": "Покупок",
+    "totalSpent": "Сумма покупок",
+    "debtTitle": "Долг",
+    "overdue": "Просрочено",
+    "lastPurchase": "Последняя покупка: {date}",
+    "history": "История покупок",
+    "noPurchases": "Покупок пока нет"
   },
   "paymentMethod": {
     "CASH": "Наличные",
@@ -452,6 +478,122 @@
     "returned": "возвращён",
     "refundedTotal": "Возвращено клиенту"
   },
+  "installments": {
+    "title": "Рассрочки",
+    "filter_active": "Активные",
+    "filter_overdue": "Просроченные",
+    "filter_paid": "Погашенные",
+    "totalDebt": "Долг клиентов",
+    "totalOverdue": "Просрочено",
+    "empty": "Рассрочек нет",
+    "nextDue": "след. платёж {date}",
+    "overdueShort": "просрочено {value}",
+    "remaining": "Осталось выплатить",
+    "overdue": "Просрочено: {value}",
+    "forSale": "Чек {number}",
+    "terms": "{total} на {months} мес., {monthly} в месяц",
+    "reduced": "Уменьшено возвратом: {value}",
+    "acceptPayment": "Принять платёж",
+    "amount": "Сумма",
+    "payNext": "Очередной: {value}",
+    "payAll": "Весь остаток",
+    "branch": "Касса филиала",
+    "accept": "Принять платёж",
+    "schedule": "График платежей",
+    "rowPaid": "оплачен",
+    "rowPartial": "оплачено {value}",
+    "rowLate": "просрочен",
+    "rowUpcoming": "ожидается",
+    "payments": "Платежи",
+    "inSale": "Рассрочка на {months} мес.",
+    "remainingShort": "Осталось: {value}"
+  },
+  "installmentStatus": {
+    "ACTIVE": "Активна",
+    "PAID": "Погашена"
+  },
+  "cash": {
+    "title": "Касса",
+    "date": "День",
+    "balance": "Наличных в кассе",
+    "balanceHint": "Продажи и платежи наличными минус возвраты, изъятия и расходы — за всё время.",
+    "day": "Выручка за день",
+    "salesCash": "Продажи — наличные",
+    "salesCard": "Продажи — карта",
+    "salesTransfer": "Продажи — перевод",
+    "installments": "Платежи по рассрочкам",
+    "refunds": "Возвраты клиентам",
+    "revenue": "Итого выручка",
+    "cashFlow": "Наличные за день",
+    "cashIn": "Поступило наличных",
+    "cashOut": "Выдано наличных",
+    "newOperation": "Операция по кассе",
+    "amount": "Сумма",
+    "reason": "Основание",
+    "reasonHint_DEPOSIT": "Например: размен",
+    "reasonHint_WITHDRAWAL": "Например: инкассация",
+    "reasonHint_EXPENSE": "Например: доставка, аренда",
+    "save": "Провести",
+    "operations": "Операции за день"
+  },
+  "cashOperationType": {
+    "DEPOSIT": "Внесение",
+    "WITHDRAWAL": "Изъятие",
+    "EXPENSE": "Расход"
+  },
+  "warranty": {
+    "title": "Гарантия",
+    "search": "IMEI или серийный номер",
+    "check": "Проверить",
+    "active": "На гарантии",
+    "expired": "Гарантия истекла",
+    "notSold": "Не продан",
+    "soldBy": "Продан: {number}, {date}, {branch}",
+    "until": "Гарантия до {date}",
+    "noWarranty": "Без гарантии",
+    "paidRepairHint": "Гарантия закончилась — обращение будет оформлено как платный ремонт.",
+    "problem": "Неисправность со слов клиента",
+    "accept": "Принять устройство",
+    "openClaims": "Устройства в работе",
+    "noOpenClaims": "Нет открытых обращений",
+    "claimInWarranty": "Гарантийный случай",
+    "claimPaid": "Вне гарантии (платный ремонт)",
+    "resolution": "Результат",
+    "changeStatus": "Статус",
+    "to_IN_REPAIR": "Отправить в ремонт",
+    "to_READY": "Готово к выдаче",
+    "to_RETURNED": "Выдать клиенту",
+    "to_REJECTED": "Отказать в гарантии"
+  },
+  "warrantyStatus": {
+    "RECEIVED": "Принят",
+    "IN_REPAIR": "В ремонте",
+    "READY": "Готов",
+    "RETURNED": "Выдан",
+    "REJECTED": "Отказ"
+  },
+  "reports": {
+    "title": "Отчёты",
+    "period_today": "Сегодня",
+    "period_yesterday": "Вчера",
+    "period_week": "7 дней",
+    "period_month": "Месяц",
+    "revenue": "Продано на сумму",
+    "salesCount": "Продаж (чеков)",
+    "itemsSold": "Продано товаров",
+    "averageCheck": "Средний чек",
+    "profit": "Прибыль",
+    "returns": "Возвраты ({count})",
+    "discounts": "Скидки",
+    "money": "Получено денег",
+    "items": "Что продано",
+    "sold": "продано {count} шт.",
+    "itemProfit": "прибыль {value}",
+    "noSales": "За этот период продаж нет",
+    "sellers": "Продавцы",
+    "salesShort": "продаж: {count}",
+    "net": "За вычетом возвратов: {value}"
+  },
   "errors": {
     "VALIDATION_ERROR": "Проверьте правильность заполнения полей.",
     "BAD_REQUEST": "Некорректный запрос.",
@@ -522,6 +664,14 @@
     "WRITE_OFF_NOT_FOUND": "Списание не найдено.",
     "INVENTORY_NOT_FOUND": "Инвентаризация не найдена.",
     "SERIAL_NOT_IN_STOCK": "IMEI / серийный номер не числится в наличии этого филиала.",
-    "DUPLICATE_DOCUMENT_ITEM": "Товар добавлен в документ дважды."
+    "DUPLICATE_DOCUMENT_ITEM": "Товар добавлен в документ дважды.",
+    "CUSTOMER_REQUIRED": "Для рассрочки выберите клиента.",
+    "INSTALLMENT_NOT_FOUND": "Рассрочка не найдена.",
+    "INSTALLMENT_OVERPAYMENT": "Сумма больше оставшегося долга.",
+    "INSTALLMENT_CLOSED": "Рассрочка уже погашена.",
+    "CASH_INSUFFICIENT": "В кассе недостаточно наличных.",
+    "WARRANTY_CLAIM_NOT_FOUND": "Гарантийное обращение не найдено.",
+    "SERIAL_NOT_SOLD": "Это устройство не числится проданным.",
+    "INVALID_STATUS_TRANSITION": "Нельзя перевести обращение в этот статус."
   }
 }

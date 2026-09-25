@@ -4,6 +4,7 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import Script from 'next/script';
 import type { ReactNode } from 'react';
 import { Providers } from './providers';
+import '@fontsource-variable/inter';
 import './globals.css';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -19,7 +20,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#2563eb',
+  themeColor: '#f2f2f7',
 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {

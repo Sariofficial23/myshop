@@ -3,6 +3,7 @@
 import { Permission } from '@myshop/shared';
 import { Button, Card, ListRow, TextField } from '@myshop/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { type FormEvent, useState } from 'react';
 import { ErrorMessage } from '@/components/error-message';
@@ -10,7 +11,7 @@ import { PageHeader } from '@/components/page-header';
 import { suppliersApi } from '@/lib/api/stock';
 import { useCan } from '@/lib/auth/auth-provider';
 
-/** Поставщики — минимальный список. Карточка с историей закупок — этап 7. */
+/** Поставщики: список и добавление; карточка с историей приходов — по нажатию. */
 export default function SuppliersPage() {
   const t = useTranslations();
   const canManage = useCan()(Permission.SUPPLIERS_MANAGE);
@@ -72,10 +73,13 @@ export default function SuppliersPage() {
           <ul className="divide-y divide-slate-100">
             {suppliers.data.map((s) => (
               <li key={s.id}>
-                <ListRow
-                  title={s.name}
-                  subtitle={[s.contact, s.phone].filter(Boolean).join(' · ') || undefined}
-                />
+                <Link href={`/suppliers/${s.id}`} className="block active:bg-slate-50">
+                  <ListRow
+                    title={s.name}
+                    subtitle={[s.contact, s.phone].filter(Boolean).join(' · ') || undefined}
+                    trailing="›"
+                  />
+                </Link>
               </li>
             ))}
           </ul>

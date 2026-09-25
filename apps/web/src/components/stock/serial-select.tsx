@@ -3,6 +3,7 @@
 import type { SerialType } from '@myshop/shared';
 import { Button } from '@myshop/ui';
 import { useQuery } from '@tanstack/react-query';
+import { ScanBarcode } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useMemo, useState } from 'react';
 import { ScannerDialog } from '@/components/catalog/scanner-dialog';
@@ -87,7 +88,7 @@ export function SerialSelect({
           className="min-h-12 min-w-0 flex-1 rounded-2xl bg-white px-4 font-mono text-base ring-1 ring-slate-200 outline-none focus:ring-2 focus:ring-brand-600"
         />
         <Button variant="secondary" aria-label="scan" onClick={() => setScanning(true)}>
-          📷
+          <ScanBarcode aria-hidden size={22} />
         </Button>
       </div>
       {notFound ? (

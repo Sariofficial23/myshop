@@ -9,6 +9,8 @@ import { SystemStatus } from '@/components/system-status';
 import { authApi } from '@/lib/api/auth';
 import { useAuth } from '@/lib/auth/auth-provider';
 import { publicEnv } from '@/lib/env';
+import { ShoppingBag } from 'lucide-react';
+import { AppIcon } from '@/components/icons/app-icon';
 
 export function LoginScreen({ error }: { error?: unknown }) {
   const t = useTranslations();
@@ -16,12 +18,7 @@ export function LoginScreen({ error }: { error?: unknown }) {
     <main className="mx-auto flex min-h-dvh max-w-md flex-col gap-4 px-4 pt-6 pb-10">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span
-            aria-hidden
-            className="grid size-10 place-items-center rounded-2xl bg-brand-600 text-xl text-white"
-          >
-            🛒
-          </span>
+          <AppIcon icon={ShoppingBag} tint="blue" size="md" />
           <span className="text-xl font-bold">{t('app.name')}</span>
         </div>
         <LocaleSwitcher />

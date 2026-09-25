@@ -4,21 +4,25 @@ import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AuditModule } from './audit/audit.module.js';
 import { AuthModule } from './auth/auth.module.js';
+import { CashModule } from './cash/cash.js';
 import { BranchesModule } from './branches/branches.module.js';
 import { CatalogModule } from './catalog/catalog.module.js';
 import { CompaniesModule } from './companies/companies.module.js';
 import { CustomersModule } from './customers/customers.js';
 import { type Env, validateEnv } from './config/env.js';
 import { HealthModule } from './health/health.module.js';
+import { InstallmentsModule } from './installments/installments.js';
 import { InventoriesModule } from './inventories/inventories.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { PurchasesModule } from './purchases/purchases.module.js';
+import { ReportsModule } from './reports/reports.js';
 import { ReturnsModule } from './returns/returns.js';
 import { SalesModule } from './sales/sales.module.js';
 import { StockModule } from './stock/stock.module.js';
 import { SuppliersModule } from './suppliers/suppliers.js';
 import { TransfersModule } from './transfers/transfers.js';
 import { UsersModule } from './users/users.module.js';
+import { WarrantyModule } from './warranty/warranty.js';
 import { WriteOffsModule } from './write-offs/write-offs.js';
 
 @Module({
@@ -61,6 +65,10 @@ import { WriteOffsModule } from './write-offs/write-offs.js';
     TransfersModule,
     WriteOffsModule,
     InventoriesModule,
+    InstallmentsModule,
+    CashModule,
+    WarrantyModule,
+    ReportsModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
