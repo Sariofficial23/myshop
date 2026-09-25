@@ -6,7 +6,9 @@ import { ScanBarcode } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useState } from 'react';
 import { ScannerDialog } from '@/components/catalog/scanner-dialog';
+import { QuickProductForm } from './quick-product-form';
 import { ErrorMessage } from '@/components/error-message';
+import { ApiError } from '@/lib/api/api-error';
 import { catalogApi, type Product, type Variant } from '@/lib/api/catalog';
 import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
 
@@ -15,12 +17,23 @@ export interface PickedVariant {
   variant: Variant;
 }
 
-/** Выбор варианта товара для документа: поиск или сканер штрихкода. */
-export function VariantPicker({ onPick }: { onPick: (picked: PickedVariant) => void }) {
+/**
+ * Выбор варианта товара для документа: поиск или сканер штрихкода.
+ * allowCreate — если товара нет, его можно создать прямо здесь (приход нового товара).
+ */
+export function VariantPicker({
+  onPick,
+  allowCreate = false,
+}: {
+  onPick: (picked: PickedVariant) => void;
+  allowCreate?: boolean;
+}) {
   const t = useTranslations('purchases');
+  const tq = useTranslations('quickProduct');
   const [q, setQ] = useState('');
   const [scanning, setScanning] = useState(false);
   const [scanError, setScanError] = useState<unknown>(null);
+  const [creating, setCreating] = useState<{ name: string; barcode: string } | null>(null);
   const search = useDebouncedValue(q.trim());
   const results = useQuery({
     queryKey: ['products', { search, picker: true }],
@@ -45,10 +58,15 @@ export function VariantPicker({ onPick }: { onPick: (picked: PickedVariant) => v
         const variant = found.product.variants.find((v) => v.id === found.variantId);
         if (variant) pick({ product: found.product, variant });
       } catch (error) {
+        // Незнакомый штрихкод при приходе — сразу предлагаем создать товар с этим штрихкодом
+        if (allowCreate && error instanceof ApiError && error.code === 'BARCODE_NOT_FOUND') {
+          setCreating({ name: '', barcode: code });
+          return;
+        }
         setScanError(error);
       }
     },
-    [pick],
+    [allowCreate, pick],
   );
 
   const options =
@@ -57,6 +75,21 @@ export function VariantPicker({ onPick }: { onPick: (picked: PickedVariant) => v
           product.variants.filter((v) => v.isActive).map((variant) => ({ product, variant })),
         )
       : [];
+
+  if (creating) {
+    return (
+      <QuickProductForm
+        initialName={creating.name}
+        initialBarcode={creating.barcode}
+        onCancel={() => setCreating(null)}
+        onCreated={(product) => {
+          setCreating(null);
+          const variant = product.variants[0];
+          if (variant) pick({ product, variant });
+        }}
+      />
+    );
+  }
 
   return (
     <div className="flex flex-col gap-2">
@@ -94,6 +127,24 @@ export function VariantPicker({ onPick }: { onPick: (picked: PickedVariant) => v
             ))}
           </ul>
         </Card>
+      ) : null}
+      {allowCreate && search.length >= 2 && results.data ? (
+        <button
+          type="button"
+          onClick={() => setCreating({ name: q.trim(), barcode: '' })}
+          className="min-h-12 rounded-2xl bg-white px-4 text-left text-[15px] font-semibold text-brand-600 ring-1 ring-black/5 active:bg-slate-50"
+        >
+          {tq('createNamed', { name: q.trim() })}
+        </button>
+      ) : null}
+      {allowCreate && search.length < 2 ? (
+        <button
+          type="button"
+          onClick={() => setCreating({ name: '', barcode: '' })}
+          className="min-h-11 self-start px-1 text-[15px] font-semibold text-brand-600"
+        >
+          {tq('create')}
+        </button>
       ) : null}
       {scanning ? <ScannerDialog onResult={onScan} onClose={() => setScanning(false)} /> : null}
     </div>
