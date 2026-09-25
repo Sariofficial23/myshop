@@ -7,7 +7,7 @@
 | ---- | ------------------------------------------------------------------------------------- | --------- |
 | 1    | Repository, monorepo, frontend, backend, database, Docker, environment, health checks | ✅ Готово |
 | 2    | Authentication (JWT), Company, Branch, Users, Roles (RBAC)                            | ✅ Готово |
-| 3    | Products, Categories, Brands, Variants, Barcode, IMEI/Serial numbers                  | ⏳        |
+| 3    | Products, Categories, Brands, Variants, Barcode, IMEI/Serial numbers                  | ✅ Готово |
 | 4    | Purchase, StockMovement, stock balances                                               | ⏳        |
 | 5    | Sales, Payments, продажа по IMEI                                                      | ⏳        |
 | 6    | Returns, Transfers, Inventory                                                         | ⏳        |
@@ -52,13 +52,30 @@
   нижняя навигация, «Ещё», компания, филиалы, сотрудники (роль, филиалы, права, блокировка), RU/UZ
 - API: `/auth/*`, `/companies/current`, `/branches`, `/users`
 
+## Этап 3 — что сделано
+
+- Каталог: категории (с вложенностью, защита от циклов), бренды, товары, варианты
+  (модель, цвет, память, ОЗУ, прочие характеристики), штрихкоды, цена продажи варианта
+- Товар создаётся вместе с вариантами и штрихкодами в одной транзакции; SKU генерируется,
+  если не указан; уникальность SKU / штрихкода / IMEI — в пределах компании (unique-индексы)
+- Учёт по номеру: без номера / IMEI / серийный номер; модель SerialNumber со статусами
+  IN_STOCK, SOLD, RETURNED, TRANSFERRED, WRITTEN_OFF (номера появятся с приходом — этап 4)
+- IMEI: проверка формата по алгоритму Луна, проверка дублей, быстрый поиск по IMEI
+- Поиск товаров: название, SKU, вариант, штрихкод, IMEI; поиск по отсканированному штрихкоду
+- Архитектура сканера: интерфейс BarcodeScanner (камера через BarcodeDetector, ручной ввод,
+  USB/Bluetooth-сканер) → строка → backend; бизнес-логика не зависит от библиотеки
+- Нарушения unique-индексов → понятные коды (DUPLICATE_SKU, DUPLICATE_BARCODE, DUPLICATE_IMEI…)
+- Frontend: вкладка «Склад», список с поиском и фильтром категорий, сканер, IMEI-поиск,
+  создание/редактирование товара, варианты, штрихкоды, «Категории и бренды», RU/UZ
+- Seed: 5 товаров из ТЗ с категориями, брендами, ценами и штрихкодами
+
 ## Модели БД по этапам
 
 | Этап | Модели                                                                                  |
 | ---- | --------------------------------------------------------------------------------------- |
 | 1    | Company, Branch                                                                         |
 | 2    | ✅ User, Membership (роль, права), MembershipBranch (доступ к филиалам), Session        |
-| 3    | Category, Brand, Product, ProductVariant, Barcode, SerialNumber                         |
+| 3    | ✅ Category, Brand, Product, ProductVariant, Barcode, SerialNumber                      |
 | 4    | Supplier (минимум), Purchase, PurchaseItem, StockMovement, StockBalance                 |
 | 5    | Customer (минимум), Sale, SaleItem, Payment                                             |
 | 6    | Return, ReturnItem, Transfer, TransferItem, Inventory, InventoryItem, WriteOff          |

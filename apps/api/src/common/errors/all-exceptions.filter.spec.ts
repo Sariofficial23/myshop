@@ -37,6 +37,24 @@ describe('normalizeException', () => {
     });
   });
 
+  it('maps known unique indexes (driver adapter meta) to specific codes', () => {
+    const error = new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+      code: 'P2002',
+      clientVersion: 'test',
+      meta: {
+        modelName: 'Barcode',
+        driverAdapterError: {
+          cause: { constraint: { index: 'barcodes_company_id_code_key' }, table: 'barcodes' },
+        },
+      },
+    });
+    expect(normalizeException(error)).toMatchObject({
+      status: HttpStatus.CONFLICT,
+      code: ErrorCode.DUPLICATE_BARCODE,
+      details: { constraint: 'barcodes_company_id_code_key' },
+    });
+  });
+
   it('hides unknown errors behind INTERNAL_ERROR', () => {
     const result = normalizeException(new Error('connection string leaked: postgres://secret'));
     expect(result.status).toBe(500);

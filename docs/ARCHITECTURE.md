@@ -106,6 +106,10 @@ Health-эндпоинты исключены из rate limiting.
 - `DATABASE_URL` — runtime (пул приложения), `DIRECT_URL` — миграции.
 - Этап 1: `Company`, `Branch`. Этап 2: `User`, `Membership`, `MembershipBranch`, `Session`.
   Модели следующих этапов — см. [ROADMAP.md](ROADMAP.md).
+- Этап 3: `Category`, `Brand`, `Product` → `ProductVariant` → `Barcode`, `SerialNumber`.
+  Остатки, цены, штрихкоды и IMEI привязаны к **варианту** (у товара без вариантов — один вариант).
+  SKU, штрихкод и IMEI уникальны в пределах компании; нарушение unique-индекса возвращается
+  понятным кодом (`DUPLICATE_SKU`, `DUPLICATE_BARCODE`, `DUPLICATE_IMEI`).
 - `User` — человек (глобально, по `telegram_id`); `Membership` — его роль в конкретной компании.
   Один пользователь может работать в нескольких магазинах и переключаться между ними.
 

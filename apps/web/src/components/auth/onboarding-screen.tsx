@@ -5,6 +5,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { type FormEvent, useState } from 'react';
 import { ErrorMessage } from '@/components/error-message';
+import { LocaleSwitcher } from '@/components/locale-switcher';
 import { useAuth } from '@/lib/auth/auth-provider';
 
 /** Пользователь Telegram без магазина: показать его ID или создать свой магазин. */
@@ -22,6 +23,9 @@ export function OnboardingScreen({ telegramId }: { telegramId?: string }) {
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col gap-4 px-4 pt-6 pb-10">
+      <div className="flex justify-end">
+        <LocaleSwitcher />
+      </div>
       <Card>
         <h1 className="text-2xl font-bold">{t('noMembershipTitle')}</h1>
         <p className="mt-2 text-slate-600">{t('noMembershipHint')}</p>

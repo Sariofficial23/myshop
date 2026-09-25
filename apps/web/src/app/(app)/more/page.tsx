@@ -26,6 +26,12 @@ export default function MorePage() {
       visible: can(Permission.BRANCHES_VIEW),
     },
     { href: '/users', icon: '👥', label: t('more.users'), visible: can(Permission.USERS_VIEW) },
+    {
+      href: '/catalog',
+      icon: '🏷️',
+      label: t('more.catalog'),
+      visible: can(Permission.PRODUCTS_VIEW),
+    },
   ].filter((link) => link.visible);
 
   return (
