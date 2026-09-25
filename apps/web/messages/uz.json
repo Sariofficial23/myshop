@@ -6,7 +6,8 @@
   "nav": {
     "home": "Bosh sahifa",
     "more": "Yana",
-    "stock": "Ombor"
+    "stock": "Ombor",
+    "sale": "Sotuv"
   },
   "common": {
     "save": "Saqlash",
@@ -19,7 +20,8 @@
     "saved": "Saqlandi",
     "inactive": "O‘chirilgan",
     "active": "Faol",
-    "optional": "ixtiyoriy"
+    "optional": "ixtiyoriy",
+    "loadMore": "Yana ko'rsatish"
   },
   "auth": {
     "loading": "MyShop’ga kirilmoqda…",
@@ -44,10 +46,11 @@
     "roleIn": "{role} · {company}",
     "yourBranches": "Filiallaringiz",
     "allBranches": "Kompaniyaning barcha filiallari",
-    "stageNotice": "Tayyor: kirish, xodimlar, katalog, kirim va qoldiqlar. Savdo keyingi bosqichda qo‘shiladi.",
+    "stageNotice": "Tayyor: kirish, xodimlar, katalog, kirimlar, qoldiqlar va sotuvlar. Qaytarish, ko'chirish va inventarizatsiya — keyingi bosqichda.",
     "quickActions": "Tezkor amallar",
     "newPurchase": "Kirim",
-    "lowStock": "Tugayapti: {count}"
+    "lowStock": "Tugayapti: {count}",
+    "newSale": "Sotuv"
   },
   "system": {
     "title": "Tizim holati",
@@ -68,7 +71,8 @@
     "language": "Til",
     "telegramId": "Telegram ID: {id}",
     "catalog": "Kategoriyalar va brendlar",
-    "suppliers": "Yetkazib beruvchilar"
+    "suppliers": "Yetkazib beruvchilar",
+    "customers": "Mijozlar"
   },
   "company": {
     "title": "Kompaniya",
@@ -289,6 +293,78 @@
     "ru": "Русский",
     "uz": "O‘zbekcha"
   },
+  "sale": {
+    "title": "Sotuv",
+    "history": "Tarix",
+    "branch": "Filial",
+    "emptyCart": "Chekka qo'shish uchun mahsulotni toping yoki skanerlang",
+    "customer": "Mijoz (ixtiyoriy)",
+    "payment": "To'lov",
+    "mixedOk": "Summa to'liq taqsimlandi",
+    "mixedLeft": "Taqsimlash qoldi: {value}",
+    "mixedOver": "To'lov summasidan {value} ko'p",
+    "subtotal": "Summa",
+    "discount": "Chegirma",
+    "toPay": "To'lash kerak",
+    "fixErrors": "Mahsulotlar va to'lovni tekshiring",
+    "sell": "Sotish",
+    "selling": "Sotuv amalga oshirilmoqda…",
+    "remove": "Olib tashlash",
+    "quantity": "Miqdor",
+    "price": "Narx",
+    "discountAmount": "Chegirma, summa",
+    "priceRequired": "Narxni kiriting",
+    "discountInvalid": "Chegirma summadan katta",
+    "selectSerials": "Kamida bitta raqamni tanlang",
+    "pickImei": "Mavjud IMEI",
+    "pickSerial": "Mavjud seriya raqamlari",
+    "selectedOf": "{total} tadan {selected} tanlandi",
+    "findNumber": "Raqam bo'yicha qidirish",
+    "numberNotInStock": "{number} raqami bu filialda mavjud emas",
+    "noSerialsInStock": "Bu filialda bu mahsulot mavjud emas",
+    "loading": "Yuklanmoqda…",
+    "receiptTitle": "Chek {number}",
+    "seller": "Sotuvchi: {name}",
+    "customerLine": "Mijoz: {name}",
+    "items": "Mahsulotlar",
+    "discountShort": "chegirma {value}",
+    "warrantyUntil": "kafolat {date} gacha",
+    "paid": "To'landi",
+    "profit": "Yalpi foyda",
+    "newSale": "Yangi sotuv"
+  },
+  "sales": {
+    "title": "Sotuvlar",
+    "add": "Sotuv",
+    "empty": "Hozircha sotuvlar yo'q"
+  },
+  "customers": {
+    "title": "Mijozlar",
+    "search": "Ism yoki telefon",
+    "empty": "Hozircha mijozlar yo'q",
+    "new": "Yangi mijoz",
+    "name": "Ism",
+    "phone": "Telefon",
+    "notes": "Izoh",
+    "archive": "Mijozni yashirish",
+    "change": "O'zgartirish",
+    "cancel": "Bekor qilish",
+    "save": "Saqlash",
+    "notFound": "Mijoz topilmadi",
+    "add": "+ Yangi mijoz"
+  },
+  "paymentMethod": {
+    "CASH": "Naqd",
+    "CARD": "Karta",
+    "TRANSFER": "O'tkazma",
+    "MIXED": "Aralash",
+    "INSTALLMENT": "Muddatli to'lov"
+  },
+  "saleStatus": {
+    "COMPLETED": "Yakunlangan",
+    "PARTIALLY_RETURNED": "Qisman qaytarilgan",
+    "RETURNED": "Qaytarilgan"
+  },
   "errors": {
     "VALIDATION_ERROR": "Maydonlar to‘g‘ri to‘ldirilganini tekshiring.",
     "BAD_REQUEST": "Noto‘g‘ri so‘rov.",
@@ -344,6 +420,13 @@
     "SERIAL_NOT_ALLOWED": "Bu mahsulot IMEI / seriya raqamisiz hisobga olinadi.",
     "PRODUCT_INACTIVE": "Mahsulot sotuvdan olingan.",
     "NETWORK_ERROR": "Server bilan aloqa yo‘q. Internetni tekshiring.",
-    "UNKNOWN": "Nimadir xato ketdi. Qayta urinib ko‘ring."
+    "UNKNOWN": "Nimadir xato ketdi. Qayta urinib ko‘ring.",
+    "CUSTOMER_NOT_FOUND": "Mijoz topilmadi.",
+    "DUPLICATE_CUSTOMER_PHONE": "Bunday telefonli mijoz allaqachon bor.",
+    "PAYMENT_MISMATCH": "To'lov summasi to'lanishi kerak bo'lgan summaga mos emas.",
+    "PRICE_REQUIRED": "Mahsulotning sotuv narxi yo'q — narxni kiriting.",
+    "PRICE_CHANGE_FORBIDDEN": "Narxni faqat menejer yoki egasi o'zgartira oladi.",
+    "DISCOUNT_TOO_LARGE": "Chegirma mahsulot summasidan katta bo‘lishi mumkin emas.",
+    "INSTALLMENT_NOT_AVAILABLE": "Muddatli to'lov hozircha mavjud emas."
   }
 }

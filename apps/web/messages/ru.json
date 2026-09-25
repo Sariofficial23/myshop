@@ -6,7 +6,8 @@
   "nav": {
     "home": "Главная",
     "more": "Ещё",
-    "stock": "Склад"
+    "stock": "Склад",
+    "sale": "Продажа"
   },
   "common": {
     "save": "Сохранить",
@@ -19,7 +20,8 @@
     "saved": "Сохранено",
     "inactive": "Отключён",
     "active": "Активен",
-    "optional": "необязательно"
+    "optional": "необязательно",
+    "loadMore": "Показать ещё"
   },
   "auth": {
     "loading": "Вход в MyShop…",
@@ -44,10 +46,11 @@
     "roleIn": "{role} · {company}",
     "yourBranches": "Ваши филиалы",
     "allBranches": "Все филиалы компании",
-    "stageNotice": "Готово: вход, сотрудники, каталог, приходы и остатки. Продажи появятся на следующем этапе.",
+    "stageNotice": "Готово: вход, сотрудники, каталог, приходы, остатки и продажи. Возвраты, перемещения и инвентаризация — на следующем этапе.",
     "quickActions": "Быстрые действия",
     "newPurchase": "Приход",
-    "lowStock": "Заканчиваются: {count}"
+    "lowStock": "Заканчиваются: {count}",
+    "newSale": "Продажа"
   },
   "system": {
     "title": "Состояние системы",
@@ -68,7 +71,8 @@
     "language": "Язык",
     "telegramId": "Telegram ID: {id}",
     "catalog": "Категории и бренды",
-    "suppliers": "Поставщики"
+    "suppliers": "Поставщики",
+    "customers": "Клиенты"
   },
   "company": {
     "title": "Компания",
@@ -289,6 +293,78 @@
     "ru": "Русский",
     "uz": "O‘zbekcha"
   },
+  "sale": {
+    "title": "Продажа",
+    "history": "История",
+    "branch": "Филиал",
+    "emptyCart": "Найдите или отсканируйте товар, чтобы добавить его в чек",
+    "customer": "Клиент (необязательно)",
+    "payment": "Оплата",
+    "mixedOk": "Сумма распределена полностью",
+    "mixedLeft": "Осталось распределить: {value}",
+    "mixedOver": "Больше суммы к оплате на {value}",
+    "subtotal": "Сумма",
+    "discount": "Скидка",
+    "toPay": "К оплате",
+    "fixErrors": "Проверьте товары и оплату",
+    "sell": "Продать",
+    "selling": "Проводим продажу…",
+    "remove": "Убрать",
+    "quantity": "Количество",
+    "price": "Цена",
+    "discountAmount": "Скидка, сумма",
+    "priceRequired": "Укажите цену",
+    "discountInvalid": "Скидка больше суммы",
+    "selectSerials": "Выберите хотя бы один номер",
+    "pickImei": "IMEI в наличии",
+    "pickSerial": "Серийные номера в наличии",
+    "selectedOf": "Выбрано {selected} из {total}",
+    "findNumber": "Поиск по номеру",
+    "numberNotInStock": "Номер {number} не найден в наличии этого филиала",
+    "noSerialsInStock": "В этом филиале нет этого товара в наличии",
+    "loading": "Загрузка…",
+    "receiptTitle": "Чек {number}",
+    "seller": "Продавец: {name}",
+    "customerLine": "Клиент: {name}",
+    "items": "Товары",
+    "discountShort": "скидка {value}",
+    "warrantyUntil": "гарантия до {date}",
+    "paid": "Оплачено",
+    "profit": "Валовая прибыль",
+    "newSale": "Новая продажа"
+  },
+  "sales": {
+    "title": "Продажи",
+    "add": "Продажа",
+    "empty": "Продаж пока нет"
+  },
+  "customers": {
+    "title": "Клиенты",
+    "search": "Имя или телефон",
+    "empty": "Клиентов пока нет",
+    "new": "Новый клиент",
+    "name": "Имя",
+    "phone": "Телефон",
+    "notes": "Комментарий",
+    "archive": "Скрыть клиента",
+    "change": "Изменить",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "notFound": "Клиент не найден",
+    "add": "+ Новый клиент"
+  },
+  "paymentMethod": {
+    "CASH": "Наличные",
+    "CARD": "Карта",
+    "TRANSFER": "Перевод",
+    "MIXED": "Смешанная",
+    "INSTALLMENT": "Рассрочка"
+  },
+  "saleStatus": {
+    "COMPLETED": "Завершена",
+    "PARTIALLY_RETURNED": "Частичный возврат",
+    "RETURNED": "Возвращена"
+  },
   "errors": {
     "VALIDATION_ERROR": "Проверьте правильность заполнения полей.",
     "BAD_REQUEST": "Некорректный запрос.",
@@ -344,6 +420,13 @@
     "SERIAL_NOT_ALLOWED": "Этот товар учитывается без IMEI / серийных номеров.",
     "PRODUCT_INACTIVE": "Товар снят с продажи.",
     "NETWORK_ERROR": "Нет связи с сервером. Проверьте интернет.",
-    "UNKNOWN": "Что-то пошло не так. Попробуйте ещё раз."
+    "UNKNOWN": "Что-то пошло не так. Попробуйте ещё раз.",
+    "CUSTOMER_NOT_FOUND": "Клиент не найден.",
+    "DUPLICATE_CUSTOMER_PHONE": "Клиент с таким телефоном уже есть.",
+    "PAYMENT_MISMATCH": "Сумма оплаты не совпадает с суммой к оплате.",
+    "PRICE_REQUIRED": "У товара нет цены продажи — укажите цену.",
+    "PRICE_CHANGE_FORBIDDEN": "Изменять цену может только менеджер или владелец.",
+    "DISCOUNT_TOO_LARGE": "Скидка не может быть больше суммы товара.",
+    "INSTALLMENT_NOT_AVAILABLE": "Рассрочка пока недоступна."
   }
 }

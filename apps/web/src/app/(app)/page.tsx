@@ -27,6 +27,18 @@ export default function HomePage() {
         </p>
       </header>
 
+      {can(Permission.SALES_CREATE) ? (
+        <Link
+          href="/sale"
+          className="flex min-h-24 items-center justify-center gap-3 rounded-3xl bg-emerald-600 text-xl font-bold text-white active:bg-emerald-800"
+        >
+          <span aria-hidden className="text-3xl">
+            🛒
+          </span>
+          + {t('home.newSale')}
+        </Link>
+      ) : null}
+
       {can(Permission.PURCHASES_MANAGE) || can(Permission.STOCK_VIEW) ? (
         <div className="grid grid-cols-2 gap-3">
           {can(Permission.PURCHASES_MANAGE) ? (

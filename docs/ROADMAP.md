@@ -9,7 +9,7 @@
 | 2    | Authentication (JWT), Company, Branch, Users, Roles (RBAC)                            | ✅ Готово |
 | 3    | Products, Categories, Brands, Variants, Barcode, IMEI/Serial numbers                  | ✅ Готово |
 | 4    | Purchase, StockMovement, stock balances                                               | ✅ Готово |
-| 5    | Sales, Payments, продажа по IMEI                                                      | ⏳        |
+| 5    | Sales, Payments, продажа по IMEI                                                      | ✅ Готово |
 | 6    | Returns, Transfers, Inventory                                                         | ⏳        |
 | 7    | Customers, Suppliers, Cash, Installments, Warranties                                  | ⏳        |
 | 8    | Dashboard, Reports, Audit log                                                         | ⏳        |
@@ -86,6 +86,26 @@
   и «+ Приход» на главной, поставщики
 - Демо-данные: `pnpm demo:data` — 2 проведённых прихода демо-компании через те же сервисы
 
+## Этап 5 — что сделано
+
+- Продажа — одна транзакция: проверка филиала, клиента, товаров, цен и скидок → `StockMovement SALE`
+  (остаток не уходит в минус) → IMEI `IN_STOCK → SOLD` условным обновлением (параллельная продажа
+  одного IMEI невозможна) → гарантия по IMEI (срок из товара) → платежи → журнал аудита
+- Нумерация ПД-1, ПД-2…; себестоимость строки фиксируется на момент продажи (средневзвешенная)
+- Оплата: наличные, карта, перевод, смешанная (несколько платежей); сумма платежей должна точно
+  совпадать с суммой к оплате (`PAYMENT_MISMATCH`). Рассрочка и долги — этап 7
+- Цена: продавец продаёт по цене из карточки, изменить её может только роль с `products.manage`
+  (`PRICE_CHANGE_FORBIDDEN`); скидка суммой на строку, не больше суммы строки (`DISCOUNT_TOO_LARGE`)
+- Себестоимость и валовая прибыль в ответах API — только при праве `reports.view`
+- Клиенты (минимально): поиск по имени/телефону, создание, изменение, скрытие; телефон уникален
+  в компании (`DUPLICATE_CUSTOMER_PHONE`)
+- API: `GET/POST /sales`, `GET /sales/:id`, `GET /payments`, `GET/POST/PATCH /customers`,
+  `GET /serial-numbers?variantId&branchId` (IMEI в наличии)
+- CHECK-ограничения БД на суммы продаж, строк и платежей
+- Frontend: вкладка «Продажа» (корзина, выбор/скан IMEI из наличия, скидка, клиент, способы оплаты,
+  контроль распределения смешанной оплаты), чек с IMEI и сроком гарантии, история продаж,
+  «+ Продажа» на главной, «Ещё» → Клиенты / Поставщики, RU/UZ
+
 ## Модели БД по этапам
 
 | Этап | Модели                                                                                      |
@@ -94,7 +114,7 @@
 | 2    | ✅ User, Membership (роль, права), MembershipBranch (доступ к филиалам), Session            |
 | 3    | ✅ Category, Brand, Product, ProductVariant, Barcode, SerialNumber                          |
 | 4    | ✅ Supplier, Purchase, PurchaseItem, StockMovement, StockBalance, DocumentCounter, AuditLog |
-| 5    | Customer (минимум), Sale, SaleItem, Payment                                                 |
+| 5    | ✅ Customer (минимум), Sale, SaleItem, Payment                                              |
 | 6    | Return, ReturnItem, Transfer, TransferItem, Inventory, InventoryItem, WriteOff              |
 | 7    | Customer/Supplier (полностью), CashOperation, Installment, InstallmentPayment, Warranty     |
 | 8    | AuditLog (+ отчёты поверх существующих моделей)                                             |
