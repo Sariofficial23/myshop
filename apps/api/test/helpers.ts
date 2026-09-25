@@ -106,3 +106,22 @@ export async function as(app: NestExpressApplication, telegramId: bigint) {
 export function prismaOf(app: NestExpressApplication): PrismaService {
   return app.get(PrismaService);
 }
+
+/** Корректный IMEI (контрольная цифра по Луну) из случайных 14 цифр. */
+export function randomImei(): string {
+  const body = Array.from({ length: 14 }, () => Math.floor(Math.random() * 10)).join('');
+  for (let check = 0; check <= 9; check++) {
+    const candidate = body + check;
+    let sum = 0;
+    for (let i = 0; i < 15; i++) {
+      let digit = Number(candidate[14 - i]);
+      if (i % 2 === 1) {
+        digit *= 2;
+        if (digit > 9) digit -= 9;
+      }
+      sum += digit;
+    }
+    if (sum % 10 === 0) return candidate;
+  }
+  throw new Error('unreachable');
+}

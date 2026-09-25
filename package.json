@@ -22,6 +22,7 @@
     "db:migrate": "pnpm --filter @myshop/database db:migrate",
     "db:deploy": "pnpm --filter @myshop/database db:deploy",
     "db:seed": "pnpm --filter @myshop/database db:seed",
+    "demo:data": "pnpm --filter @myshop/api demo:data",
     "db:status": "pnpm --filter @myshop/database db:status",
     "db:studio": "pnpm --filter @myshop/database db:studio"
   },

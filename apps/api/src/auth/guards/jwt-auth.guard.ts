@@ -44,7 +44,11 @@ export class JwtAuthGuard implements CanActivate {
       throw AppException.unauthorized('Invalid access token');
     }
 
-    request.auth = await this.sessions.resolveAuthContext(payload.sid, payload.sub);
+    request.auth = {
+      ...(await this.sessions.resolveAuthContext(payload.sid, payload.sub)),
+      ip: request.ip,
+      userAgent: request.headers['user-agent']?.slice(0, 500),
+    };
     return true;
   }
 }

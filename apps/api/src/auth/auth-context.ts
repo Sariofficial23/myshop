@@ -20,6 +20,9 @@ export interface AuthContext {
   allBranches: boolean;
   /** Филиалы с доступом (при allBranches = false). */
   branchIds: readonly string[];
+  /** Для журнала аудита. */
+  ip?: string;
+  userAgent?: string;
 }
 
 export type AuthenticatedRequest = Request & { auth?: AuthContext };
