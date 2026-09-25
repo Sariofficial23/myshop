@@ -5,7 +5,8 @@ SaaS-система учёта для магазинов телефонов, б�
 перемещения, инвентаризация, касса, рассрочки, гарантии и отчёты.
 
 > **Статус:** ✅ Этап 1 — инфраструктура · ✅ Этап 2 — вход через Telegram, компании, филиалы,
-> сотрудники и роли (RBAC) · ✅ Этап 3 — каталог: товары, варианты, штрихкоды, IMEI.
+> сотрудники и роли (RBAC) · ✅ Этап 3 — каталог: товары, варианты, штрихкоды, IMEI ·
+> ✅ Этап 4 — приходы, движения товара и остатки.
 > План этапов — [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Стек
@@ -58,6 +59,7 @@ docker compose up -d db
 # 4. Миграции и демо-данные
 pnpm db:deploy     # или pnpm db:migrate — в режиме разработки схемы
 pnpm db:seed
+pnpm build && pnpm demo:data   # демо-приходы (остатки и IMEI) через сервисы API
 
 # 5. Запуск API (http://localhost:3000) и Web (http://localhost:3001)
 pnpm dev
@@ -84,21 +86,22 @@ docker compose --profile bot up --build     # + Telegram-бот (нужен TELE
 
 ## Команды
 
-| Команда           | Что делает                              |
-| ----------------- | --------------------------------------- |
-| `pnpm dev`        | API + Web в режиме разработки           |
-| `pnpm dev:bot`    | Telegram-бот (long polling)             |
-| `pnpm build`      | Production-сборка всех пакетов          |
-| `pnpm lint`       | oxlint (warnings = ошибка)              |
-| `pnpm typecheck`  | Проверка типов TypeScript               |
-| `pnpm test`       | Unit-тесты (Vitest)                     |
-| `pnpm test:e2e`   | Интеграционные тесты API (нужна БД)     |
-| `pnpm check`      | lint + typecheck + test                 |
-| `pnpm format`     | Prettier                                |
-| `pnpm db:migrate` | Создать/применить миграцию (разработка) |
-| `pnpm db:deploy`  | Применить миграции (production)         |
-| `pnpm db:seed`    | Демо-данные (идемпотентно)              |
-| `pnpm db:studio`  | Prisma Studio                           |
+| Команда           | Что делает                                            |
+| ----------------- | ----------------------------------------------------- |
+| `pnpm dev`        | API + Web в режиме разработки                         |
+| `pnpm dev:bot`    | Telegram-бот (long polling)                           |
+| `pnpm build`      | Production-сборка всех пакетов                        |
+| `pnpm lint`       | oxlint (warnings = ошибка)                            |
+| `pnpm typecheck`  | Проверка типов TypeScript                             |
+| `pnpm test`       | Unit-тесты (Vitest)                                   |
+| `pnpm test:e2e`   | Интеграционные тесты API (нужна БД)                   |
+| `pnpm check`      | lint + typecheck + test                               |
+| `pnpm format`     | Prettier                                              |
+| `pnpm db:migrate` | Создать/применить миграцию (разработка)               |
+| `pnpm db:deploy`  | Применить миграции (production)                       |
+| `pnpm db:seed`    | Демо-данные (идемпотентно)                            |
+| `pnpm demo:data`  | Демо-документы через сервисы API (после `pnpm build`) |
+| `pnpm db:studio`  | Prisma Studio                                         |
 
 ## Переменные окружения
 

@@ -44,7 +44,10 @@
     "roleIn": "{role} · {company}",
     "yourBranches": "Ваши филиалы",
     "allBranches": "Все филиалы компании",
-    "stageNotice": "Готово: вход, сотрудники, филиалы и каталог товаров. Приходы, остатки и продажи появятся на следующих этапах."
+    "stageNotice": "Готово: вход, сотрудники, каталог, приходы и остатки. Продажи появятся на следующем этапе.",
+    "quickActions": "Быстрые действия",
+    "newPurchase": "Приход",
+    "lowStock": "Заканчиваются: {count}"
   },
   "system": {
     "title": "Состояние системы",
@@ -64,7 +67,8 @@
     "users": "Сотрудники",
     "language": "Язык",
     "telegramId": "Telegram ID: {id}",
-    "catalog": "Категории и бренды"
+    "catalog": "Категории и бренды",
+    "suppliers": "Поставщики"
   },
   "company": {
     "title": "Компания",
@@ -106,6 +110,11 @@
     "notLoggedIn": "ещё не входил",
     "readOnly": "Вы не можете изменять этого сотрудника.",
     "empty": "Сотрудников пока нет"
+  },
+  "stockTabs": {
+    "products": "Товары",
+    "stock": "Остатки",
+    "purchases": "Приходы"
   },
   "products": {
     "title": "Товары",
@@ -157,6 +166,66 @@
     "imeiNotFound": "Такого IMEI нет в вашем магазине",
     "imeiInvalid": "Неверный IMEI: проверьте цифры (15 цифр, контрольная сумма не сходится)"
   },
+  "stock": {
+    "title": "Остатки",
+    "allBranches": "Все филиалы",
+    "branch": "Филиал",
+    "lowOnly": "Только заканчивающиеся",
+    "empty": "Остатков пока нет. Оформите приход.",
+    "qty": "{count} {unit}",
+    "low": "Заканчивается",
+    "value": "Себестоимость: {value}",
+    "totalValue": "Стоимость склада: {value}",
+    "searchPlaceholder": "Название или SKU",
+    "history": "История движений",
+    "noHistory": "Движений пока нет",
+    "byBranch": "Остатки по филиалам",
+    "noStock": "Нет на складе",
+    "balanceAfter": "остаток {count}"
+  },
+  "purchases": {
+    "title": "Приходы",
+    "add": "Приход",
+    "new": "Новый приход",
+    "empty": "Приходов пока нет",
+    "branch": "Филиал",
+    "supplier": "Поставщик",
+    "noSupplier": "Без поставщика",
+    "addSupplier": "+ Новый поставщик",
+    "supplierName": "Название поставщика",
+    "documentNumber": "Номер накладной",
+    "notes": "Комментарий",
+    "items": "Товары",
+    "addItem": "Добавить товар",
+    "searchProduct": "Найдите товар: название, SKU или штрихкод",
+    "noItems": "Добавьте хотя бы один товар",
+    "quantity": "Количество",
+    "purchasePrice": "Цена закупки",
+    "salePrice": "Цена продажи",
+    "salePriceHint": "Необязательно: обновит цену продажи",
+    "imeiList": "IMEI — по одному на строку",
+    "serialList": "Серийные номера — по одному на строку",
+    "serialsCount": "Введено: {count}",
+    "serialsDuplicates": "Повторяются: {list}",
+    "remove": "Убрать",
+    "total": "Итого: {value}",
+    "saveDraft": "Сохранить черновик",
+    "confirm": "Провести",
+    "confirmHint": "После проведения остатки увеличатся, IMEI появятся на складе. Изменить проведённый приход нельзя.",
+    "cancel": "Отменить приход",
+    "createdBy": "Создал: {name}",
+    "confirmedBy": "Провёл: {name}",
+    "lineTotal": "{qty} × {price} = {total}",
+    "serialsRequired": "Введите хотя бы один номер"
+  },
+  "suppliers": {
+    "title": "Поставщики",
+    "add": "Добавить поставщика",
+    "name": "Название",
+    "phone": "Телефон",
+    "contact": "Контактное лицо",
+    "empty": "Поставщиков пока нет"
+  },
   "catalog": {
     "title": "Категории и бренды",
     "categories": "Категории",
@@ -188,6 +257,20 @@
     "RETURNED": "Возвращён",
     "TRANSFERRED": "Перемещён",
     "WRITTEN_OFF": "Списан"
+  },
+  "movementType": {
+    "PURCHASE": "Приход",
+    "SALE": "Продажа",
+    "RETURN": "Возврат",
+    "TRANSFER_IN": "Перемещение (приход)",
+    "TRANSFER_OUT": "Перемещение (расход)",
+    "WRITE_OFF": "Списание",
+    "INVENTORY_ADJUSTMENT": "Инвентаризация"
+  },
+  "documentStatus": {
+    "DRAFT": "Черновик",
+    "CONFIRMED": "Проведён",
+    "CANCELLED": "Отменён"
   },
   "roles": {
     "OWNER": "Владелец",
@@ -253,6 +336,13 @@
     "CATEGORY_CYCLE": "Категория не может быть вложена сама в себя.",
     "INVALID_IMEI": "Неверный IMEI. Проверьте 15 цифр.",
     "INVALID_SERIAL_NUMBER": "Неверный серийный номер.",
+    "SUPPLIER_NOT_FOUND": "Поставщик не найден.",
+    "DUPLICATE_SUPPLIER": "Такой поставщик уже есть.",
+    "PURCHASE_NOT_FOUND": "Приход не найден.",
+    "DOCUMENT_NOT_DRAFT": "Документ уже проведён или отменён — изменить его нельзя.",
+    "SERIAL_COUNT_MISMATCH": "Количество IMEI / серийных номеров должно совпадать с количеством товара.",
+    "SERIAL_NOT_ALLOWED": "Этот товар учитывается без IMEI / серийных номеров.",
+    "PRODUCT_INACTIVE": "Товар снят с продажи.",
     "NETWORK_ERROR": "Нет связи с сервером. Проверьте интернет.",
     "UNKNOWN": "Что-то пошло не так. Попробуйте ещё раз."
   }

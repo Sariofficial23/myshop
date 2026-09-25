@@ -44,7 +44,10 @@
     "roleIn": "{role} · {company}",
     "yourBranches": "Filiallaringiz",
     "allBranches": "Kompaniyaning barcha filiallari",
-    "stageNotice": "Tayyor: kirish, xodimlar, filiallar va mahsulotlar katalogi. Kirim, qoldiqlar va savdo keyingi bosqichlarda qo‘shiladi."
+    "stageNotice": "Tayyor: kirish, xodimlar, katalog, kirim va qoldiqlar. Savdo keyingi bosqichda qo‘shiladi.",
+    "quickActions": "Tezkor amallar",
+    "newPurchase": "Kirim",
+    "lowStock": "Tugayapti: {count}"
   },
   "system": {
     "title": "Tizim holati",
@@ -64,7 +67,8 @@
     "users": "Xodimlar",
     "language": "Til",
     "telegramId": "Telegram ID: {id}",
-    "catalog": "Kategoriyalar va brendlar"
+    "catalog": "Kategoriyalar va brendlar",
+    "suppliers": "Yetkazib beruvchilar"
   },
   "company": {
     "title": "Kompaniya",
@@ -106,6 +110,11 @@
     "notLoggedIn": "hali kirmagan",
     "readOnly": "Siz bu xodimni o‘zgartira olmaysiz.",
     "empty": "Hozircha xodimlar yo‘q"
+  },
+  "stockTabs": {
+    "products": "Mahsulotlar",
+    "stock": "Qoldiqlar",
+    "purchases": "Kirimlar"
   },
   "products": {
     "title": "Mahsulotlar",
@@ -157,6 +166,66 @@
     "imeiNotFound": "Bunday IMEI do‘koningizda yo‘q",
     "imeiInvalid": "IMEI noto‘g‘ri: raqamlarni tekshiring (15 ta raqam, nazorat yig‘indisi mos emas)"
   },
+  "stock": {
+    "title": "Qoldiqlar",
+    "allBranches": "Barcha filiallar",
+    "branch": "Filial",
+    "lowOnly": "Faqat tugayotganlar",
+    "empty": "Hozircha qoldiq yo‘q. Kirim rasmiylashtiring.",
+    "qty": "{count} {unit}",
+    "low": "Tugayapti",
+    "value": "Tannarx: {value}",
+    "totalValue": "Ombor qiymati: {value}",
+    "searchPlaceholder": "Nomi yoki SKU",
+    "history": "Harakatlar tarixi",
+    "noHistory": "Hozircha harakatlar yo‘q",
+    "byBranch": "Filiallar bo‘yicha qoldiq",
+    "noStock": "Omborda yo‘q",
+    "balanceAfter": "qoldiq {count}"
+  },
+  "purchases": {
+    "title": "Kirimlar",
+    "add": "Kirim",
+    "new": "Yangi kirim",
+    "empty": "Hozircha kirimlar yo‘q",
+    "branch": "Filial",
+    "supplier": "Yetkazib beruvchi",
+    "noSupplier": "Yetkazib beruvchisiz",
+    "addSupplier": "+ Yangi yetkazib beruvchi",
+    "supplierName": "Yetkazib beruvchi nomi",
+    "documentNumber": "Nakladnoy raqami",
+    "notes": "Izoh",
+    "items": "Mahsulotlar",
+    "addItem": "Mahsulot qo‘shish",
+    "searchProduct": "Mahsulotni toping: nomi, SKU yoki shtrix-kod",
+    "noItems": "Kamida bitta mahsulot qo‘shing",
+    "quantity": "Miqdor",
+    "purchasePrice": "Xarid narxi",
+    "salePrice": "Sotuv narxi",
+    "salePriceHint": "Ixtiyoriy: sotuv narxini yangilaydi",
+    "imeiList": "IMEI — har qatorda bittadan",
+    "serialList": "Seriya raqamlari — har qatorda bittadan",
+    "serialsCount": "Kiritildi: {count}",
+    "serialsDuplicates": "Takrorlanmoqda: {list}",
+    "remove": "Olib tashlash",
+    "total": "Jami: {value}",
+    "saveDraft": "Qoralamani saqlash",
+    "confirm": "O‘tkazish",
+    "confirmHint": "O‘tkazilgandan so‘ng qoldiqlar ko‘payadi, IMEI omborda paydo bo‘ladi. O‘tkazilgan kirimni o‘zgartirib bo‘lmaydi.",
+    "cancel": "Kirimni bekor qilish",
+    "createdBy": "Yaratdi: {name}",
+    "confirmedBy": "O‘tkazdi: {name}",
+    "lineTotal": "{qty} × {price} = {total}",
+    "serialsRequired": "Kamida bitta raqam kiriting"
+  },
+  "suppliers": {
+    "title": "Yetkazib beruvchilar",
+    "add": "Yetkazib beruvchi qo‘shish",
+    "name": "Nomi",
+    "phone": "Telefon",
+    "contact": "Aloqa uchun shaxs",
+    "empty": "Hozircha yetkazib beruvchilar yo‘q"
+  },
   "catalog": {
     "title": "Kategoriyalar va brendlar",
     "categories": "Kategoriyalar",
@@ -188,6 +257,20 @@
     "RETURNED": "Qaytarilgan",
     "TRANSFERRED": "Ko‘chirilgan",
     "WRITTEN_OFF": "Hisobdan chiqarilgan"
+  },
+  "movementType": {
+    "PURCHASE": "Kirim",
+    "SALE": "Savdo",
+    "RETURN": "Qaytarish",
+    "TRANSFER_IN": "Ko‘chirish (kirim)",
+    "TRANSFER_OUT": "Ko‘chirish (chiqim)",
+    "WRITE_OFF": "Hisobdan chiqarish",
+    "INVENTORY_ADJUSTMENT": "Inventarizatsiya"
+  },
+  "documentStatus": {
+    "DRAFT": "Qoralama",
+    "CONFIRMED": "O‘tkazilgan",
+    "CANCELLED": "Bekor qilingan"
   },
   "roles": {
     "OWNER": "Egasi",
@@ -253,6 +336,13 @@
     "CATEGORY_CYCLE": "Kategoriya o‘ziga o‘zi ichki bo‘la olmaydi.",
     "INVALID_IMEI": "IMEI noto‘g‘ri. 15 ta raqamni tekshiring.",
     "INVALID_SERIAL_NUMBER": "Seriya raqami noto‘g‘ri.",
+    "SUPPLIER_NOT_FOUND": "Yetkazib beruvchi topilmadi.",
+    "DUPLICATE_SUPPLIER": "Bunday yetkazib beruvchi allaqachon bor.",
+    "PURCHASE_NOT_FOUND": "Kirim topilmadi.",
+    "DOCUMENT_NOT_DRAFT": "Hujjat allaqachon o‘tkazilgan yoki bekor qilingan — uni o‘zgartirib bo‘lmaydi.",
+    "SERIAL_COUNT_MISMATCH": "IMEI / seriya raqamlari soni mahsulot miqdoriga teng bo‘lishi kerak.",
+    "SERIAL_NOT_ALLOWED": "Bu mahsulot IMEI / seriya raqamisiz hisobga olinadi.",
+    "PRODUCT_INACTIVE": "Mahsulot sotuvdan olingan.",
     "NETWORK_ERROR": "Server bilan aloqa yo‘q. Internetni tekshiring.",
     "UNKNOWN": "Nimadir xato ketdi. Qayta urinib ko‘ring."
   }

@@ -4,20 +4,20 @@ import { cn } from '@myshop/ui';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { STOCK_SECTION_PATHS } from './stock/stock-tabs';
 
 /**
  * Нижняя навигация. Разделы "Продажа" и "Отчёты" добавляются
  * на этапах, где появляется их реальная функциональность.
  */
+function isStockSection(pathname: string): boolean {
+  return STOCK_SECTION_PATHS.some((path) => pathname.startsWith(path));
+}
+
 const items = [
   { href: '/', icon: '🏠', key: 'home', match: (p: string) => p === '/' },
-  { href: '/products', icon: '📦', key: 'stock', match: (p: string) => p.startsWith('/products') },
-  {
-    href: '/more',
-    icon: '☰',
-    key: 'more',
-    match: (p: string) => p !== '/' && !p.startsWith('/products'),
-  },
+  { href: '/products', icon: '📦', key: 'stock', match: isStockSection },
+  { href: '/more', icon: '☰', key: 'more', match: (p: string) => p !== '/' && !isStockSection(p) },
 ] as const;
 
 export function BottomNav() {

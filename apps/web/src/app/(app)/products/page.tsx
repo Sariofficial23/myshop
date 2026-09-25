@@ -12,6 +12,7 @@ import { ImeiLookup } from '@/components/catalog/imei-lookup';
 import { ScannerDialog } from '@/components/catalog/scanner-dialog';
 import { ErrorMessage } from '@/components/error-message';
 import { PageHeader } from '@/components/page-header';
+import { StockTabs } from '@/components/stock/stock-tabs';
 import { catalogApi, type Product } from '@/lib/api/catalog';
 import { useCan } from '@/lib/auth/auth-provider';
 import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
@@ -52,6 +53,7 @@ export default function ProductsPage() {
 
   return (
     <>
+      <StockTabs />
       <PageHeader
         title={t('products.title')}
         action={
