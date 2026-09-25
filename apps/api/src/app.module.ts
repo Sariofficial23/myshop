@@ -15,6 +15,7 @@ import { InstallmentsModule } from './installments/installments.js';
 import { InventoriesModule } from './inventories/inventories.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { PurchasesModule } from './purchases/purchases.module.js';
+import { ReportsModule } from './reports/reports.js';
 import { ReturnsModule } from './returns/returns.js';
 import { SalesModule } from './sales/sales.module.js';
 import { StockModule } from './stock/stock.module.js';
@@ -67,6 +68,7 @@ import { WriteOffsModule } from './write-offs/write-offs.js';
     InstallmentsModule,
     CashModule,
     WarrantyModule,
+    ReportsModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

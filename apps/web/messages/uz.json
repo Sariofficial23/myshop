@@ -7,7 +7,8 @@
     "home": "Bosh sahifa",
     "more": "Yana",
     "stock": "Ombor",
-    "sale": "Sotuv"
+    "sale": "Sotuv",
+    "reports": "Hisobotlar"
   },
   "common": {
     "save": "Saqlash",
@@ -48,10 +49,13 @@
     "allBranches": "Kompaniyaning barcha filiallari",
     "stageNotice": "Tayyor: sotuvlar, ombor, qaytarishlar, ko'chirishlar, inventarizatsiya, kassa, muddatli to'lov va kafolat. Dashbord va hisobotlar — keyingi bosqichda.",
     "quickActions": "Tezkor amallar",
-    "newPurchase": "Kirim",
+    "newPurchase": "Mahsulot kirimi",
     "lowStock": "Tugayapti: {count}",
-    "newSale": "Sotuv",
-    "overdueInstallments": "Muddati o'tgan: {count}"
+    "newSale": "Yangi sotuv",
+    "overdueInstallments": "Muddati o'tgan: {count}",
+    "today": "Bugun",
+    "todayStats": "Sotuvlar: {sales} · mahsulotlar: {items}",
+    "reports": "Hisobotlar"
   },
   "system": {
     "title": "Tizim holati",
@@ -567,6 +571,28 @@
     "READY": "Tayyor",
     "RETURNED": "Berildi",
     "REJECTED": "Rad etildi"
+  },
+  "reports": {
+    "title": "Hisobotlar",
+    "period_today": "Bugun",
+    "period_yesterday": "Kecha",
+    "period_week": "7 kun",
+    "period_month": "Oy",
+    "revenue": "Sotilgan summa",
+    "salesCount": "Sotuvlar (cheklar)",
+    "itemsSold": "Sotilgan mahsulotlar",
+    "averageCheck": "O'rtacha chek",
+    "profit": "Foyda",
+    "returns": "Qaytarishlar ({count})",
+    "discounts": "Chegirmalar",
+    "money": "Olingan pul",
+    "items": "Nima sotildi",
+    "sold": "{count} dona sotildi",
+    "itemProfit": "foyda {value}",
+    "noSales": "Bu davrda sotuvlar yo'q",
+    "sellers": "Sotuvchilar",
+    "salesShort": "sotuvlar: {count}",
+    "net": "Qaytarishlarsiz: {value}"
   },
   "errors": {
     "VALIDATION_ERROR": "Maydonlar to‘g‘ri to‘ldirilganini tekshiring.",

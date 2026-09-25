@@ -3,6 +3,7 @@
 import { Permission } from '@myshop/shared';
 import { Button, Card, cn, ListRow, StatusBadge } from '@myshop/ui';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { ScanBarcode } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -82,7 +83,7 @@ export default function ProductsPage() {
           aria-label={t('products.scan')}
           onClick={() => setScanning(true)}
         >
-          📷
+          <ScanBarcode aria-hidden size={22} />
         </Button>
       </div>
 

@@ -4,11 +4,20 @@
 @source '../../../../packages/ui/src';
 
 @theme {
-  --color-brand-50: #eff6ff;
-  --color-brand-100: #dbeafe;
-  --color-brand-600: #2563eb;
-  --color-brand-700: #1d4ed8;
-  --color-brand-800: #1e40af;
+  /* Системный синий iOS */
+  --color-brand-50: #eaf3ff;
+  --color-brand-100: #d4e7ff;
+  --color-brand-600: #007aff;
+  --color-brand-700: #0066d6;
+  --color-brand-800: #0051ab;
+
+  /*
+   * Шрифт в стиле Apple: на iPhone / iPad / Mac — системный San Francisco (SF Pro),
+   * на Android и Windows — Inter, ближайший по рисунку свободный шрифт.
+   */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Inter Variable',
+    'Helvetica Neue', system-ui, sans-serif;
 }
 
 :root {
@@ -17,6 +26,13 @@
 
 html,
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
+  @apply bg-[#f2f2f7] font-sans text-slate-900 antialiased;
   -webkit-tap-highlight-color: transparent;
+  font-feature-settings: 'cv11', 'ss01';
+  letter-spacing: -0.01em;
+}
+
+h1,
+h2 {
+  letter-spacing: -0.022em;
 }

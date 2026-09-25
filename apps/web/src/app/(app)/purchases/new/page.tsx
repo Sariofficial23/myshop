@@ -2,6 +2,7 @@
 
 import { Button, Card, SelectField, TextField } from '@myshop/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { ScanBarcode } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useCallback, useState } from 'react';
@@ -222,7 +223,7 @@ function LineCard({
                 {t('serialsCount', { count: serials.length })}
               </p>
               <Button variant="secondary" aria-label="scan" onClick={() => setScanning(true)}>
-                📷
+                <ScanBarcode aria-hidden size={22} />
               </Button>
             </div>
             {duplicates.length ? (

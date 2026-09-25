@@ -7,7 +7,8 @@
     "home": "Главная",
     "more": "Ещё",
     "stock": "Склад",
-    "sale": "Продажа"
+    "sale": "Продажа",
+    "reports": "Отчёты"
   },
   "common": {
     "save": "Сохранить",
@@ -48,10 +49,13 @@
     "allBranches": "Все филиалы компании",
     "stageNotice": "Готово: продажи, склад, возвраты, перемещения, инвентаризация, касса, рассрочки и гарантия. Дашборд и отчёты — на следующем этапе.",
     "quickActions": "Быстрые действия",
-    "newPurchase": "Приход",
+    "newPurchase": "Приход товара",
     "lowStock": "Заканчиваются: {count}",
-    "newSale": "Продажа",
-    "overdueInstallments": "Просрочено: {count}"
+    "newSale": "Новая продажа",
+    "overdueInstallments": "Просрочено: {count}",
+    "today": "Сегодня",
+    "todayStats": "Продаж: {sales} · товаров: {items}",
+    "reports": "Отчёты"
   },
   "system": {
     "title": "Состояние системы",
@@ -567,6 +571,28 @@
     "READY": "Готов",
     "RETURNED": "Выдан",
     "REJECTED": "Отказ"
+  },
+  "reports": {
+    "title": "Отчёты",
+    "period_today": "Сегодня",
+    "period_yesterday": "Вчера",
+    "period_week": "7 дней",
+    "period_month": "Месяц",
+    "revenue": "Продано на сумму",
+    "salesCount": "Продаж (чеков)",
+    "itemsSold": "Продано товаров",
+    "averageCheck": "Средний чек",
+    "profit": "Прибыль",
+    "returns": "Возвраты ({count})",
+    "discounts": "Скидки",
+    "money": "Получено денег",
+    "items": "Что продано",
+    "sold": "продано {count} шт.",
+    "itemProfit": "прибыль {value}",
+    "noSales": "За этот период продаж нет",
+    "sellers": "Продавцы",
+    "salesShort": "продаж: {count}",
+    "net": "За вычетом возвратов: {value}"
   },
   "errors": {
     "VALIDATION_ERROR": "Проверьте правильность заполнения полей.",

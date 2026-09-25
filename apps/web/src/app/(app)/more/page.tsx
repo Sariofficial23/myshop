@@ -3,9 +3,22 @@
 import { Permission } from '@myshop/shared';
 import { Button, Card, ListRow, SelectField } from '@myshop/ui';
 import { useMutation } from '@tanstack/react-query';
+import {
+  Building2,
+  CalendarClock,
+  Contact,
+  Globe,
+  ShieldCheck,
+  Store,
+  Tags,
+  Truck,
+  Users,
+  Wallet,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { ErrorMessage } from '@/components/error-message';
+import { AppIcon, type IconTint } from '@/components/icons/app-icon';
 import { LocaleSwitcher } from '@/components/locale-switcher';
 import { PageHeader } from '@/components/page-header';
 import { useAuth, useCan, useMe } from '@/lib/auth/auth-provider';
@@ -18,47 +31,66 @@ export default function MorePage() {
   const switcher = useMutation({ mutationFn: switchCompany });
 
   const links = [
-    { href: '/company', icon: '🏢', label: t('more.company'), visible: true },
+    {
+      href: '/company',
+      icon: Building2,
+      tint: 'gray' as IconTint,
+      label: t('more.company'),
+      visible: true,
+    },
     {
       href: '/branches',
-      icon: '🏬',
+      icon: Store,
+      tint: 'blue' as IconTint,
       label: t('more.branches'),
       visible: can(Permission.BRANCHES_VIEW),
     },
-    { href: '/users', icon: '👥', label: t('more.users'), visible: can(Permission.USERS_VIEW) },
+    {
+      href: '/users',
+      icon: Users,
+      tint: 'indigo' as IconTint,
+      label: t('more.users'),
+      visible: can(Permission.USERS_VIEW),
+    },
     {
       href: '/cash',
-      icon: '💵',
+      icon: Wallet,
+      tint: 'green' as IconTint,
       label: t('more.cash'),
       visible: can(Permission.CASH_MANAGE),
     },
     {
       href: '/installments',
-      icon: '📅',
+      icon: CalendarClock,
+      tint: 'orange' as IconTint,
       label: t('more.installments'),
       visible: can(Permission.SALES_VIEW),
     },
     {
       href: '/warranty',
-      icon: '🛡️',
+      icon: ShieldCheck,
+      tint: 'teal' as IconTint,
       label: t('more.warranty'),
       visible: can(Permission.SALES_VIEW),
     },
     {
       href: '/customers',
-      icon: '🧑‍🤝‍🧑',
+      icon: Contact,
+      tint: 'pink' as IconTint,
       label: t('more.customers'),
       visible: can(Permission.CUSTOMERS_MANAGE),
     },
     {
       href: '/suppliers',
-      icon: '🚚',
+      icon: Truck,
+      tint: 'purple' as IconTint,
       label: t('more.suppliers'),
       visible: can(Permission.SUPPLIERS_MANAGE),
     },
     {
       href: '/catalog',
-      icon: '🏷️',
+      icon: Tags,
+      tint: 'yellow' as IconTint,
       label: t('more.catalog'),
       visible: can(Permission.PRODUCTS_VIEW),
     },
@@ -104,7 +136,7 @@ export default function MorePage() {
             <li key={link.href}>
               <Link href={link.href} className="block rounded-3xl active:bg-slate-50">
                 <ListRow
-                  leading={<span className="text-xl">{link.icon}</span>}
+                  leading={<AppIcon icon={link.icon} tint={link.tint} size="sm" />}
                   title={link.label}
                   trailing="›"
                 />
@@ -113,7 +145,7 @@ export default function MorePage() {
           ))}
           <li>
             <ListRow
-              leading={<span className="text-xl">🌐</span>}
+              leading={<AppIcon icon={Globe} tint="blue" size="sm" />}
               title={t('more.language')}
               trailing={<LocaleSwitcher />}
             />

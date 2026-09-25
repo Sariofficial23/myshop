@@ -3,6 +3,7 @@
 import { Permission } from '@myshop/shared';
 import { Button, Card, ListRow, StatusBadge, TextField } from '@myshop/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ScanBarcode } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
@@ -70,7 +71,7 @@ export default function WarrantyPage() {
           className="min-h-12 min-w-0 flex-1 rounded-2xl bg-white px-4 font-mono text-base ring-1 ring-slate-200 outline-none focus:ring-2 focus:ring-brand-600"
         />
         <Button variant="secondary" aria-label="scan" onClick={() => setScanning(true)}>
-          📷
+          <ScanBarcode aria-hidden size={22} />
         </Button>
         <Button type="submit">{t('warranty.check')}</Button>
       </form>
