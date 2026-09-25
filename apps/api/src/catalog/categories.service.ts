@@ -14,30 +14,40 @@ const categorySelect = {
   _count: { select: { products: true } },
 } as const;
 
+function withProductsCount<T extends { _count: { products: number } }>({ _count, ...rest }: T) {
+  return { ...rest, productsCount: _count.products };
+}
+
 @Injectable()
 export class CategoriesService {
   constructor(private readonly prisma: PrismaService) {}
 
   list(ctx: AuthContext, includeInactive = false) {
-    return this.prisma.category.findMany({
-      where: { companyId: ctx.companyId, ...(includeInactive ? {} : { isActive: true }) },
-      select: categorySelect,
-      orderBy: { name: 'asc' },
-    });
+    return this.prisma.category
+      .findMany({
+        where: { companyId: ctx.companyId, ...(includeInactive ? {} : { isActive: true }) },
+        select: categorySelect,
+        orderBy: { name: 'asc' },
+      })
+      .then((rows) => rows.map(withProductsCount));
   }
 
   async create(ctx: AuthContext, dto: CreateCategoryDto) {
     if (dto.parentId) await this.assertInCompany(ctx, dto.parentId);
-    return this.prisma.category.create({
-      data: { companyId: ctx.companyId, name: dto.name, parentId: dto.parentId ?? null },
-      select: categorySelect,
-    });
+    return this.prisma.category
+      .create({
+        data: { companyId: ctx.companyId, name: dto.name, parentId: dto.parentId ?? null },
+        select: categorySelect,
+      })
+      .then(withProductsCount);
   }
 
   async update(ctx: AuthContext, id: string, dto: UpdateCategoryDto) {
     await this.assertInCompany(ctx, id);
     if (dto.parentId) await this.assertNoCycle(ctx, id, dto.parentId);
-    return this.prisma.category.update({ where: { id }, data: dto, select: categorySelect });
+    return this.prisma.category
+      .update({ where: { id }, data: dto, select: categorySelect })
+      .then(withProductsCount);
   }
 
   async assertInCompany(ctx: AuthContext, id: string): Promise<void> {

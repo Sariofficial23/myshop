@@ -5,7 +5,8 @@
   },
   "nav": {
     "home": "Bosh sahifa",
-    "more": "Yana"
+    "more": "Yana",
+    "stock": "Ombor"
   },
   "common": {
     "save": "Saqlash",
@@ -43,7 +44,7 @@
     "roleIn": "{role} · {company}",
     "yourBranches": "Filiallaringiz",
     "allBranches": "Kompaniyaning barcha filiallari",
-    "stageNotice": "Tayyor: kirish, kompaniya, filiallar va xodimlar. Mahsulotlar, ombor va savdo keyingi bosqichlarda qo‘shiladi."
+    "stageNotice": "Tayyor: kirish, xodimlar, filiallar va mahsulotlar katalogi. Kirim, qoldiqlar va savdo keyingi bosqichlarda qo‘shiladi."
   },
   "system": {
     "title": "Tizim holati",
@@ -62,7 +63,8 @@
     "branches": "Filiallar",
     "users": "Xodimlar",
     "language": "Til",
-    "telegramId": "Telegram ID: {id}"
+    "telegramId": "Telegram ID: {id}",
+    "catalog": "Kategoriyalar va brendlar"
   },
   "company": {
     "title": "Kompaniya",
@@ -104,6 +106,88 @@
     "notLoggedIn": "hali kirmagan",
     "readOnly": "Siz bu xodimni o‘zgartira olmaysiz.",
     "empty": "Hozircha xodimlar yo‘q"
+  },
+  "products": {
+    "title": "Mahsulotlar",
+    "add": "Mahsulot",
+    "new": "Yangi mahsulot",
+    "searchPlaceholder": "Nomi, SKU, shtrix-kod yoki IMEI",
+    "scan": "Skanerlash",
+    "allCategories": "Barchasi",
+    "empty": "Hech narsa topilmadi",
+    "emptyCatalog": "Hozircha mahsulotlar yo‘q. Birinchi mahsulotni qo‘shing.",
+    "found": "Topildi: {count}",
+    "name": "Nomi",
+    "namePlaceholder": "Masalan, iPhone 15",
+    "sku": "Artikul (SKU)",
+    "skuHint": "Bo‘sh qoldiring — avtomatik yaratiladi",
+    "category": "Kategoriya",
+    "brand": "Brend",
+    "none": "Tanlanmagan",
+    "description": "Tavsif",
+    "unit": "O‘lchov birligi",
+    "minimumStock": "Minimal qoldiq",
+    "minimumStockHint": "Shu miqdordan kam bo‘lsa, mahsulot «tugayapti» ro‘yxatiga tushadi",
+    "serialType": "Raqam bo‘yicha hisob",
+    "serialNone": "Raqamsiz",
+    "serialIMEI": "IMEI (telefonlar)",
+    "serialSERIAL": "Seriya raqami (texnika)",
+    "warrantyMonths": "Kafolat, oy",
+    "isActive": "Mahsulot sotuvda",
+    "inactive": "Sotuvdan olingan",
+    "variants": "Variantlar",
+    "variantsCount": "{count} ta variant",
+    "firstVariant": "Variant",
+    "addVariant": "Variant qo‘shish",
+    "variantName": "Variant nomi",
+    "variantNamePlaceholder": "Masalan, 128GB Black",
+    "color": "Rang",
+    "storage": "Xotira",
+    "memory": "Operativ xotira",
+    "model": "Model",
+    "salePrice": "Sotuv narxi",
+    "salePriceInvalid": "Narxni son bilan kiriting, masalan 11 990 000",
+    "noPrice": "Narx ko‘rsatilmagan",
+    "barcodes": "Shtrix-kodlar",
+    "barcode": "Shtrix-kod",
+    "addBarcode": "Shtrix-kod qo‘shish",
+    "removeBarcode": "{code} shtrix-kodini o‘chirish",
+    "imeiTitle": "IMEI {number}",
+    "imeiStatus": "{product} · {branch}",
+    "imeiNotFound": "Bunday IMEI do‘koningizda yo‘q",
+    "imeiInvalid": "IMEI noto‘g‘ri: raqamlarni tekshiring (15 ta raqam, nazorat yig‘indisi mos emas)"
+  },
+  "catalog": {
+    "title": "Kategoriyalar va brendlar",
+    "categories": "Kategoriyalar",
+    "brands": "Brendlar",
+    "newCategory": "Yangi kategoriya",
+    "newBrand": "Yangi brend",
+    "parent": "Asosiy kategoriya",
+    "productsCount": "Mahsulotlar: {count}",
+    "empty": "Hozircha bo‘sh"
+  },
+  "scanner": {
+    "title": "Kamerani shtrix-kodga qarating",
+    "unsupported": "Bu qurilmada skanerlash uchun kamera mavjud emas. Shtrix-kodni qo‘lda kiriting yoki USB/Bluetooth skanerdan foydalaning.",
+    "cameraError": "Kamerani yoqib bo‘lmadi. Kameraga ruxsat bering.",
+    "manual": "Shtrix-kodni qo‘lda kiritish",
+    "find": "Topish",
+    "close": "Yopish"
+  },
+  "units": {
+    "PCS": "dona",
+    "SET": "to‘plam",
+    "PAIR": "juft",
+    "M": "m",
+    "KG": "kg"
+  },
+  "serialStatus": {
+    "IN_STOCK": "Omborda",
+    "SOLD": "Sotilgan",
+    "RETURNED": "Qaytarilgan",
+    "TRANSFERRED": "Ko‘chirilgan",
+    "WRITTEN_OFF": "Hisobdan chiqarilgan"
   },
   "roles": {
     "OWNER": "Egasi",
@@ -158,6 +242,17 @@
     "LAST_OWNER": "Do‘konda kamida bitta egasi qolishi kerak.",
     "CANNOT_MODIFY_SELF": "O‘z rolingiz, kirish huquqingiz yoki holatingizni o‘zgartirib bo‘lmaydi.",
     "ALREADY_REGISTERED": "Siz allaqachon do‘konda ishlaysiz.",
+    "VARIANT_NOT_FOUND": "Mahsulot varianti topilmadi.",
+    "CATEGORY_NOT_FOUND": "Kategoriya topilmadi.",
+    "BRAND_NOT_FOUND": "Brend topilmadi.",
+    "BARCODE_NOT_FOUND": "Bunday shtrix-kodli mahsulot topilmadi.",
+    "DUPLICATE_SKU": "Bunday artikul (SKU) allaqachon ishlatilgan.",
+    "DUPLICATE_BARCODE": "Bu shtrix-kod boshqa mahsulotga bog‘langan.",
+    "DUPLICATE_CATEGORY": "Bunday kategoriya allaqachon bor.",
+    "DUPLICATE_BRAND": "Bunday brend allaqachon bor.",
+    "CATEGORY_CYCLE": "Kategoriya o‘ziga o‘zi ichki bo‘la olmaydi.",
+    "INVALID_IMEI": "IMEI noto‘g‘ri. 15 ta raqamni tekshiring.",
+    "INVALID_SERIAL_NUMBER": "Seriya raqami noto‘g‘ri.",
     "NETWORK_ERROR": "Server bilan aloqa yo‘q. Internetni tekshiring.",
     "UNKNOWN": "Nimadir xato ketdi. Qayta urinib ko‘ring."
   }

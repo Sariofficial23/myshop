@@ -43,6 +43,8 @@ describe('Catalog (e2e)', () => {
 
       const list = await owner.get('/api/categories').expect(200);
       expect(list.body.map((c: { name: string }) => c.name)).toEqual(['Apple phones', 'Смартфоны']);
+      expect(list.body[0]).toMatchObject({ productsCount: 0, isActive: true });
+      expect(list.body[0]).not.toHaveProperty('_count');
     });
 
     it('prevents category cycles', async () => {

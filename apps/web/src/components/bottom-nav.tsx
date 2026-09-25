@@ -6,12 +6,18 @@ import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
 /**
- * Нижняя навигация. Разделы "Продажа", "Склад", "Отчёты" добавляются
+ * Нижняя навигация. Разделы "Продажа" и "Отчёты" добавляются
  * на этапах, где появляется их реальная функциональность.
  */
 const items = [
   { href: '/', icon: '🏠', key: 'home', match: (p: string) => p === '/' },
-  { href: '/more', icon: '☰', key: 'more', match: (p: string) => p !== '/' },
+  { href: '/products', icon: '📦', key: 'stock', match: (p: string) => p.startsWith('/products') },
+  {
+    href: '/more',
+    icon: '☰',
+    key: 'more',
+    match: (p: string) => p !== '/' && !p.startsWith('/products'),
+  },
 ] as const;
 
 export function BottomNav() {

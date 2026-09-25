@@ -5,7 +5,8 @@
   },
   "nav": {
     "home": "Главная",
-    "more": "Ещё"
+    "more": "Ещё",
+    "stock": "Склад"
   },
   "common": {
     "save": "Сохранить",
@@ -43,7 +44,7 @@
     "roleIn": "{role} · {company}",
     "yourBranches": "Ваши филиалы",
     "allBranches": "Все филиалы компании",
-    "stageNotice": "Готово: вход, компания, филиалы и сотрудники. Товары, склад и продажи появятся на следующих этапах."
+    "stageNotice": "Готово: вход, сотрудники, филиалы и каталог товаров. Приходы, остатки и продажи появятся на следующих этапах."
   },
   "system": {
     "title": "Состояние системы",
@@ -62,7 +63,8 @@
     "branches": "Филиалы",
     "users": "Сотрудники",
     "language": "Язык",
-    "telegramId": "Telegram ID: {id}"
+    "telegramId": "Telegram ID: {id}",
+    "catalog": "Категории и бренды"
   },
   "company": {
     "title": "Компания",
@@ -104,6 +106,88 @@
     "notLoggedIn": "ещё не входил",
     "readOnly": "Вы не можете изменять этого сотрудника.",
     "empty": "Сотрудников пока нет"
+  },
+  "products": {
+    "title": "Товары",
+    "add": "Товар",
+    "new": "Новый товар",
+    "searchPlaceholder": "Название, SKU, штрихкод или IMEI",
+    "scan": "Сканировать",
+    "allCategories": "Все",
+    "empty": "Ничего не найдено",
+    "emptyCatalog": "Товаров пока нет. Добавьте первый товар.",
+    "found": "Найдено: {count}",
+    "name": "Название",
+    "namePlaceholder": "Например, iPhone 15",
+    "sku": "Артикул (SKU)",
+    "skuHint": "Оставьте пустым — сгенерируется автоматически",
+    "category": "Категория",
+    "brand": "Бренд",
+    "none": "Не выбрано",
+    "description": "Описание",
+    "unit": "Единица измерения",
+    "minimumStock": "Минимальный остаток",
+    "minimumStockHint": "Ниже этого количества товар попадёт в «заканчивается»",
+    "serialType": "Учёт по номеру",
+    "serialNone": "Без номера",
+    "serialIMEI": "IMEI (телефоны)",
+    "serialSERIAL": "Серийный номер (техника)",
+    "warrantyMonths": "Гарантия, месяцев",
+    "isActive": "Товар в продаже",
+    "inactive": "Снят с продажи",
+    "variants": "Варианты",
+    "variantsCount": "{count, plural, one {# вариант} few {# варианта} other {# вариантов}}",
+    "firstVariant": "Вариант",
+    "addVariant": "Добавить вариант",
+    "variantName": "Название варианта",
+    "variantNamePlaceholder": "Например, 128GB Black",
+    "color": "Цвет",
+    "storage": "Память",
+    "memory": "ОЗУ",
+    "model": "Модель",
+    "salePrice": "Цена продажи",
+    "salePriceInvalid": "Введите цену числом, например 11 990 000",
+    "noPrice": "Цена не указана",
+    "barcodes": "Штрихкоды",
+    "barcode": "Штрихкод",
+    "addBarcode": "Добавить штрихкод",
+    "removeBarcode": "Удалить штрихкод {code}",
+    "imeiTitle": "IMEI {number}",
+    "imeiStatus": "{product} · {branch}",
+    "imeiNotFound": "Такого IMEI нет в вашем магазине",
+    "imeiInvalid": "Неверный IMEI: проверьте цифры (15 цифр, контрольная сумма не сходится)"
+  },
+  "catalog": {
+    "title": "Категории и бренды",
+    "categories": "Категории",
+    "brands": "Бренды",
+    "newCategory": "Новая категория",
+    "newBrand": "Новый бренд",
+    "parent": "Родительская категория",
+    "productsCount": "Товаров: {count}",
+    "empty": "Пока пусто"
+  },
+  "scanner": {
+    "title": "Наведите камеру на штрихкод",
+    "unsupported": "Камера для сканирования недоступна на этом устройстве. Введите штрихкод вручную или используйте USB/Bluetooth-сканер.",
+    "cameraError": "Не удалось включить камеру. Разрешите доступ к камере.",
+    "manual": "Штрихкод вручную",
+    "find": "Найти",
+    "close": "Закрыть"
+  },
+  "units": {
+    "PCS": "шт",
+    "SET": "комплект",
+    "PAIR": "пара",
+    "M": "м",
+    "KG": "кг"
+  },
+  "serialStatus": {
+    "IN_STOCK": "На складе",
+    "SOLD": "Продан",
+    "RETURNED": "Возвращён",
+    "TRANSFERRED": "Перемещён",
+    "WRITTEN_OFF": "Списан"
   },
   "roles": {
     "OWNER": "Владелец",
@@ -158,6 +242,17 @@
     "LAST_OWNER": "В магазине должен остаться хотя бы один владелец.",
     "CANNOT_MODIFY_SELF": "Нельзя изменить свою роль, доступ или статус.",
     "ALREADY_REGISTERED": "Вы уже работаете в магазине.",
+    "VARIANT_NOT_FOUND": "Вариант товара не найден.",
+    "CATEGORY_NOT_FOUND": "Категория не найдена.",
+    "BRAND_NOT_FOUND": "Бренд не найден.",
+    "BARCODE_NOT_FOUND": "Товар с таким штрихкодом не найден.",
+    "DUPLICATE_SKU": "Такой артикул (SKU) уже используется.",
+    "DUPLICATE_BARCODE": "Этот штрихкод уже привязан к другому товару.",
+    "DUPLICATE_CATEGORY": "Такая категория уже есть.",
+    "DUPLICATE_BRAND": "Такой бренд уже есть.",
+    "CATEGORY_CYCLE": "Категория не может быть вложена сама в себя.",
+    "INVALID_IMEI": "Неверный IMEI. Проверьте 15 цифр.",
+    "INVALID_SERIAL_NUMBER": "Неверный серийный номер.",
     "NETWORK_ERROR": "Нет связи с сервером. Проверьте интернет.",
     "UNKNOWN": "Что-то пошло не так. Попробуйте ещё раз."
   }
