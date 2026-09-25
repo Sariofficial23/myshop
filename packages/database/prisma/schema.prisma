@@ -34,19 +34,21 @@ enum CompanyStatus {
 }
 
 model Company {
-  id        String        @id @default(uuid()) @db.Uuid
-  name      String        @db.VarChar(200)
+  id            String        @id @default(uuid()) @db.Uuid
+  name          String        @db.VarChar(200)
   /// Название в нижнем регистре — уникально: по нему сотрудники входят в свою компанию.
-  nameKey   String?       @unique @map("name_key") @db.VarChar(200)
-  status    CompanyStatus @default(ACTIVE)
+  nameKey       String?       @unique @map("name_key") @db.VarChar(200)
+  status        CompanyStatus @default(ACTIVE)
   /// Подписка оплачена до этой даты. null — без ограничения срока.
-  paidUntil DateTime?     @map("paid_until") @db.Timestamptz(3)
+  paidUntil     DateTime?     @map("paid_until") @db.Timestamptz(3)
   /// Код валюты ISO 4217, по умолчанию узбекский сум.
-  currency  String        @default("UZS") @db.Char(3)
-  timezone  String        @default("Asia/Tashkent") @db.VarChar(64)
-  isActive  Boolean       @default(true) @map("is_active")
-  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+  currency      String        @default("UZS") @db.Char(3)
+  timezone      String        @default("Asia/Tashkent") @db.VarChar(64)
+  /// Текст внизу печатного чека (благодарность, условия обмена и возврата).
+  receiptFooter String?       @map("receipt_footer") @db.VarChar(500)
+  isActive      Boolean       @default(true) @map("is_active")
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   branches            Branch[]
   memberships         Membership[]

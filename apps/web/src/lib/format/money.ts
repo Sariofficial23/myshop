@@ -34,3 +34,15 @@ export function parseMoneyInput(input: string): string | null {
   if (cleaned === '') return null;
   return /^\d{1,12}(\.\d{1,2})?$/.test(cleaned) ? cleaned : null;
 }
+
+/** Сумма без кода валюты — для строк печатного чека ("11 990 000"). */
+export function formatAmount(value: string | null | undefined, locale: Locale): string {
+  const amount = Number(value);
+  if (value === null || value === undefined || value === '' || !Number.isFinite(amount)) {
+    return '—';
+  }
+  return new Intl.NumberFormat(LOCALE_TAGS[locale], {
+    minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}

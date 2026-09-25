@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsOptional, IsString, IsTimeZone, Length, Matches } from 'class-validator';
+import { IsOptional, IsString, IsTimeZone, Length, Matches, MaxLength } from 'class-validator';
 
 const trim = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value);
 
@@ -22,4 +22,15 @@ export class UpdateCompanyDto {
   @IsOptional()
   @IsTimeZone()
   timezone?: string;
+
+  @ApiPropertyOptional({
+    example: 'Спасибо за покупку! Обмен и возврат — 14 дней.',
+    description: 'Текст внизу печатного чека; пустая строка очищает его',
+    nullable: true,
+  })
+  @IsOptional()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() || null : value))
+  @IsString()
+  @MaxLength(500)
+  receiptFooter?: string | null;
 }

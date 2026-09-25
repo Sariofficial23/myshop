@@ -53,7 +53,19 @@ describe('Access control (e2e)', () => {
       const name = `Techno House ${fx.companyId.slice(0, 8)}`;
       await owner.patch('/api/companies/current').send({ name, currency: 'usd' }).expect(200);
       const company = await owner.get('/api/companies/current').expect(200);
-      expect(company.body).toMatchObject({ name, currency: 'USD' });
+      expect(company.body).toMatchObject({ name, currency: 'USD', receiptFooter: null });
+
+      // Текст внизу чека: сохраняется обрезанным, пустая строка очищает его
+      const footer = await owner
+        .patch('/api/companies/current')
+        .send({ receiptFooter: '  Спасибо за покупку!  ' })
+        .expect(200);
+      expect(footer.body.receiptFooter).toBe('Спасибо за покупку!');
+      const cleared = await owner
+        .patch('/api/companies/current')
+        .send({ receiptFooter: '   ' })
+        .expect(200);
+      expect(cleared.body.receiptFooter).toBeNull();
 
       await owner.post('/api/branches').send({ name: 'Sergeli' }).expect(201);
       const dup = await owner.post('/api/branches').send({ name: 'Sergeli' }).expect(409);

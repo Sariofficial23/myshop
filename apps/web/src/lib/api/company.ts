@@ -6,6 +6,8 @@ export interface Company {
   name: string;
   currency: string;
   timezone: string;
+  /** Текст внизу печатного чека. */
+  receiptFooter: string | null;
 }
 
 export interface Branch {

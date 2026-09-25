@@ -111,7 +111,9 @@
     "currency": "Valyuta",
     "currencyHint": "ISO 4217 kodi, masalan UZS yoki USD",
     "timezone": "Vaqt mintaqasi",
-    "readOnly": "Kompaniya sozlamalarini faqat egasi o‘zgartira oladi."
+    "readOnly": "Kompaniya sozlamalarini faqat egasi o‘zgartira oladi.",
+    "receiptFooter": "Chek pastidagi matn",
+    "receiptFooterHint": "Har bir chekning oxirida chiqadi. Masalan: «Xaridingiz uchun rahmat! Almashtirish va qaytarish — 14 kun»."
   },
   "branches": {
     "title": "Filiallar",
@@ -776,5 +778,14 @@
     "money": "Pul",
     "people": "Hamkorlar",
     "settings": "Sozlamalar"
+  },
+  "receipt": {
+    "print": "Chekni chop etish",
+    "number": "Chek № {number}",
+    "phone": "Tel.: {phone}",
+    "total": "JAMI",
+    "sum": "so'm",
+    "installment": "{months} oyga muddatli to'lov",
+    "thanks": "Xaridingiz uchun rahmat!"
   }
 }

@@ -14,6 +14,7 @@ const companySelect = {
   name: true,
   currency: true,
   timezone: true,
+  receiptFooter: true,
   createdAt: true,
   updatedAt: true,
 } as const;

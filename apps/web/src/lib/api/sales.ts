@@ -72,7 +72,7 @@ export interface Sale {
   costTotal?: string;
   grossProfit?: string;
   notes: string | null;
-  branch: NamedRef;
+  branch: NamedRef & { address: string | null; phone: string | null };
   customer: { id: string; name: string; phone: string | null } | null;
   seller: { id: string; firstName: string; lastName: string | null };
   payments: SalePayment[];

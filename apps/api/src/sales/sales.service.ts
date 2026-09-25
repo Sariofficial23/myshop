@@ -29,7 +29,8 @@ type Tx = Prisma.TransactionClient;
 const person = { select: { id: true, firstName: true, lastName: true } } as const;
 
 const saleInclude = {
-  branch: { select: { id: true, name: true } },
+  // Адрес и телефон филиала печатаются в шапке чека
+  branch: { select: { id: true, name: true, address: true, phone: true } },
   customer: { select: { id: true, name: true, phone: true } },
   seller: person,
   payments: { orderBy: { createdAt: 'asc' } },
