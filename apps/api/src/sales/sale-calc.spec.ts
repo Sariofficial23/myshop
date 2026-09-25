@@ -65,6 +65,22 @@ describe('validatePayments', () => {
       ),
     ).toBe(ErrorCode.VALIDATION_ERROR);
   });
+
+  it('requires at least one payment for a regular sale', () => {
+    expect(code(() => validatePayments(total, []))).toBe(ErrorCode.PAYMENT_MISMATCH);
+  });
+
+  it('installment: a down payment below the total, possibly zero', () => {
+    expect(validatePayments(total, [], { partial: true }).paid.toFixed(2)).toBe('0.00');
+    expect(
+      validatePayments(total, [{ method: 'CASH', amount: '300' }], { partial: true }).paid.toFixed(
+        2,
+      ),
+    ).toBe('300.00');
+    expect(
+      code(() => validatePayments(total, [{ method: 'CASH', amount: '1000' }], { partial: true })),
+    ).toBe(ErrorCode.PAYMENT_MISMATCH);
+  });
 });
 
 describe('addMonths (warranty end)', () => {

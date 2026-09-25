@@ -17,6 +17,7 @@ export const DocumentPrefix = {
   TRANSFER: 'ПМ',
   WRITE_OFF: 'СП',
   INVENTORY: 'ИН',
+  WARRANTY_CLAIM: 'ГР',
 } as const;
 
 /** Причина списания. */

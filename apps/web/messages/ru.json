@@ -522,6 +522,14 @@
     "WRITE_OFF_NOT_FOUND": "Списание не найдено.",
     "INVENTORY_NOT_FOUND": "Инвентаризация не найдена.",
     "SERIAL_NOT_IN_STOCK": "IMEI / серийный номер не числится в наличии этого филиала.",
-    "DUPLICATE_DOCUMENT_ITEM": "Товар добавлен в документ дважды."
+    "DUPLICATE_DOCUMENT_ITEM": "Товар добавлен в документ дважды.",
+    "CUSTOMER_REQUIRED": "Для рассрочки выберите клиента.",
+    "INSTALLMENT_NOT_FOUND": "Рассрочка не найдена.",
+    "INSTALLMENT_OVERPAYMENT": "Сумма больше оставшегося долга.",
+    "INSTALLMENT_CLOSED": "Рассрочка уже погашена.",
+    "CASH_INSUFFICIENT": "В кассе недостаточно наличных.",
+    "WARRANTY_CLAIM_NOT_FOUND": "Гарантийное обращение не найдено.",
+    "SERIAL_NOT_SOLD": "Это устройство не числится проданным.",
+    "INVALID_STATUS_TRANSITION": "Нельзя перевести обращение в этот статус."
   }
 }

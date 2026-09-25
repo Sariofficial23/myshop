@@ -522,6 +522,14 @@
     "WRITE_OFF_NOT_FOUND": "Hisobdan chiqarish topilmadi.",
     "INVENTORY_NOT_FOUND": "Inventarizatsiya topilmadi.",
     "SERIAL_NOT_IN_STOCK": "IMEI / seriya raqami bu filialda mavjud deb hisoblanmaydi.",
-    "DUPLICATE_DOCUMENT_ITEM": "Mahsulot hujjatga ikki marta qo'shilgan."
+    "DUPLICATE_DOCUMENT_ITEM": "Mahsulot hujjatga ikki marta qo'shilgan.",
+    "CUSTOMER_REQUIRED": "Muddatli to'lov uchun mijozni tanlang.",
+    "INSTALLMENT_NOT_FOUND": "Muddatli to'lov topilmadi.",
+    "INSTALLMENT_OVERPAYMENT": "Summa qolgan qarzdan katta.",
+    "INSTALLMENT_CLOSED": "Muddatli to'lov allaqachon yopilgan.",
+    "CASH_INSUFFICIENT": "Kassada naqd pul yetarli emas.",
+    "WARRANTY_CLAIM_NOT_FOUND": "Kafolat murojaati topilmadi.",
+    "SERIAL_NOT_SOLD": "Bu qurilma sotilgan deb hisoblanmaydi.",
+    "INVALID_STATUS_TRANSITION": "Murojaatni bu holatga o'tkazib bo'lmaydi."
   }
 }

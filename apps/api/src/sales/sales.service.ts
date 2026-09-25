@@ -20,6 +20,7 @@ import { AppException } from '../common/errors/app.exception.js';
 import { CustomersService } from '../customers/customers.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { StockService } from '../stock/stock.service.js';
+import { monthlyAmount } from '../installments/installment-calc.js';
 import { addMonths, calculateLines, validatePayments } from './sale-calc.js';
 import type { CreateSaleDto, ListSalesQuery, SaleItemDto } from './sales.dto.js';
 
@@ -32,6 +33,16 @@ const saleInclude = {
   customer: { select: { id: true, name: true, phone: true } },
   seller: person,
   payments: { orderBy: { createdAt: 'asc' } },
+  installment: {
+    select: {
+      id: true,
+      total: true,
+      paidAmount: true,
+      reducedAmount: true,
+      months: true,
+      status: true,
+    },
+  },
   returns: {
     orderBy: { createdAt: 'asc' },
     select: { id: true, number: true, date: true, refundTotal: true, costTotal: true },
@@ -69,6 +80,18 @@ function toResponse(sale: SaleWithRelations, ctx: AuthContext) {
     total: sale.total.toFixed(2),
     paidTotal: sale.paidTotal.toFixed(2),
     refundedTotal: refunded.toFixed(2),
+    installment: sale.installment
+      ? {
+          ...sale.installment,
+          total: sale.installment.total.toFixed(2),
+          paidAmount: sale.installment.paidAmount.toFixed(2),
+          reducedAmount: sale.installment.reducedAmount.toFixed(2),
+          remaining: sale.installment.total
+            .sub(sale.installment.paidAmount)
+            .sub(sale.installment.reducedAmount)
+            .toFixed(2),
+        }
+      : null,
     costTotal: showCost ? sale.costTotal.toFixed(2) : undefined,
     // Прибыль за вычетом возвратов: (выручка − возвращено) − (себестоимость − себестоимость возвратов)
     grossProfit: showCost
@@ -171,10 +194,20 @@ export class SalesService {
     if (!branch)
       throw new AppException(ErrorCode.BRANCH_NOT_FOUND, HttpStatus.NOT_FOUND, 'Branch not found');
     if (dto.customerId) await this.customers.assertInCompany(ctx, dto.customerId);
+    if (dto.installment && !dto.customerId) {
+      // Рассрочка — это долг конкретного клиента
+      throw new AppException(
+        ErrorCode.CUSTOMER_REQUIRED,
+        HttpStatus.BAD_REQUEST,
+        'Customer is required for an installment sale',
+      );
+    }
 
     const prepared = await this.prepareItems(ctx, dto.items);
     const calc = calculateLines(prepared);
-    const { payments, paid } = validatePayments(calc.total, dto.payments);
+    const { payments, paid } = validatePayments(calc.total, dto.payments, {
+      partial: Boolean(dto.installment),
+    });
     const now = new Date();
 
     const id = await this.prisma.$transaction(async (tx) => {
@@ -187,7 +220,9 @@ export class SalesService {
           sellerId: ctx.userId,
           number,
           date: now,
-          paymentType: paymentTypeOf(payments.map((p) => p.method)),
+          paymentType: dto.installment
+            ? 'INSTALLMENT'
+            : paymentTypeOf(payments.map((p) => p.method)),
           subtotal: calc.subtotal,
           discountTotal: calc.discountTotal,
           total: calc.total,
@@ -246,6 +281,23 @@ export class SalesService {
         where: { id: sale.id },
         data: { costTotal: costTotal.toDecimalPlaces(2) },
       });
+      if (dto.installment) {
+        const debt = calc.total.sub(paid);
+        await tx.installment.create({
+          data: {
+            companyId: ctx.companyId,
+            branchId: dto.branchId,
+            saleId: sale.id,
+            customerId: dto.customerId!,
+            total: debt,
+            months: dto.installment.months,
+            monthlyAmount: monthlyAmount(debt, dto.installment.months),
+            firstDueDate: dto.installment.firstDueDate
+              ? new Date(dto.installment.firstDueDate)
+              : dateOnly(addMonths(now, 1)),
+          },
+        });
+      }
       await this.audit.log(tx, ctx, {
         action: 'SALE',
         entity: 'Sale',
@@ -255,6 +307,9 @@ export class SalesService {
           branchId: dto.branchId,
           total: calc.total.toFixed(2),
           payments: payments.map((p) => ({ method: p.method, amount: p.amount.toFixed(2) })),
+          installment: dto.installment
+            ? { months: dto.installment.months, debt: calc.total.sub(paid).toFixed(2) }
+            : undefined,
           items: prepared.map((i) => ({
             variantId: i.variantId,
             quantity: i.quantity,
@@ -457,4 +512,8 @@ function endOfDay(date: string): Date {
   const end = new Date(date);
   end.setUTCHours(23, 59, 59, 999);
   return end;
+}
+
+function dateOnly(date: Date): Date {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 }

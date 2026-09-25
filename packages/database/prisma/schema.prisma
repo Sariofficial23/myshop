@@ -33,28 +33,32 @@ model Company {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  branches         Branch[]
-  memberships      Membership[]
-  categories       Category[]
-  brands           Brand[]
-  products         Product[]
-  variants         ProductVariant[]
-  barcodes         Barcode[]
-  serialNumbers    SerialNumber[]
-  suppliers        Supplier[]
-  documentCounters DocumentCounter[]
-  purchases        Purchase[]
-  stockMovements   StockMovement[]
-  stockBalances    StockBalance[]
-  auditLogs        AuditLog[]
-  customers        Customer[]
-  sales            Sale[]
-  payments         Payment[]
-  returns          SaleReturn[]
-  refunds          Refund[]
-  transfers        Transfer[]
-  writeOffs        WriteOff[]
-  inventories      Inventory[]
+  branches            Branch[]
+  memberships         Membership[]
+  categories          Category[]
+  brands              Brand[]
+  products            Product[]
+  variants            ProductVariant[]
+  barcodes            Barcode[]
+  serialNumbers       SerialNumber[]
+  suppliers           Supplier[]
+  documentCounters    DocumentCounter[]
+  purchases           Purchase[]
+  stockMovements      StockMovement[]
+  stockBalances       StockBalance[]
+  auditLogs           AuditLog[]
+  customers           Customer[]
+  sales               Sale[]
+  payments            Payment[]
+  returns             SaleReturn[]
+  refunds             Refund[]
+  transfers           Transfer[]
+  writeOffs           WriteOff[]
+  inventories         Inventory[]
+  installments        Installment[]
+  installmentPayments InstallmentPayment[]
+  cashOperations      CashOperation[]
+  warrantyClaims      WarrantyClaim[]
 
   @@index([createdAt])
   @@map("companies")
@@ -71,18 +75,22 @@ model Branch {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  company            Company            @relation(fields: [companyId], references: [id], onDelete: Restrict)
-  membershipBranches MembershipBranch[]
-  serialNumbers      SerialNumber[]
-  purchases          Purchase[]
-  stockMovements     StockMovement[]
-  stockBalances      StockBalance[]
-  sales              Sale[]
-  returns            SaleReturn[]
-  transfersOut       Transfer[]         @relation("TransferFrom")
-  transfersIn        Transfer[]         @relation("TransferTo")
-  writeOffs          WriteOff[]
-  inventories        Inventory[]
+  company             Company              @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  membershipBranches  MembershipBranch[]
+  serialNumbers       SerialNumber[]
+  purchases           Purchase[]
+  stockMovements      StockMovement[]
+  stockBalances       StockBalance[]
+  sales               Sale[]
+  returns             SaleReturn[]
+  transfersOut        Transfer[]           @relation("TransferFrom")
+  transfersIn         Transfer[]           @relation("TransferTo")
+  writeOffs           WriteOff[]
+  inventories         Inventory[]
+  installments        Installment[]
+  installmentPayments InstallmentPayment[]
+  cashOperations      CashOperation[]
+  warrantyClaims      WarrantyClaim[]
 
   @@unique([companyId, name])
   @@index([companyId, isActive])
@@ -111,20 +119,23 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  memberships          Membership[]
-  sessions             Session[]
-  purchasesCreated     Purchase[]      @relation("PurchaseCreatedBy")
-  purchasesConfirmed   Purchase[]      @relation("PurchaseConfirmedBy")
-  stockMovements       StockMovement[]
-  auditLogs            AuditLog[]
-  sales                Sale[]          @relation("SaleSeller")
-  paymentsReceived     Payment[]
-  returnsCreated       SaleReturn[]    @relation("ReturnCreatedBy")
-  refundsPaid          Refund[]        @relation("RefundPaidBy")
-  transfersCreated     Transfer[]      @relation("TransferCreatedBy")
-  writeOffsCreated     WriteOff[]      @relation("WriteOffCreatedBy")
-  inventoriesCreated   Inventory[]     @relation("InventoryCreatedBy")
-  inventoriesConfirmed Inventory[]     @relation("InventoryConfirmedBy")
+  memberships                 Membership[]
+  sessions                    Session[]
+  purchasesCreated            Purchase[]           @relation("PurchaseCreatedBy")
+  purchasesConfirmed          Purchase[]           @relation("PurchaseConfirmedBy")
+  stockMovements              StockMovement[]
+  auditLogs                   AuditLog[]
+  sales                       Sale[]               @relation("SaleSeller")
+  paymentsReceived            Payment[]
+  returnsCreated              SaleReturn[]         @relation("ReturnCreatedBy")
+  refundsPaid                 Refund[]             @relation("RefundPaidBy")
+  transfersCreated            Transfer[]           @relation("TransferCreatedBy")
+  writeOffsCreated            WriteOff[]           @relation("WriteOffCreatedBy")
+  inventoriesCreated          Inventory[]          @relation("InventoryCreatedBy")
+  inventoriesConfirmed        Inventory[]          @relation("InventoryConfirmedBy")
+  installmentPaymentsReceived InstallmentPayment[] @relation("InstallmentPaymentReceivedBy")
+  cashOperationsCreated       CashOperation[]      @relation("CashOperationCreatedBy")
+  warrantyClaimsCreated       WarrantyClaim[]      @relation("WarrantyClaimCreatedBy")
 
   @@index([phone])
   @@map("users")
@@ -360,12 +371,13 @@ model SerialNumber {
   createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt     DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  company  Company        @relation(fields: [companyId], references: [id], onDelete: Restrict)
-  variant  ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
-  branch   Branch         @relation(fields: [branchId], references: [id], onDelete: Restrict)
-  purchase Purchase?      @relation(fields: [purchaseId], references: [id], onDelete: Restrict)
-  sale     Sale?          @relation(fields: [saleId], references: [id], onDelete: Restrict)
-  saleItem SaleItem?      @relation(fields: [saleItemId], references: [id], onDelete: Restrict)
+  company        Company         @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  variant        ProductVariant  @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  branch         Branch          @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  purchase       Purchase?       @relation(fields: [purchaseId], references: [id], onDelete: Restrict)
+  sale           Sale?           @relation(fields: [saleId], references: [id], onDelete: Restrict)
+  saleItem       SaleItem?       @relation(fields: [saleItemId], references: [id], onDelete: Restrict)
+  warrantyClaims WarrantyClaim[]
 
   /// Нельзя дважды добавить один и тот же IMEI в компании.
   @@unique([companyId, number])
@@ -597,8 +609,10 @@ model Customer {
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  company Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
-  sales   Sale[]
+  company        Company         @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  sales          Sale[]
+  installments   Installment[]
+  warrantyClaims WarrantyClaim[]
 
   @@unique([companyId, phone])
   @@index([companyId, name])
@@ -659,6 +673,8 @@ model Sale {
   serialNumbers  SerialNumber[]
   stockMovements StockMovement[]
   returns        SaleReturn[]
+  installment    Installment?
+  warrantyClaims WarrantyClaim[]
 
   @@unique([companyId, number])
   @@index([companyId, date])
@@ -719,19 +735,21 @@ model Payment {
 
 /// Возврат по продаже. Создаётся сразу проведённым: товар возвращается на склад филиала продажи.
 model SaleReturn {
-  id          String   @id @default(uuid()) @db.Uuid
-  companyId   String   @map("company_id") @db.Uuid
-  branchId    String   @map("branch_id") @db.Uuid
-  saleId      String   @map("sale_id") @db.Uuid
-  number      Int
-  date        DateTime @default(now()) @db.Timestamptz(3)
-  reason      String?  @db.Text
+  id            String   @id @default(uuid()) @db.Uuid
+  companyId     String   @map("company_id") @db.Uuid
+  branchId      String   @map("branch_id") @db.Uuid
+  saleId        String   @map("sale_id") @db.Uuid
+  number        Int
+  date          DateTime @default(now()) @db.Timestamptz(3)
+  reason        String?  @db.Text
   /// Сумма, возвращённая клиенту.
-  refundTotal Decimal  @map("refund_total") @db.Decimal(14, 2)
+  refundTotal   Decimal  @map("refund_total") @db.Decimal(14, 2)
+  /// Часть суммы возврата, которая уменьшила долг по рассрочке (не выплачивается деньгами).
+  debtReduction Decimal  @default(0) @map("debt_reduction") @db.Decimal(14, 2)
   /// Себестоимость возвращённого товара (уменьшает себестоимость продаж в отчётах).
-  costTotal   Decimal  @map("cost_total") @db.Decimal(14, 2)
-  createdById String   @map("created_by_id") @db.Uuid
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  costTotal     Decimal  @map("cost_total") @db.Decimal(14, 2)
+  createdById   String   @map("created_by_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
   company        Company         @relation(fields: [companyId], references: [id], onDelete: Restrict)
   branch         Branch          @relation(fields: [branchId], references: [id], onDelete: Restrict)
@@ -921,4 +939,139 @@ model InventoryItem {
 
   @@unique([inventoryId, variantId])
   @@map("inventory_items")
+}
+
+// ─────────────── Рассрочки, касса, гарантии (этап 7) ───────────────
+
+enum InstallmentStatus {
+  ACTIVE
+  PAID
+}
+
+/// Рассрочка по продаже: долг клиента = total − paidAmount − reducedAmount.
+model Installment {
+  id            String            @id @default(uuid()) @db.Uuid
+  companyId     String            @map("company_id") @db.Uuid
+  branchId      String            @map("branch_id") @db.Uuid
+  saleId        String            @unique @map("sale_id") @db.Uuid
+  customerId    String            @map("customer_id") @db.Uuid
+  /// Сумма в рассрочку (к оплате минус первоначальный взнос).
+  total         Decimal           @db.Decimal(14, 2)
+  paidAmount    Decimal           @default(0) @map("paid_amount") @db.Decimal(14, 2)
+  /// На сколько уменьшен долг возвратами товара.
+  reducedAmount Decimal           @default(0) @map("reduced_amount") @db.Decimal(14, 2)
+  months        Int
+  /// Ежемесячный платёж (последний месяц забирает остаток от округления).
+  monthlyAmount Decimal           @map("monthly_amount") @db.Decimal(14, 2)
+  firstDueDate  DateTime          @map("first_due_date") @db.Date
+  status        InstallmentStatus @default(ACTIVE)
+  createdAt     DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  company  Company              @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  branch   Branch               @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  sale     Sale                 @relation(fields: [saleId], references: [id], onDelete: Restrict)
+  customer Customer             @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  payments InstallmentPayment[]
+
+  @@index([companyId, status])
+  @@index([customerId])
+  @@map("installments")
+}
+
+/// Платёж клиента по рассрочке.
+model InstallmentPayment {
+  id            String        @id @default(uuid()) @db.Uuid
+  companyId     String        @map("company_id") @db.Uuid
+  installmentId String        @map("installment_id") @db.Uuid
+  /// Филиал, где приняты деньги (для кассы).
+  branchId      String        @map("branch_id") @db.Uuid
+  method        PaymentMethod
+  amount        Decimal       @db.Decimal(14, 2)
+  receivedById  String        @map("received_by_id") @db.Uuid
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company     Company     @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  installment Installment @relation(fields: [installmentId], references: [id], onDelete: Restrict)
+  branch      Branch      @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  receivedBy  User        @relation("InstallmentPaymentReceivedBy", fields: [receivedById], references: [id], onDelete: Restrict)
+
+  @@index([companyId, createdAt])
+  @@index([installmentId])
+  @@index([branchId, createdAt])
+  @@map("installment_payments")
+}
+
+/// Операция по кассе филиала, не связанная с продажей.
+enum CashOperationType {
+  /// Внесение денег в кассу (размен).
+  DEPOSIT
+  /// Изъятие (инкассация, владелец забрал выручку).
+  WITHDRAWAL
+  /// Расход из кассы (аренда, доставка, хозяйственные нужды).
+  EXPENSE
+}
+
+model CashOperation {
+  id          String            @id @default(uuid()) @db.Uuid
+  companyId   String            @map("company_id") @db.Uuid
+  branchId    String            @map("branch_id") @db.Uuid
+  type        CashOperationType
+  amount      Decimal           @db.Decimal(14, 2)
+  reason      String            @db.VarChar(500)
+  createdById String            @map("created_by_id") @db.Uuid
+  createdAt   DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  branch    Branch  @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  createdBy User    @relation("CashOperationCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([companyId, createdAt])
+  @@index([branchId, createdAt])
+  @@map("cash_operations")
+}
+
+enum WarrantyClaimStatus {
+  /// Принят от клиента
+  RECEIVED
+  /// В ремонте / у поставщика
+  IN_REPAIR
+  /// Готов к выдаче
+  READY
+  /// Выдан клиенту
+  RETURNED
+  /// Отказано в гарантии
+  REJECTED
+}
+
+/// Гарантийное обращение по проданному IMEI / серийному номеру.
+model WarrantyClaim {
+  id             String              @id @default(uuid()) @db.Uuid
+  companyId      String              @map("company_id") @db.Uuid
+  branchId       String              @map("branch_id") @db.Uuid
+  number         Int
+  serialNumberId String              @map("serial_number_id") @db.Uuid
+  saleId         String?             @map("sale_id") @db.Uuid
+  customerId     String?             @map("customer_id") @db.Uuid
+  /// Обращение в пределах гарантийного срока (иначе — платный ремонт).
+  inWarranty     Boolean             @map("in_warranty")
+  problem        String              @db.Text
+  status         WarrantyClaimStatus @default(RECEIVED)
+  resolution     String?             @db.Text
+  createdById    String              @map("created_by_id") @db.Uuid
+  closedAt       DateTime?           @map("closed_at") @db.Timestamptz(3)
+  createdAt      DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  company      Company      @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  branch       Branch       @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  serialNumber SerialNumber @relation(fields: [serialNumberId], references: [id], onDelete: Restrict)
+  sale         Sale?        @relation(fields: [saleId], references: [id], onDelete: Restrict)
+  customer     Customer?    @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  createdBy    User         @relation("WarrantyClaimCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@unique([companyId, number])
+  @@index([companyId, status])
+  @@index([serialNumberId])
+  @@map("warranty_claims")
 }

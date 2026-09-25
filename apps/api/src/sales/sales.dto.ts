@@ -77,6 +77,23 @@ export class PaymentDto {
   amount: string;
 }
 
+export class InstallmentOptionDto {
+  @ApiProperty({ example: 6, description: 'Срок рассрочки в месяцах' })
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(60)
+  months: number;
+
+  @ApiPropertyOptional({
+    example: '2026-10-25',
+    description: 'Дата первого платежа (по умолчанию через месяц)',
+  })
+  @IsOptional()
+  @IsDateString()
+  firstDueDate?: string;
+}
+
 export class CreateSaleDto {
   @ApiProperty()
   @IsUUID()
@@ -97,14 +114,23 @@ export class CreateSaleDto {
 
   @ApiProperty({
     type: [PaymentDto],
-    description: 'Несколько платежей разными способами = смешанная оплата',
+    description:
+      'Несколько платежей разными способами = смешанная оплата. В рассрочку — первоначальный взнос (можно пусто)',
   })
   @IsArray()
-  @ArrayMinSize(1)
   @ArrayMaxSize(10)
   @ValidateNested({ each: true })
   @Type(() => PaymentDto)
   payments: PaymentDto[];
+
+  @ApiPropertyOptional({
+    type: InstallmentOptionDto,
+    description: 'Продажа в рассрочку: нужен клиент, оплачивается только взнос',
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => InstallmentOptionDto)
+  installment?: InstallmentOptionDto;
 
   @ApiPropertyOptional()
   @IsOptional()
