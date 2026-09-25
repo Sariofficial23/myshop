@@ -31,7 +31,14 @@ export function configureApp(app: NestExpressApplication): Env {
     origin: env.CORS_ORIGINS,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id', 'Accept-Language'],
+    // X-Telegram-Init-Data — подпись Telegram для админ-панели платформы
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Request-Id',
+      'Accept-Language',
+      'X-Telegram-Init-Data',
+    ],
     exposedHeaders: ['X-Request-Id'],
     maxAge: 600,
   });
