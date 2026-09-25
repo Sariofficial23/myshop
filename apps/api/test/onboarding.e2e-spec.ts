@@ -89,6 +89,18 @@ describe('Onboarding, subscription and platform admin (e2e)', () => {
     expect(ok.body.me.company.id).toBe(companyId);
   });
 
+  it('browsers may send the Telegram initData header cross-origin (CORS preflight)', async () => {
+    const res = await http()
+      .options('/api/admin/me')
+      .set('Origin', 'http://localhost:3001')
+      .set('Access-Control-Request-Method', 'GET')
+      .set('Access-Control-Request-Headers', 'x-telegram-init-data')
+      .expect(204);
+    expect(res.headers['access-control-allow-headers']?.toLowerCase()).toContain(
+      'x-telegram-init-data',
+    );
+  });
+
   it('only the platform admin (by signed Telegram initData) manages companies', async () => {
     const none = await http().get('/api/admin/companies').expect(403);
     expect(none.body.error.code).toBe('NOT_PLATFORM_ADMIN');
