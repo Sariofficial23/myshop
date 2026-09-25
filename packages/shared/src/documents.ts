@@ -12,6 +12,7 @@ export const DOCUMENT_STATUSES: readonly DocumentStatus[] = Object.values(Docume
 /** Префиксы номеров документов: ПР-15 — приход №15. */
 export const DocumentPrefix = {
   PURCHASE: 'ПР',
+  SALE: 'ПД',
 } as const;
 
 export function formatDocumentNumber(prefix: string, number: number): string {

@@ -23,6 +23,7 @@ import {
   IncludeInactiveQuery,
   ListProductsQuery,
   SerialCheckQuery,
+  SerialListQuery,
   UpdateBrandDto,
   UpdateCategoryDto,
   UpdateProductDto,
@@ -196,6 +197,13 @@ export class SerialNumbersController {
   @ApiOperation({ summary: 'Проверить IMEI / серийный номер: формат и дубликаты' })
   check(@CurrentAuth() ctx: AuthContext, @Query() query: SerialCheckQuery) {
     return this.serials.check(ctx, query.number, query.type);
+  }
+
+  @Get()
+  @RequirePermissions(Permission.PRODUCTS_VIEW)
+  @ApiOperation({ summary: 'IMEI варианта в наличии (для выбора при продаже)' })
+  inStock(@CurrentAuth() ctx: AuthContext, @Query() query: SerialListQuery) {
+    return this.serials.inStock(ctx, query.variantId, query.branchId);
   }
 
   @Get(':number')

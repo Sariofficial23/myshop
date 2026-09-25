@@ -319,3 +319,14 @@ export class SerialCheckQuery {
   @IsIn(SERIAL_TYPES)
   type?: SerialType;
 }
+
+export class SerialListQuery {
+  @ApiProperty()
+  @IsUUID()
+  variantId: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsUUID()
+  branchId?: string;
+}

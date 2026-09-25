@@ -1,12 +1,18 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ErrorCode, isValidSerialNumber, normalizeSerialNumber, SerialType } from '@myshop/shared';
-import { canAccessBranch, type AuthContext } from '../auth/auth-context.js';
+import {
+  accessibleBranchWhere,
+  assertBranchAccess,
+  canAccessBranch,
+  type AuthContext,
+} from '../auth/auth-context.js';
 import { AppException } from '../common/errors/app.exception.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { notFound } from './catalog.errors.js';
 
 const serialInclude = {
   branch: { select: { id: true, name: true } },
+  sale: { select: { id: true, number: true, date: true } },
   variant: {
     select: {
       id: true,
@@ -53,6 +59,23 @@ export class SerialNumbersService {
       throw notFound(ErrorCode.IMEI_NOT_FOUND, 'IMEI / serial number not found');
     }
     return serial;
+  }
+
+  /** IMEI варианта в наличии в доступных филиалах — выбор конкретной единицы при продаже. */
+  inStock(ctx: AuthContext, variantId: string, branchId?: string) {
+    if (branchId) assertBranchAccess(ctx, branchId);
+    return this.prisma.serialNumber.findMany({
+      where: {
+        companyId: ctx.companyId,
+        variantId,
+        status: 'IN_STOCK',
+        branch: accessibleBranchWhere(ctx),
+        ...(branchId ? { branchId } : {}),
+      },
+      select: { id: true, number: true, type: true, branch: { select: { id: true, name: true } } },
+      orderBy: { createdAt: 'asc' },
+      take: 500,
+    });
   }
 
   /** Бросает INVALID_IMEI / INVALID_SERIAL_NUMBER. Используется документами прихода (этап 4). */

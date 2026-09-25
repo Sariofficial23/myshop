@@ -19,6 +19,7 @@ export interface MovementInput {
   /** Себестоимость единицы (для поступлений влияет на средневзвешенную себестоимость). */
   unitCost?: Prisma.Decimal | string;
   purchaseId?: string;
+  saleId?: string;
 }
 
 interface LockedBalance {
@@ -84,6 +85,7 @@ export class StockService {
         balanceAfter,
         unitCost: input.unitCost ?? (input.quantity < 0 ? locked.avg_cost : undefined),
         purchaseId: input.purchaseId,
+        saleId: input.saleId,
         createdById: ctx.userId,
       },
     });
@@ -161,6 +163,7 @@ export class StockService {
         branch: { select: { id: true, name: true } },
         createdBy: { select: { id: true, firstName: true, lastName: true } },
         purchase: { select: { id: true, number: true } },
+        sale: { select: { id: true, number: true } },
       },
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       take: 200,

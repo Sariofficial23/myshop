@@ -41,6 +41,7 @@ const UNIQUE_CONSTRAINT_CODES: Record<string, ErrorCode> = {
   barcodes_company_id_code_key: ErrorCode.DUPLICATE_BARCODE,
   serial_numbers_company_id_number_key: ErrorCode.DUPLICATE_IMEI,
   suppliers_company_id_name_key: ErrorCode.DUPLICATE_SUPPLIER,
+  customers_company_id_phone_key: ErrorCode.DUPLICATE_CUSTOMER_PHONE,
   users_telegram_id_key: ErrorCode.TELEGRAM_ID_TAKEN,
 };
 

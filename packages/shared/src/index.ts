@@ -5,6 +5,7 @@ export * from './error-codes.js';
 export * from './health.js';
 export * from './imei.js';
 export * from './locales.js';
+export * from './payments.js';
 export * from './permissions.js';
 export * from './product.js';
 export * from './roles.js';
