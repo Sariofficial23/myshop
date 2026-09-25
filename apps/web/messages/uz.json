@@ -254,7 +254,7 @@
     "remove": "Olib tashlash",
     "total": "Jami: {value}",
     "saveDraft": "Qoralamani saqlash",
-    "confirm": "O‘tkazish",
+    "confirm": "Mahsulotni kirim qilish",
     "confirmHint": "O‘tkazilgandan so‘ng qoldiqlar ko‘payadi, IMEI omborda paydo bo‘ladi. O‘tkazilgan kirimni o‘zgartirib bo‘lmaydi.",
     "cancel": "Kirimni bekor qilish",
     "createdBy": "Yaratdi: {name}",
