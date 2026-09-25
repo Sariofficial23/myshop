@@ -12,8 +12,15 @@ export interface DevUser {
 export const authApi = {
   telegram: (initData: string) =>
     apiRequest<AuthResponse>('/auth/telegram', { method: 'POST', body: { initData }, auth: false }),
-  register: (body: { initData: string; companyName: string; branchName?: string }) =>
-    apiRequest<AuthResponse>('/auth/telegram/register', { method: 'POST', body, auth: false }),
+  /** Регистрация владельца: бренд, email, пароль. Компания ждёт активации. */
+  register: (body: { companyName: string; email: string; password: string; initData?: string }) =>
+    apiRequest<AuthResponse>('/auth/register', { method: 'POST', body, auth: false }),
+  /** Вход владельца по email и паролю. */
+  login: (body: { email: string; password: string; initData?: string }) =>
+    apiRequest<AuthResponse>('/auth/login', { method: 'POST', body, auth: false }),
+  /** Вход сотрудника: название компании + логин + пароль. */
+  staffLogin: (body: { companyName: string; login: string; password: string; initData?: string }) =>
+    apiRequest<AuthResponse>('/auth/staff-login', { method: 'POST', body, auth: false }),
   devLogin: (telegramId: string, companyId?: string) =>
     apiRequest<AuthResponse>('/auth/dev-login', {
       method: 'POST',

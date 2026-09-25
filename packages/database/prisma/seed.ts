@@ -223,10 +223,12 @@ async function seedCatalog(companyId: string): Promise<void> {
 async function main(): Promise<void> {
   const company = await prisma.company.upsert({
     where: { id: DEMO_COMPANY_ID },
-    update: {},
+    // Ключ названия нужен для входа сотрудников по названию компании
+    update: { nameKey: 'demo electronics' },
     create: {
       id: DEMO_COMPANY_ID,
       name: 'Demo Electronics',
+      nameKey: 'demo electronics',
       currency: 'UZS',
       timezone: 'Asia/Tashkent',
     },

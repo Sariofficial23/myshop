@@ -38,7 +38,8 @@ export function UserForm({ user }: { user?: StaffMember }) {
     firstName: user?.firstName ?? '',
     lastName: user?.lastName ?? '',
     phone: user?.phone ?? '',
-    telegramId: user?.telegramId ?? '',
+    login: user?.login ?? '',
+    password: '',
     role: (user?.role ?? roles.at(-1) ?? 'SELLER') as Role,
     allBranches: user?.allBranches ?? false,
     branchIds: user?.branches.map((b) => b.id) ?? [],
@@ -52,7 +53,8 @@ export function UserForm({ user }: { user?: StaffMember }) {
         firstName: form.firstName,
         lastName: form.lastName,
         phone: form.phone,
-        ...(user?.telegramId ? {} : { telegramId: form.telegramId || null }),
+        login: form.login.trim().toLowerCase() || null,
+        ...(form.password ? { password: form.password } : {}),
       };
       const access: StaffInput = canEditAccess
         ? {
@@ -63,7 +65,6 @@ export function UserForm({ user }: { user?: StaffMember }) {
             ...(user ? { isActive: form.isActive } : {}),
           }
         : {};
-      if (user && profile.telegramId === null) delete profile.telegramId;
       return user
         ? usersApi.update(user.id, { ...profile, ...access })
         : usersApi.create({ ...profile, ...access });
@@ -107,13 +108,29 @@ export function UserForm({ user }: { user?: StaffMember }) {
             maxLength={32}
           />
           <TextField
-            label={t('users.telegramId')}
-            hint={user?.telegramId ? t('users.telegramLinked') : t('users.telegramIdHint')}
-            inputMode="numeric"
-            pattern="\d{1,20}"
-            value={form.telegramId}
-            onChange={(e) => setForm({ ...form, telegramId: e.target.value.replace(/\D/g, '') })}
-            disabled={!canEditProfile || Boolean(user?.telegramId)}
+            label={t('users.login')}
+            hint={t('users.loginHint', { company: me.company.name })}
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            pattern="[A-Za-z0-9._\-]{3,32}"
+            value={form.login}
+            onChange={(e) => setForm({ ...form, login: e.target.value.replace(/\s/g, '') })}
+            disabled={!canEditAccess && !isSelf}
+            required={!user}
+            maxLength={32}
+          />
+          <TextField
+            label={user ? t('users.newPassword') : t('users.password')}
+            hint={user ? t('users.newPasswordHint') : t('users.passwordHint')}
+            type="password"
+            autoComplete="new-password"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            disabled={!canEditAccess && !isSelf}
+            required={!user}
+            minLength={6}
+            maxLength={128}
           />
         </div>
       </Card>

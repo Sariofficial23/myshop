@@ -85,7 +85,8 @@ export class AuthService {
               data: {
                 email,
                 passwordHash,
-                firstName: dto.firstName ?? profile?.firstName ?? dto.companyName.slice(0, 100),
+                firstName:
+                  dto.firstName ?? profile?.firstName ?? email.split('@')[0]!.slice(0, 100),
                 lastName: profile?.lastName ?? null,
                 username: profile?.username ?? null,
                 languageCode: profile?.languageCode,

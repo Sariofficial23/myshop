@@ -32,3 +32,5 @@ services:
         generateValue: true
       - key: TELEGRAM_BOT_TOKEN
         sync: false
+      - key: PLATFORM_ADMIN_TELEGRAM_IDS
+        sync: false

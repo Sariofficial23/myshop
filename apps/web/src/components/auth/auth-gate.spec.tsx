@@ -6,7 +6,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import messages from '../../../messages/ru.json';
 import { ApiError } from '@/lib/api/api-error';
 import { authApi } from '@/lib/api/auth';
-import { healthApi } from '@/lib/api/health';
 import { AuthProvider } from '@/lib/auth/auth-provider';
 import { AuthGate } from './auth-gate';
 
@@ -31,12 +30,19 @@ const me = {
   user: {
     id: 'u1',
     telegramId: '42',
+    email: 'ali@example.com',
     firstName: 'Ali',
     lastName: null,
     username: null,
     languageCode: 'ru',
   },
-  company: { id: 'c1', name: 'Techno House', currency: 'UZS', timezone: 'Asia/Tashkent' },
+  company: {
+    id: 'c1',
+    name: 'Techno House',
+    currency: 'UZS',
+    timezone: 'Asia/Tashkent',
+    subscription: { state: 'ACTIVE', paidUntil: null },
+  },
   role: 'OWNER',
   permissions: [],
   branches: [],
@@ -51,11 +57,13 @@ afterEach(() => {
 });
 
 describe('AuthGate', () => {
-  it('outside Telegram without a session shows the "open in Telegram" screen', async () => {
-    vi.spyOn(healthApi, 'liveness').mockRejectedValue(new ApiError('NETWORK_ERROR', 0, ''));
-    vi.spyOn(healthApi, 'readiness').mockRejectedValue(new ApiError('NETWORK_ERROR', 0, ''));
+  it('without a session shows owner / employee sign-in', async () => {
     renderGate();
-    expect(await screen.findByText('Откройте MyShop через Telegram')).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Владелец' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Сотрудник' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Нет аккаунта? Зарегистрировать бизнес' }),
+    ).toBeInTheDocument();
     expect(screen.queryByText('Приложение')).not.toBeInTheDocument();
   });
 
@@ -75,16 +83,31 @@ describe('AuthGate', () => {
     expect(window.Telegram.WebApp?.ready).toHaveBeenCalled();
   });
 
-  it('shows the Telegram ID and "create shop" form for users without a company', async () => {
+  it('an unlinked Telegram account gets the sign-in screen without an error', async () => {
     window.Telegram = {
       WebApp: { initData: 'signed-data', ready: vi.fn<() => void>(), expand: vi.fn<() => void>() },
     };
-    vi.spyOn(authApi, 'telegram').mockRejectedValue(
-      new ApiError('NO_MEMBERSHIP', 403, 'no', { telegramId: '123456789' }),
-    );
+    vi.spyOn(authApi, 'telegram').mockRejectedValue(new ApiError('NO_MEMBERSHIP', 403, 'no'));
     renderGate();
-    expect(await screen.findByText('Вас ещё нет в магазине')).toBeInTheDocument();
-    expect(screen.getByText('123456789')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Создать магазин' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Войти' })).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('a company waiting for activation sees the waiting screen instead of the app', async () => {
+    window.Telegram = {
+      WebApp: { initData: 'signed-data', ready: vi.fn<() => void>(), expand: vi.fn<() => void>() },
+    };
+    vi.spyOn(authApi, 'telegram').mockResolvedValue({
+      accessToken: 'A',
+      refreshToken: 'R',
+      expiresIn: 900,
+      me: {
+        ...me,
+        company: { ...me.company, subscription: { state: 'PENDING', paidUntil: null } },
+      } as never,
+    });
+    renderGate();
+    expect(await screen.findByText('Заявка отправлена')).toBeInTheDocument();
+    expect(screen.queryByText('Приложение')).not.toBeInTheDocument();
   });
 });

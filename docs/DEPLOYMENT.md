@@ -107,18 +107,19 @@ pnpm db:status
 
 В той же форме → **Environment Variables** → _Add Environment Variable_ (или позже: _Environment_ в меню сервиса):
 
-| Key                  | Value                                     | Комментарий                                                          |
-| -------------------- | ----------------------------------------- | -------------------------------------------------------------------- |
-| `NODE_VERSION`       | `22`                                      | Версия Node.js для сборки и запуска                                  |
-| `NODE_ENV`           | `production`                              |                                                                      |
-| `DATABASE_URL`       | Session pooler URI + `?sslmode=no-verify` | из шага 1.2 — **секрет**                                             |
-| `DIRECT_URL`         | Session pooler URI + `?sslmode=require`   | из шага 1.2 — **секрет**                                             |
-| `DATABASE_POOL_MAX`  | `5`                                       | Supabase free ограничивает число подключений к пулеру                |
-| `CORS_ORIGINS`       | `http://localhost:3001`                   | Временно. После шага 3 заменим на URL Vercel                         |
-| `TRUST_PROXY`        | `true`                                    | Render стоит перед приложением как прокси — нужно для rate limit     |
-| `SWAGGER_ENABLED`    | `true`                                    | Swagger UI на `/api/docs`. Поставьте `false`, если не нужен публично |
-| `JWT_ACCESS_SECRET`  | нажмите **Generate**                      | Секрет подписи токенов входа (≥ 32 символов) — **секрет**            |
-| `TELEGRAM_BOT_TOKEN` | токен бота из шага 5.1                    | Нужен для входа через Telegram — **секрет**                          |
+| Key                           | Value                                     | Комментарий                                                          |
+| ----------------------------- | ----------------------------------------- | -------------------------------------------------------------------- |
+| `NODE_VERSION`                | `22`                                      | Версия Node.js для сборки и запуска                                  |
+| `NODE_ENV`                    | `production`                              |                                                                      |
+| `DATABASE_URL`                | Session pooler URI + `?sslmode=no-verify` | из шага 1.2 — **секрет**                                             |
+| `DIRECT_URL`                  | Session pooler URI + `?sslmode=require`   | из шага 1.2 — **секрет**                                             |
+| `DATABASE_POOL_MAX`           | `5`                                       | Supabase free ограничивает число подключений к пулеру                |
+| `CORS_ORIGINS`                | `http://localhost:3001`                   | Временно. После шага 3 заменим на URL Vercel                         |
+| `TRUST_PROXY`                 | `true`                                    | Render стоит перед приложением как прокси — нужно для rate limit     |
+| `SWAGGER_ENABLED`             | `true`                                    | Swagger UI на `/api/docs`. Поставьте `false`, если не нужен публично |
+| `JWT_ACCESS_SECRET`           | нажмите **Generate**                      | Секрет подписи токенов входа (≥ 32 символов) — **секрет**            |
+| `TELEGRAM_BOT_TOKEN`          | токен бота из шага 5.1                    | Нужен для входа через Telegram — **секрет**                          |
+| `PLATFORM_ADMIN_TELEGRAM_IDS` | ваш Telegram ID, например `689136142`     | Доступ к «Админ-панели»: активация и продление компаний              |
 
 `PORT` задавать **не нужно** — Render передаёт его сам, API слушает `0.0.0.0:$PORT`.
 
