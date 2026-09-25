@@ -12,7 +12,7 @@ import { STOCK_SECTION_PATHS } from './stock/stock-tabs';
  * Нижняя навигация. Раздел "Отчёты" добавляется на этапе,
  * где появляется его реальная функциональность.
  */
-const SALE_SECTION_PATHS = ['/sale', '/sales'];
+const SALE_SECTION_PATHS = ['/sale', '/sales', '/returns'];
 
 const inSection = (paths: readonly string[]) => (pathname: string) =>
   paths.some((path) => pathname === path || pathname.startsWith(`${path}/`));

@@ -27,7 +27,7 @@ export function SerialSelect({
   selected: string[];
   onChange: (numbers: string[]) => void;
 }) {
-  const t = useTranslations('sale');
+  const t = useTranslations('serialPicker');
   const [filter, setFilter] = useState('');
   const [scanning, setScanning] = useState(false);
   const [notFound, setNotFound] = useState<string | null>(null);

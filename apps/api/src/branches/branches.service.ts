@@ -34,6 +34,18 @@ export class BranchesService {
     });
   }
 
+  /**
+   * Все активные филиалы компании (только id и название) — куда можно переместить товар.
+   * Складу с доступом к одному филиалу нужно видеть получателей в других филиалах.
+   */
+  transferTargets(ctx: AuthContext) {
+    return this.prisma.branch.findMany({
+      where: { companyId: ctx.companyId, isActive: true },
+      select: { id: true, name: true },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+
   async get(ctx: AuthContext, id: string) {
     const branch = await this.findInCompany(ctx, id);
     assertBranchAccess(ctx, branch.id);

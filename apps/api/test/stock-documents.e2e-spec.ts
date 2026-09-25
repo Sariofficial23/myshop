@@ -100,7 +100,7 @@ describe('Returns, transfers, write-offs, inventory (e2e)', () => {
     });
 
     it('requires returns.create: a seller cannot return without the extra permission', async () => {
-      await seller
+      const res = await seller
         .post('/api/returns')
         .send({
           saleId: sale.id,
@@ -108,6 +108,7 @@ describe('Returns, transfers, write-offs, inventory (e2e)', () => {
           items: [{ saleItemId: phoneLine().id, serialNumbers: [imeis[0]] }],
         })
         .expect(403);
+      expect(res.body.error.code).toBe('FORBIDDEN');
     });
 
     it('partial return: stock back, IMEI IN_STOCK, proportional refund, sale PARTIALLY_RETURNED', async () => {
@@ -170,13 +171,12 @@ describe('Returns, transfers, write-offs, inventory (e2e)', () => {
     });
 
     it('parallel returns never exceed what was sold', async () => {
-      const send = () =>
-        owner.post('/api/returns').send({
-          saleId: sale.id,
-          refundMethod: 'CASH',
-          items: [{ saleItemId: accessoryLine().id, quantity: 2 }],
-        });
-      const results = await Promise.all([send(), send()]);
+      const body = {
+        saleId: sale.id,
+        refundMethod: 'CASH',
+        items: [{ saleItemId: accessoryLine().id, quantity: 2 }],
+      };
+      const results = await Promise.all([1, 2].map(() => owner.post('/api/returns').send(body)));
       expect(results.map((r) => r.status).toSorted()).toEqual([201, 409]);
     });
 
@@ -191,6 +191,9 @@ describe('Returns, transfers, write-offs, inventory (e2e)', () => {
         .expect(201);
       const final = await owner.get(`/api/sales/${sale.id}`).expect(200);
       expect(final.body.status).toBe('RETURNED');
+      // Полностью возвращённая продажа не приносит ни выручки, ни прибыли
+      expect(final.body.refundedTotal).toBe(final.body.total);
+      expect(final.body.grossProfit).toBe('0.00');
       const returns = await owner.get(`/api/returns?saleId=${sale.id}`).expect(200);
       const refunded = returns.body.items.reduce(
         (sum: number, r: { refundTotal: string }) => sum + Math.round(Number(r.refundTotal) * 100),
@@ -305,6 +308,14 @@ describe('Returns, transfers, write-offs, inventory (e2e)', () => {
         })
         .expect(409);
       expect(tooMany.body.error.code).toBe('INSUFFICIENT_STOCK');
+    });
+
+    it('lists every company branch as a transfer target, even for single-branch staff', async () => {
+      const res = await warehouse.get('/api/branches/transfer-targets').expect(200);
+      expect(res.body.map((b: { id: string }) => b.id).toSorted()).toEqual(
+        [fx.branchA, fx.branchB].toSorted(),
+      );
+      await seller.get('/api/branches/transfer-targets').expect(403);
     });
 
     it('checks branch access and permissions', async () => {

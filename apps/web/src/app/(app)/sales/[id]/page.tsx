@@ -1,7 +1,7 @@
 'use client';
 
 import { Permission } from '@myshop/shared';
-import { Card, StatusBadge } from '@myshop/ui';
+import { Card, ListRow, StatusBadge } from '@myshop/ui';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -54,7 +54,7 @@ export default function SaleReceiptPage() {
                   </p>
                 ) : null}
               </div>
-              <StatusBadge tone={s.status === 'COMPLETED' ? 'success' : 'neutral'}>
+              <StatusBadge tone={s.status === 'COMPLETED' ? 'success' : 'danger'}>
                 {t(`saleStatus.${s.status}`)}
               </StatusBadge>
             </div>
@@ -79,10 +79,24 @@ export default function SaleReceiptPage() {
                       ? ` − ${t('sale.discountShort', { value: money(item.discount) })}`
                       : ''}
                   </p>
+                  {item.returnedQuantity > 0 ? (
+                    <p className="text-sm font-medium text-amber-700">
+                      {t('returns.returnedCount', { count: item.returnedQuantity })}
+                    </p>
+                  ) : null}
                   {item.serialNumbers.map((serial) => (
                     <p key={serial.id} className="text-sm text-slate-600">
-                      <span className="font-mono">{serial.number}</span>
-                      {serial.warrantyEnd
+                      <span
+                        className={
+                          serial.status === 'SOLD'
+                            ? 'font-mono'
+                            : 'font-mono text-slate-400 line-through'
+                        }
+                      >
+                        {serial.number}
+                      </span>
+                      {serial.status !== 'SOLD' ? ` · ${t('returns.returned')}` : ''}
+                      {serial.status === 'SOLD' && serial.warrantyEnd
                         ? ` · ${t('sale.warrantyUntil', {
                             date: format.dateTime(new Date(serial.warrantyEnd), {
                               dateStyle: 'medium',
@@ -120,6 +134,12 @@ export default function SaleReceiptPage() {
                 <dt>{t('sale.paid')}</dt>
                 <dd>{money(s.paidTotal)}</dd>
               </div>
+              {Number(s.refundedTotal) > 0 ? (
+                <div className="flex justify-between font-semibold text-amber-700">
+                  <dt>{t('returns.refundedTotal')}</dt>
+                  <dd>−{money(s.refundedTotal)}</dd>
+                </div>
+              ) : null}
               {s.grossProfit !== undefined ? (
                 <div className="mt-2 flex justify-between border-t border-slate-100 pt-2 text-sm text-slate-500">
                   <dt>{t('sale.profit')}</dt>
@@ -128,6 +148,36 @@ export default function SaleReceiptPage() {
               ) : null}
             </dl>
           </Card>
+
+          {s.returns.length ? (
+            <Card title={t('returns.title')} className="p-0">
+              <ul className="divide-y divide-slate-100">
+                {s.returns.map((r) => (
+                  <li key={r.id}>
+                    <Link href={`/returns/${r.id}`} className="block active:bg-slate-50">
+                      <ListRow
+                        title={r.displayNumber}
+                        subtitle={format.dateTime(new Date(r.date), {
+                          dateStyle: 'medium',
+                          timeStyle: 'short',
+                        })}
+                        trailing={<span className="font-semibold">−{money(r.refundTotal)}</span>}
+                      />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ) : null}
+
+          {can(Permission.RETURNS_CREATE) && s.status !== 'RETURNED' ? (
+            <Link
+              href={`/sales/${s.id}/return`}
+              className="flex min-h-12 items-center justify-center rounded-2xl bg-white font-semibold text-slate-800 ring-1 ring-slate-200 active:bg-slate-50"
+            >
+              {t('returns.create')}
+            </Link>
+          ) : null}
 
           {can(Permission.SALES_CREATE) ? (
             <Link

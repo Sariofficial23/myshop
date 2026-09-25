@@ -33,6 +33,8 @@ export interface SaleItem {
   price: string;
   discount: string;
   total: string;
+  returnedQuantity: number;
+  refundedAmount: string;
   /** Только при праве reports.view. */
   unitCost?: string;
   variant: {
@@ -45,6 +47,8 @@ export interface SaleItem {
     id: string;
     number: string;
     type: SerialType;
+    /** SOLD — продан этим чеком, IN_STOCK — возвращён. */
+    status: string;
     warrantyEnd: string | null;
   }>;
 }
@@ -60,6 +64,8 @@ export interface Sale {
   discountTotal: string;
   total: string;
   paidTotal: string;
+  /** Сколько возвращено клиенту по возвратам. */
+  refundedTotal: string;
   /** Только при праве reports.view. */
   costTotal?: string;
   grossProfit?: string;
@@ -68,6 +74,13 @@ export interface Sale {
   customer: { id: string; name: string; phone: string | null } | null;
   seller: { id: string; firstName: string; lastName: string | null };
   payments: SalePayment[];
+  returns: Array<{
+    id: string;
+    number: number;
+    displayNumber: string;
+    date: string;
+    refundTotal: string;
+  }>;
   items: SaleItem[];
 }
 

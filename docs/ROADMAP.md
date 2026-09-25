@@ -10,7 +10,7 @@
 | 3    | Products, Categories, Brands, Variants, Barcode, IMEI/Serial numbers                  | ✅ Готово |
 | 4    | Purchase, StockMovement, stock balances                                               | ✅ Готово |
 | 5    | Sales, Payments, продажа по IMEI                                                      | ✅ Готово |
-| 6    | Returns, Transfers, Inventory                                                         | ⏳        |
+| 6    | Returns, Transfers, Inventory                                                         | ✅ Готово |
 | 7    | Customers, Suppliers, Cash, Installments, Warranties                                  | ⏳        |
 | 8    | Dashboard, Reports, Audit log                                                         | ⏳        |
 | 9    | Telegram bot (webhook), Telegram Mini App SDK (тема, кнопки), приглашения сотрудников | ⏳        |
@@ -106,18 +106,38 @@
   контроль распределения смешанной оплаты), чек с IMEI и сроком гарантии, история продаж,
   «+ Продажа» на главной, «Ещё» → Клиенты / Поставщики, RU/UZ
 
+## Этап 6 — что сделано
+
+- Возврат по чеку (ВЗ-n): строки чека блокируются (`SELECT … FOR UPDATE`), вернуть можно не больше
+  проданного минус уже возвращённое (`RETURN_LIMIT_EXCEEDED`, + CHECK в БД); сумма — пропорционально
+  строке со скидкой, последний возврат забирает остаток суммы (копейки не теряются);
+  IMEI должен быть продан этой строкой → снова `IN_STOCK`; `StockMovement RETURN` по себестоимости
+  продажи; выплата клиенту (наличные/карта/перевод); статус продажи PARTIALLY_RETURNED / RETURNED;
+  прибыль продажи учитывает возвраты
+- Перемещение (ПМ-n): `TRANSFER_OUT` из своего филиала по средней себестоимости + `TRANSFER_IN`
+  в любой филиал компании; IMEI меняют филиал условным обновлением; `/branches/transfer-targets`
+- Списание (СП-n): причина (брак, порча, утеря, другое), `WRITE_OFF`, IMEI → `WRITTEN_OFF`
+- Инвентаризация (ИН-n): черновик → сверка (учёт/факт/разница) → проведение; остаток блокируется
+  и доводится до факта `INVENTORY_ADJUSTMENT` (излишек — по текущей средней себестоимости);
+  найденные IMEI должны быть в наличии филиала, ненайденные → `WRITTEN_OFF`; частичная инвентаризация
+- Общие проверки строк документа: без повторов (`DUPLICATE_DOCUMENT_ITEM`), IMEI только из наличия
+  филиала (`SERIAL_NOT_IN_STOCK`); всё в одной транзакции с журналом аудита
+- История движений товара ссылается на документ-источник любого типа
+- Frontend: возврат из чека, чек с возвращёнными IMEI и списком возвратов; «Склад» →
+  Перемещения / Списания / Инвентаризация (списки, создание, карточки), RU/UZ
+
 ## Модели БД по этапам
 
-| Этап | Модели                                                                                      |
-| ---- | ------------------------------------------------------------------------------------------- |
-| 1    | Company, Branch                                                                             |
-| 2    | ✅ User, Membership (роль, права), MembershipBranch (доступ к филиалам), Session            |
-| 3    | ✅ Category, Brand, Product, ProductVariant, Barcode, SerialNumber                          |
-| 4    | ✅ Supplier, Purchase, PurchaseItem, StockMovement, StockBalance, DocumentCounter, AuditLog |
-| 5    | ✅ Customer (минимум), Sale, SaleItem, Payment                                              |
-| 6    | Return, ReturnItem, Transfer, TransferItem, Inventory, InventoryItem, WriteOff              |
-| 7    | Customer/Supplier (полностью), CashOperation, Installment, InstallmentPayment, Warranty     |
-| 8    | AuditLog (+ отчёты поверх существующих моделей)                                             |
+| Этап | Модели                                                                                                      |
+| ---- | ----------------------------------------------------------------------------------------------------------- |
+| 1    | Company, Branch                                                                                             |
+| 2    | ✅ User, Membership (роль, права), MembershipBranch (доступ к филиалам), Session                            |
+| 3    | ✅ Category, Brand, Product, ProductVariant, Barcode, SerialNumber                                          |
+| 4    | ✅ Supplier, Purchase, PurchaseItem, StockMovement, StockBalance, DocumentCounter, AuditLog                 |
+| 5    | ✅ Customer (минимум), Sale, SaleItem, Payment                                                              |
+| 6    | ✅ SaleReturn, ReturnItem, Refund, Transfer, TransferItem, WriteOff, WriteOffItem, Inventory, InventoryItem |
+| 7    | Customer/Supplier (полностью), CashOperation, Installment, InstallmentPayment, Warranty                     |
+| 8    | AuditLog (+ отчёты поверх существующих моделей)                                                             |
 
 Seed будет расширяться на каждом этапе: пользователи Owner/Manager/Seller/Warehouse (этап 2),
 товары iPhone 15 128GB Black, Samsung Galaxy A56, Redmi Note, LG TV 55, AirPods (этап 3),
