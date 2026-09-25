@@ -76,7 +76,7 @@ export default function ReportsPage() {
                 {t('reports.net', { value: money(r.netRevenue) })}
               </p>
             ) : null}
-            <div className="mt-3 grid grid-cols-2 gap-3">
+            <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
               <Stat label={t('reports.salesCount')} value={String(r.salesCount)} />
               <Stat label={t('reports.itemsSold')} value={String(r.itemsSold)} />
               <Stat label={t('reports.averageCheck')} value={money(r.averageCheck)} />
@@ -100,63 +100,64 @@ export default function ReportsPage() {
             </div>
           </Card>
 
-          <Card title={t('reports.money')} className="p-0 pt-4">
-            <ul className="divide-y divide-slate-100">
-              {PAYMENT_METHODS.map((m) => (
-                <li key={m} className="flex items-center gap-3 px-4 py-3">
-                  <AppIcon icon={METHOD_ICONS[m].icon} tint={METHOD_ICONS[m].tint} size="sm" />
-                  <span className="flex-1">{t(`paymentMethod.${m}`)}</span>
-                  <span className="font-semibold">{money(r.money[m])}</span>
-                </li>
-              ))}
-            </ul>
-          </Card>
-
-          <Card title={t('reports.items')} className="p-0 pt-4">
-            {r.items.length ? (
+          <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[3fr_2fr] lg:items-start">
+            <Card title={t('reports.items')} className="p-0 pt-4 lg:row-span-2">
+              {r.items.length ? (
+                <ul className="divide-y divide-slate-100">
+                  {r.items.map((item) => (
+                    <li key={item.variantId} className="flex items-center gap-3 px-4 py-3">
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate font-medium">
+                          {item.product}
+                          {item.variant ? (
+                            <span className="font-normal text-[#8e8e93]"> · {item.variant}</span>
+                          ) : null}
+                        </span>
+                        <span className="block text-[13px] text-[#8e8e93]">
+                          {t('reports.sold', { count: item.quantity })}
+                          {item.profit !== undefined
+                            ? ` · ${t('reports.itemProfit', { value: money(item.profit) })}`
+                            : ''}
+                        </span>
+                      </span>
+                      <span className="shrink-0 font-semibold">{money(item.amount)}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="px-4 pb-4 text-[#8e8e93]">{t('reports.noSales')}</p>
+              )}
+            </Card>
+            <Card title={t('reports.money')} className="order-first p-0 pt-4 lg:order-none">
               <ul className="divide-y divide-slate-100">
-                {r.items.map((item) => (
-                  <li key={item.variantId} className="flex items-center gap-3 px-4 py-3">
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate font-medium">
-                        {item.product}
-                        {item.variant ? (
-                          <span className="font-normal text-[#8e8e93]"> · {item.variant}</span>
-                        ) : null}
-                      </span>
-                      <span className="block text-[13px] text-[#8e8e93]">
-                        {t('reports.sold', { count: item.quantity })}
-                        {item.profit !== undefined
-                          ? ` · ${t('reports.itemProfit', { value: money(item.profit) })}`
-                          : ''}
-                      </span>
-                    </span>
-                    <span className="shrink-0 font-semibold">{money(item.amount)}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="px-4 pb-4 text-[#8e8e93]">{t('reports.noSales')}</p>
-            )}
-          </Card>
-
-          {r.sellers.length ? (
-            <Card title={t('reports.sellers')} className="p-0 pt-4">
-              <ul className="divide-y divide-slate-100">
-                {r.sellers.map((s) => (
-                  <li key={s.id} className="flex items-center justify-between px-4 py-3">
-                    <span>
-                      <span className="block font-medium">{s.name}</span>
-                      <span className="block text-[13px] text-[#8e8e93]">
-                        {t('reports.salesShort', { count: s.salesCount })}
-                      </span>
-                    </span>
-                    <span className="font-semibold">{money(s.revenue)}</span>
+                {PAYMENT_METHODS.map((m) => (
+                  <li key={m} className="flex items-center gap-3 px-4 py-3">
+                    <AppIcon icon={METHOD_ICONS[m].icon} tint={METHOD_ICONS[m].tint} size="sm" />
+                    <span className="flex-1">{t(`paymentMethod.${m}`)}</span>
+                    <span className="font-semibold">{money(r.money[m])}</span>
                   </li>
                 ))}
               </ul>
             </Card>
-          ) : null}
+
+            {r.sellers.length ? (
+              <Card title={t('reports.sellers')} className="p-0 pt-4">
+                <ul className="divide-y divide-slate-100">
+                  {r.sellers.map((s) => (
+                    <li key={s.id} className="flex items-center justify-between px-4 py-3">
+                      <span>
+                        <span className="block font-medium">{s.name}</span>
+                        <span className="block text-[13px] text-[#8e8e93]">
+                          {t('reports.salesShort', { count: s.salesCount })}
+                        </span>
+                      </span>
+                      <span className="font-semibold">{money(s.revenue)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            ) : null}
+          </div>
         </>
       ) : null}
     </>

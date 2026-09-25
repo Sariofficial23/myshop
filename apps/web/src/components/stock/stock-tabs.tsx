@@ -22,7 +22,7 @@ export function StockTabs() {
   ].filter((tab) => tab.visible);
   if (tabs.length < 2) return null;
   return (
-    <nav className="-mx-4 flex gap-1 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
+    <nav className="-mx-4 flex gap-1 overflow-x-auto px-4 pb-1 [scrollbar-width:none] lg:hidden">
       {tabs.map((tab) => {
         const active = pathname.startsWith(tab.href);
         return (

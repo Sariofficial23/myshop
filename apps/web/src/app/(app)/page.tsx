@@ -75,37 +75,39 @@ export default function HomePage() {
         </h1>
       </header>
 
-      {today.data ? (
-        <Link href="/reports" className="block active:opacity-80">
-          <Card>
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-[#8e8e93] uppercase">{t('home.today')}</p>
-              <ChevronRight aria-hidden size={20} className="text-[#c7c7cc]" />
-            </div>
-            <p className="mt-1 text-[34px] leading-tight font-bold tracking-tight">
-              {money(today.data.revenue)}
-            </p>
-            <p className="text-[15px] text-[#8e8e93]">
-              {t('home.todayStats', {
-                sales: today.data.salesCount,
-                items: today.data.itemsSold,
-              })}
-            </p>
-          </Card>
-        </Link>
-      ) : null}
+      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[2fr_1fr]">
+        {today.data ? (
+          <Link href="/reports" className="block active:opacity-80">
+            <Card>
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-[#8e8e93] uppercase">{t('home.today')}</p>
+                <ChevronRight aria-hidden size={20} className="text-[#c7c7cc]" />
+              </div>
+              <p className="mt-1 text-[34px] leading-tight font-bold tracking-tight">
+                {money(today.data.revenue)}
+              </p>
+              <p className="text-[15px] text-[#8e8e93]">
+                {t('home.todayStats', {
+                  sales: today.data.salesCount,
+                  items: today.data.itemsSold,
+                })}
+              </p>
+            </Card>
+          </Link>
+        ) : null}
 
-      {can(Permission.SALES_CREATE) ? (
-        <Link
-          href="/sale"
-          className="flex min-h-16 items-center justify-center gap-3 rounded-2xl bg-gradient-to-b from-[#1a8cff] to-[#007aff] text-[17px] font-semibold text-white shadow-lg shadow-brand-600/25 active:opacity-90"
-        >
-          <ShoppingBag aria-hidden size={22} strokeWidth={2.2} />
-          {t('home.newSale')}
-        </Link>
-      ) : null}
+        {can(Permission.SALES_CREATE) ? (
+          <Link
+            href="/sale"
+            className="flex min-h-16 items-center justify-center gap-3 rounded-2xl lg:rounded-3xl bg-gradient-to-b from-[#1a8cff] to-[#007aff] text-[17px] font-semibold text-white shadow-lg shadow-brand-600/25 active:opacity-90"
+          >
+            <ShoppingBag aria-hidden size={22} strokeWidth={2.2} />
+            {t('home.newSale')}
+          </Link>
+        ) : null}
+      </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {can(Permission.SALES_VIEW) ? (
           <Tile href="/reports" icon={ChartColumn} tint="indigo">
             {t('home.reports')}

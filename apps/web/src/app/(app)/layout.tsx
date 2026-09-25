@@ -1,15 +1,18 @@
 import type { ReactNode } from 'react';
+import { AppMain } from '@/components/app-main';
 import { AuthGate } from '@/components/auth/auth-gate';
 import { SubscriptionBanner } from '@/components/auth/subscription-banner';
 import { BottomNav } from '@/components/bottom-nav';
+import { SideNav } from '@/components/side-nav';
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
     <AuthGate>
-      <main className="mx-auto flex min-h-dvh max-w-md flex-col gap-4 px-4 pt-6 pb-28">
+      <SideNav />
+      <AppMain>
         <SubscriptionBanner />
         {children}
-      </main>
+      </AppMain>
       <BottomNav />
     </AuthGate>
   );
