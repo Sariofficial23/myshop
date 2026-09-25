@@ -1,7 +1,7 @@
 'use client';
 
 import { Permission } from '@myshop/shared';
-import { Button, Card, ListRow } from '@myshop/ui';
+import { Button, Card, ListRow, StatusBadge } from '@myshop/ui';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useFormatter, useTranslations } from 'next-intl';
@@ -67,9 +67,13 @@ export default function SalesPage() {
                       .filter(Boolean)
                       .join(' · ')}
                     trailing={
-                      <span className="text-sm text-slate-500">
-                        {t(`paymentMethod.${sale.paymentType}`)}
-                      </span>
+                      sale.status === 'COMPLETED' ? (
+                        <span className="text-sm text-slate-500">
+                          {t(`paymentMethod.${sale.paymentType}`)}
+                        </span>
+                      ) : (
+                        <StatusBadge tone="danger">{t(`saleStatus.${sale.status}`)}</StatusBadge>
+                      )
                     }
                   />
                 </Link>

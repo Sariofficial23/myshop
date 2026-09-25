@@ -21,7 +21,17 @@ export interface StockMovement {
   createdAt: string;
   branch: NamedRef;
   createdBy: { id: string; firstName: string; lastName: string | null };
-  purchase: { id: string; number: number } | null;
+  purchase: DocRef | null;
+  sale: DocRef | null;
+  return: DocRef | null;
+  transfer: DocRef | null;
+  writeOff: DocRef | null;
+  inventory: DocRef | null;
+}
+
+export interface DocRef {
+  id: string;
+  number: number;
 }
 
 export interface Supplier {

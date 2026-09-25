@@ -2,7 +2,9 @@
 
 import { Card, ListRow } from '@myshop/ui';
 import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
 import { useFormatter, useTranslations } from 'next-intl';
+import { movementDocument } from '@/lib/format/documents';
 import { stockApi } from '@/lib/api/stock';
 
 /** Остатки варианта по филиалам и история движений (приход → перемещение → продажа → возврат). */
@@ -49,8 +51,9 @@ export function ProductStock({ variantIds }: { variantIds: string[] }) {
       <Card title={t('stock.history')} className="p-0 pt-4">
         {movements.data?.length ? (
           <ul className="divide-y divide-slate-100">
-            {movements.data.slice(0, 30).map((m) => (
-              <li key={m.id}>
+            {movements.data.slice(0, 30).map((m) => {
+              const doc = movementDocument(m);
+              const row = (
                 <ListRow
                   title={`${t(`movementType.${m.type}`)} ${m.quantity > 0 ? `+${m.quantity}` : m.quantity}`}
                   subtitle={[
@@ -59,7 +62,7 @@ export function ProductStock({ variantIds }: { variantIds: string[] }) {
                       timeStyle: 'short',
                     }),
                     m.branch.name,
-                    m.purchase ? `ПР-${m.purchase.number}` : null,
+                    doc?.label,
                   ]
                     .filter(Boolean)
                     .join(' · ')}
@@ -69,8 +72,19 @@ export function ProductStock({ variantIds }: { variantIds: string[] }) {
                     </span>
                   }
                 />
-              </li>
-            ))}
+              );
+              return (
+                <li key={m.id}>
+                  {doc ? (
+                    <Link href={doc.href} className="block active:bg-slate-50">
+                      {row}
+                    </Link>
+                  ) : (
+                    row
+                  )}
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <p className="px-4 pb-4 text-slate-500">{t('stock.noHistory')}</p>

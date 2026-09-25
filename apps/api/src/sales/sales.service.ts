@@ -32,6 +32,10 @@ const saleInclude = {
   customer: { select: { id: true, name: true, phone: true } },
   seller: person,
   payments: { orderBy: { createdAt: 'asc' } },
+  returns: {
+    orderBy: { createdAt: 'asc' },
+    select: { id: true, number: true, date: true, refundTotal: true, costTotal: true },
+  },
   items: {
     orderBy: { createdAt: 'asc' },
     include: {
@@ -43,7 +47,9 @@ const saleInclude = {
           product: { select: { id: true, name: true, serialType: true, warrantyMonths: true } },
         },
       },
-      serialNumbers: { select: { id: true, number: true, type: true, warrantyEnd: true } },
+      serialNumbers: {
+        select: { id: true, number: true, type: true, status: true, warrantyEnd: true },
+      },
     },
   },
 } satisfies Prisma.SaleInclude;
@@ -53,6 +59,8 @@ type SaleWithRelations = Prisma.SaleGetPayload<{ include: typeof saleInclude }>;
 /** Себестоимость и прибыль видят только те, кому доступны отчёты. */
 function toResponse(sale: SaleWithRelations, ctx: AuthContext) {
   const showCost = hasPermission(ctx, Permission.REPORTS_VIEW);
+  const refunded = sale.returns.reduce((sum, r) => sum.add(r.refundTotal), new Prisma.Decimal(0));
+  const returnedCost = sale.returns.reduce((sum, r) => sum.add(r.costTotal), new Prisma.Decimal(0));
   return {
     ...sale,
     displayNumber: formatDocumentNumber(DocumentPrefix.SALE, sale.number),
@@ -60,14 +68,24 @@ function toResponse(sale: SaleWithRelations, ctx: AuthContext) {
     discountTotal: sale.discountTotal.toFixed(2),
     total: sale.total.toFixed(2),
     paidTotal: sale.paidTotal.toFixed(2),
+    refundedTotal: refunded.toFixed(2),
     costTotal: showCost ? sale.costTotal.toFixed(2) : undefined,
-    grossProfit: showCost ? sale.total.sub(sale.costTotal).toFixed(2) : undefined,
+    // Прибыль за вычетом возвратов: (выручка − возвращено) − (себестоимость − себестоимость возвратов)
+    grossProfit: showCost
+      ? sale.total.sub(refunded).sub(sale.costTotal.sub(returnedCost)).toFixed(2)
+      : undefined,
     payments: sale.payments.map((p) => ({ ...p, amount: p.amount.toFixed(2) })),
+    returns: sale.returns.map(({ costTotal: _cost, ...r }) => ({
+      ...r,
+      displayNumber: formatDocumentNumber(DocumentPrefix.RETURN, r.number),
+      refundTotal: r.refundTotal.toFixed(2),
+    })),
     items: sale.items.map(({ unitCost, ...item }) => ({
       ...item,
       price: item.price.toFixed(2),
       discount: item.discount.toFixed(2),
       total: item.total.toFixed(2),
+      refundedAmount: item.refundedAmount.toFixed(2),
       unitCost: showCost ? unitCost.toFixed(2) : undefined,
     })),
   };

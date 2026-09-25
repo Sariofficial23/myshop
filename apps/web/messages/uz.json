@@ -46,7 +46,7 @@
     "roleIn": "{role} · {company}",
     "yourBranches": "Filiallaringiz",
     "allBranches": "Kompaniyaning barcha filiallari",
-    "stageNotice": "Tayyor: kirish, xodimlar, katalog, kirimlar, qoldiqlar va sotuvlar. Qaytarish, ko'chirish va inventarizatsiya — keyingi bosqichda.",
+    "stageNotice": "Tayyor: kirish, xodimlar, katalog, kirimlar, qoldiqlar, sotuvlar, qaytarishlar, ko'chirishlar, hisobdan chiqarish va inventarizatsiya. Kassa, muddatli to'lov va kafolatlar — keyingi bosqichda.",
     "quickActions": "Tezkor amallar",
     "newPurchase": "Kirim",
     "lowStock": "Tugayapti: {count}",
@@ -118,7 +118,10 @@
   "stockTabs": {
     "products": "Mahsulotlar",
     "stock": "Qoldiqlar",
-    "purchases": "Kirimlar"
+    "purchases": "Kirimlar",
+    "transfers": "Ko'chirishlar",
+    "writeOffs": "Hisobdan chiqarish",
+    "inventories": "Inventarizatsiya"
   },
   "products": {
     "title": "Mahsulotlar",
@@ -316,13 +319,6 @@
     "priceRequired": "Narxni kiriting",
     "discountInvalid": "Chegirma summadan katta",
     "selectSerials": "Kamida bitta raqamni tanlang",
-    "pickImei": "Mavjud IMEI",
-    "pickSerial": "Mavjud seriya raqamlari",
-    "selectedOf": "{total} tadan {selected} tanlandi",
-    "findNumber": "Raqam bo'yicha qidirish",
-    "numberNotInStock": "{number} raqami bu filialda mavjud emas",
-    "noSerialsInStock": "Bu filialda bu mahsulot mavjud emas",
-    "loading": "Yuklanmoqda…",
     "receiptTitle": "Chek {number}",
     "seller": "Sotuvchi: {name}",
     "customerLine": "Mijoz: {name}",
@@ -364,6 +360,97 @@
     "COMPLETED": "Yakunlangan",
     "PARTIALLY_RETURNED": "Qisman qaytarilgan",
     "RETURNED": "Qaytarilgan"
+  },
+  "serialPicker": {
+    "pickImei": "Mavjud IMEI",
+    "pickSerial": "Mavjud seriya raqamlari",
+    "selectedOf": "{total} tadan {selected} tanlandi",
+    "findNumber": "Raqam bo'yicha qidirish",
+    "numberNotInStock": "{number} raqami bu filialda mavjud emas",
+    "noSerialsInStock": "Bu filialda bu mahsulot mavjud emas",
+    "loading": "Yuklanmoqda…"
+  },
+  "stockDocs": {
+    "remove": "Olib tashlash",
+    "selectSerials": "Kamida bitta raqamni belgilang",
+    "quantity": "Miqdor",
+    "quantityInvalid": "Miqdorni kiriting",
+    "noItems": "Kamida bitta mahsulot qo'shing",
+    "notes": "Izoh",
+    "items": "Mahsulotlar",
+    "pcs": "{count} dona",
+    "createdBy": "Rasmiylashtirdi: {name}",
+    "branch": "Filial"
+  },
+  "transfers": {
+    "title": "Ko'chirishlar",
+    "add": "Ko'chirish",
+    "new": "Yangi ko'chirish",
+    "empty": "Hozircha ko'chirishlar yo'q",
+    "from": "Qayerdan",
+    "to": "Qayerga",
+    "chooseBranch": "Qabul qiluvchi filialni tanlang",
+    "noOtherBranches": "Kompaniyada boshqa filiallar yo'q",
+    "hint": "Mahsulot darhol jo'natuvchi filialdan chiqariladi va qabul qiluvchi filialda paydo bo'ladi. IMEI mahsulot bilan birga o'tadi.",
+    "submit": "Ko'chirish"
+  },
+  "writeOffs": {
+    "title": "Hisobdan chiqarish",
+    "add": "Hisobdan chiqarish",
+    "new": "Yangi hisobdan chiqarish",
+    "empty": "Hozircha hisobdan chiqarishlar yo'q",
+    "reason": "Sabab",
+    "hint": "Mahsulot darhol qoldiqdan chiqariladi, IMEI «hisobdan chiqarilgan» bo'ladi. Bekor qilib bo'lmaydi.",
+    "submit": "Hisobdan chiqarish",
+    "cost": "Tannarx: {value}"
+  },
+  "writeOffReason": {
+    "DEFECT": "Nuqson",
+    "DAMAGE": "Buzilish / shikastlanish",
+    "LOSS": "Yo'qolish",
+    "OTHER": "Boshqa"
+  },
+  "inventories": {
+    "title": "Inventarizatsiya",
+    "add": "Yangi",
+    "new": "Yangi inventarizatsiya",
+    "empty": "Hozircha inventarizatsiyalar yo'q",
+    "hint": "Qayta sanalgan mahsulotlarni qo'shing va haqiqiy miqdorni kiriting. IMEI li mahsulotlar uchun topilgan raqamlarni belgilang — topilmaganlari hisobdan chiqariladi. Hujjatda yo'q mahsulotlar o'zgarmaydi.",
+    "counted": "Sanaldi",
+    "actual": "Haqiqatda",
+    "check": "Saqlash va solishtirish",
+    "confirmNow": "Darhol o'tkazish",
+    "confirmedBy": "O'tkazdi: {name}",
+    "differences": "Farqlar: {count}",
+    "noDifferences": "Farqlar yo'q",
+    "expected": "Hisob: {count}",
+    "actualShort": "Haqiqat: {count}",
+    "missingSerials": "Topilmadi (hisobdan chiqariladi): {list}",
+    "confirmHint": "O'tkazilgandan keyin qoldiqlar haqiqatga teng bo'ladi. O'tkazilgan inventarizatsiyani o'zgartirib bo'lmaydi.",
+    "confirm": "O'tkazish",
+    "cancel": "Bekor qilish",
+    "positions": "Pozitsiyalar: {count}",
+    "writtenOffSerials": "Topilmadi va hisobdan chiqarildi: {list}"
+  },
+  "returns": {
+    "title": "Qaytarishlar",
+    "create": "Qaytarishni rasmiylashtirish",
+    "newFor": "{number} bo'yicha qaytarish",
+    "nothingLeft": "Bu chekdagi barcha mahsulotlar allaqachon qaytarilgan",
+    "soldLine": "Sotilgan: {quantity}, {total} · qaytarish mumkin: {left}",
+    "quantity": "Qaytarish, dona",
+    "maxLeft": "Ko'pi bilan {count} ta qaytarish mumkin",
+    "refundMethod": "Pulni qanday qaytarish",
+    "reason": "Sabab",
+    "toRefund": "Mijozga qaytarish",
+    "hint": "Mahsulot omborga qaytadi, IMEI yana mavjud bo'ladi. Summa chekdagi chegirmani hisobga oladi.",
+    "selectItems": "Qaytarish uchun mahsulotlarni tanlang",
+    "submit": "Qaytarishni rasmiylashtirish",
+    "forSale": "{number} chek bo'yicha",
+    "refunds": "Mijozga to'landi",
+    "returnedCount": "Qaytarildi: {count}",
+    "returned": "qaytarilgan",
+    "refundedTotal": "Mijozga qaytarildi"
   },
   "errors": {
     "VALIDATION_ERROR": "Maydonlar to‘g‘ri to‘ldirilganini tekshiring.",
@@ -427,6 +514,14 @@
     "PRICE_REQUIRED": "Mahsulotning sotuv narxi yo'q — narxni kiriting.",
     "PRICE_CHANGE_FORBIDDEN": "Narxni faqat menejer yoki egasi o'zgartira oladi.",
     "DISCOUNT_TOO_LARGE": "Chegirma mahsulot summasidan katta bo‘lishi mumkin emas.",
-    "INSTALLMENT_NOT_AVAILABLE": "Muddatli to'lov hozircha mavjud emas."
+    "INSTALLMENT_NOT_AVAILABLE": "Muddatli to'lov hozircha mavjud emas.",
+    "RETURN_NOT_FOUND": "Qaytarish topilmadi.",
+    "SALE_ITEM_NOT_FOUND": "Bu chekda bunday mahsulot yo'q.",
+    "TRANSFER_NOT_FOUND": "Ko'chirish topilmadi.",
+    "SAME_BRANCH_TRANSFER": "Boshqa qabul qiluvchi filialni tanlang.",
+    "WRITE_OFF_NOT_FOUND": "Hisobdan chiqarish topilmadi.",
+    "INVENTORY_NOT_FOUND": "Inventarizatsiya topilmadi.",
+    "SERIAL_NOT_IN_STOCK": "IMEI / seriya raqami bu filialda mavjud deb hisoblanmaydi.",
+    "DUPLICATE_DOCUMENT_ITEM": "Mahsulot hujjatga ikki marta qo'shilgan."
   }
 }

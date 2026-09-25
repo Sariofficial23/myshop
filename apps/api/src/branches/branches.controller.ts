@@ -20,6 +20,13 @@ export class BranchesController {
     return this.branches.list(ctx, query.includeInactive);
   }
 
+  @Get('transfer-targets')
+  @RequirePermissions(Permission.TRANSFERS_MANAGE)
+  @ApiOperation({ summary: 'Филиалы компании, в которые можно переместить товар' })
+  transferTargets(@CurrentAuth() ctx: AuthContext) {
+    return this.branches.transferTargets(ctx);
+  }
+
   @Get(':id')
   @RequirePermissions(Permission.BRANCHES_VIEW)
   @ApiOperation({ summary: 'Филиал' })

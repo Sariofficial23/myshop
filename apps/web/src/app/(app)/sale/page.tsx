@@ -10,7 +10,7 @@ import { useCallback, useState } from 'react';
 import { ErrorMessage } from '@/components/error-message';
 import { PageHeader } from '@/components/page-header';
 import { CustomerSelect } from '@/components/sales/customer-select';
-import { SerialSelect } from '@/components/sales/serial-select';
+import { SerialSelect } from '@/components/stock/serial-select';
 import { type PickedVariant, VariantPicker } from '@/components/stock/variant-picker';
 import { type Customer, salesApi } from '@/lib/api/sales';
 import { useCan, useMe } from '@/lib/auth/auth-provider';
