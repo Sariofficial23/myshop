@@ -20,30 +20,25 @@ import { tokenStore } from './token-store';
 export type AuthState =
   | { status: 'loading' }
   | { status: 'authenticated'; me: MeResponse }
-  | { status: 'unauthenticated'; error?: unknown }
-  /** Пользователь Telegram ещё не сотрудник ни одной компании. */
-  | { status: 'no-membership'; telegramId?: string };
+  | { status: 'unauthenticated'; error?: unknown };
 
 interface AuthContextValue {
   state: AuthState;
   /** Есть ли подписанные данные Telegram (открыто внутри Telegram). */
   inTelegram: boolean;
   loginDev(telegramId: string): Promise<void>;
-  register(input: { companyName: string; branchName?: string }): Promise<void>;
+  /** Регистрация владельца бизнеса. */
+  register(input: { companyName: string; email: string; password: string }): Promise<void>;
+  /** Вход владельца по email и паролю. */
+  loginOwner(input: { email: string; password: string }): Promise<void>;
+  /** Вход сотрудника по названию компании, логину и паролю. */
+  loginStaff(input: { companyName: string; login: string; password: string }): Promise<void>;
   switchCompany(companyId: string): Promise<void>;
   logout(): Promise<void>;
   reloadMe(): Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
-
-function telegramIdFrom(error: unknown): string | undefined {
-  if (error instanceof ApiError && typeof error.details === 'object' && error.details !== null) {
-    const id = (error.details as { telegramId?: unknown }).telegramId;
-    return typeof id === 'string' ? id : undefined;
-  }
-  return undefined;
-}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
@@ -59,11 +54,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const handleAuthError = useCallback((error: unknown) => {
-    if (error instanceof ApiError && error.code === 'NO_MEMBERSHIP') {
-      setState({ status: 'no-membership', telegramId: telegramIdFrom(error) });
-    } else {
-      setState({ status: 'unauthenticated', error });
-    }
+    // Telegram ещё не привязан к аккаунту — просто показываем экран входа, без ошибки
+    const notLinked = error instanceof ApiError && error.code === 'NO_MEMBERSHIP';
+    setState({ status: 'unauthenticated', error: notLinked ? undefined : error });
   }, []);
 
   // Первичный вход: Telegram initData → сохранённая сессия → экран входа
@@ -74,12 +67,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     (async () => {
       try {
+        // Сначала сохранённая сессия (вход по паролю), затем привязанный Telegram
+        if (tokenStore.getRefreshToken() && (await refreshSession())) return;
         if (initData) {
           const response = await authApi.telegram(initData);
           if (!cancelled) apply(response);
           return;
         }
-        if (tokenStore.getRefreshToken() && (await refreshSession())) return;
         if (!cancelled) setState({ status: 'unauthenticated' });
       } catch (error) {
         if (!cancelled) handleAuthError(error);
@@ -108,7 +102,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         apply(await authApi.devLogin(telegramId));
       },
       async register(input) {
-        apply(await authApi.register({ initData: getTelegramInitData(), ...input }));
+        apply(await authApi.register({ ...input, initData: getTelegramInitData() || undefined }));
+      },
+      async loginOwner(input) {
+        apply(await authApi.login({ ...input, initData: getTelegramInitData() || undefined }));
+      },
+      async loginStaff(input) {
+        apply(await authApi.staffLogin({ ...input, initData: getTelegramInitData() || undefined }));
       },
       async switchCompany(companyId) {
         const response = await authApi.switchCompany(companyId);

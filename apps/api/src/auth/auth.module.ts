@@ -7,6 +7,7 @@ import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
 import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
 import { PermissionsGuard } from './guards/permissions.guard.js';
+import { SubscriptionGuard } from './guards/subscription.guard.js';
 import { SessionService } from './session.service.js';
 
 @Global()
@@ -25,8 +26,9 @@ import { SessionService } from './session.service.js';
   providers: [
     AuthService,
     SessionService,
-    // Порядок важен: сначала аутентификация, затем проверка прав
+    // Порядок важен: аутентификация → подписка компании → права
     { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: SubscriptionGuard },
     { provide: APP_GUARD, useClass: PermissionsGuard },
   ],
   exports: [SessionService, AuthService],

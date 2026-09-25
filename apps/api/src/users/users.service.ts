@@ -3,6 +3,7 @@ import { ErrorCode, hasAllBranchesByDefault, type Role } from '@myshop/shared';
 import type { Prisma } from '@myshop/database';
 import type { AuthContext } from '../auth/auth-context.js';
 import { SessionService } from '../auth/session.service.js';
+import { hashPassword } from '../auth/password.js';
 import { AppException } from '../common/errors/app.exception.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
@@ -24,6 +25,8 @@ type Tx = Prisma.TransactionClient;
 export interface StaffMember {
   id: string;
   telegramId: string | null;
+  login: string | null;
+  hasPassword: boolean;
   firstName: string;
   lastName: string | null;
   username: string | null;
@@ -41,6 +44,8 @@ function toStaffMember(m: MembershipWithUser): StaffMember {
   return {
     id: m.user.id,
     telegramId: m.user.telegramId?.toString() ?? null,
+    login: m.login,
+    hasPassword: m.passwordHash !== null,
     firstName: m.user.firstName,
     lastName: m.user.lastName,
     username: m.user.username,
@@ -81,15 +86,25 @@ export class UsersService {
 
   async create(ctx: AuthContext, dto: CreateUserDto): Promise<StaffMember> {
     assertCanManageRole(ctx.role, dto.role);
+
     const allBranches = dto.allBranches ?? hasAllBranchesByDefault(dto.role);
     const branchIds = allBranches ? [] : [...new Set(dto.branchIds ?? [])];
     assertHasBranchAccess(allBranches, branchIds);
     assertCanAssignBranches(ctx, allBranches, branchIds);
     const extraPermissions = assertCanGrantPermissions(ctx, dto.extraPermissions ?? []);
 
-    const membership = await this.prisma.$transaction(async (tx) => {
-      await this.assertBranchesInCompany(tx, ctx, branchIds);
+    await this.assertBranchesInCompany(this.prisma, ctx, branchIds);
+    // Сотрудник входит либо по логину и паролю, либо через свой Telegram
+    if (!dto.telegramId && !(dto.login && dto.password)) {
+      throw new AppException(
+        ErrorCode.CREDENTIALS_REQUIRED,
+        HttpStatus.BAD_REQUEST,
+        'Login and password (or Telegram ID) are required',
+      );
+    }
+    const passwordHash = dto.password ? await hashPassword(dto.password) : null;
 
+    const membership = await this.prisma.$transaction(async (tx) => {
       let user = dto.telegramId
         ? await tx.user.findUnique({ where: { telegramId: BigInt(dto.telegramId) } })
         : null;
@@ -122,6 +137,8 @@ export class UsersService {
           role: dto.role,
           allBranches,
           extraPermissions,
+          login: dto.login ?? null,
+          passwordHash,
           branches: { create: branchIds.map((branchId) => ({ branchId })) },
         },
         include: membershipInclude,
@@ -177,6 +194,8 @@ export class UsersService {
       }
 
       const membershipData: Prisma.MembershipUpdateInput = {};
+      if (dto.login !== undefined) membershipData.login = dto.login;
+      if (dto.password) membershipData.passwordHash = await hashPassword(dto.password);
       if (dto.role) membershipData.role = dto.role;
       if (dto.isActive !== undefined) membershipData.isActive = dto.isActive;
       if (dto.extraPermissions) {
@@ -201,7 +220,8 @@ export class UsersService {
       await this.updateProfile(tx, ctx, target, dto);
       await tx.membership.update({ where: { id: target.id }, data: membershipData });
 
-      if (dto.isActive === false) {
+      // Блокировка или смена пароля — все открытые сессии сотрудника закрываются
+      if (dto.isActive === false || (dto.password && target.userId !== ctx.userId)) {
         await this.sessions.revokeAllForMembership(target.id, tx);
       }
       return this.findMembership(tx, ctx, userId);

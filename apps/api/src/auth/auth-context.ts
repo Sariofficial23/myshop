@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import { ErrorCode, type Permission, type Role } from '@myshop/shared';
+import { ErrorCode, type Permission, type Role, type SubscriptionState } from '@myshop/shared';
 import type { Request } from 'express';
 import { AppException } from '../common/errors/app.exception.js';
 
@@ -20,6 +20,8 @@ export interface AuthContext {
   allBranches: boolean;
   /** Филиалы с доступом (при allBranches = false). */
   branchIds: readonly string[];
+  /** Подписка компании: EXPIRED — только чтение, PENDING / BLOCKED — доступа нет. */
+  subscription: SubscriptionState;
   /** Для журнала аудита. */
   ip?: string;
   userAgent?: string;

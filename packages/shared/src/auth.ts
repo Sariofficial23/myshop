@@ -1,10 +1,12 @@
 import type { Locale } from './locales.js';
 import type { Permission } from './permissions.js';
 import type { Role } from './roles.js';
+import type { SubscriptionState } from './subscription.js';
 
 export interface AuthUser {
   id: string;
   telegramId: string | null;
+  email: string | null;
   firstName: string;
   lastName: string | null;
   username: string | null;
@@ -16,6 +18,8 @@ export interface AuthCompany {
   name: string;
   currency: string;
   timezone: string;
+  /** Подписка: ACTIVE — работа, EXPIRED — только просмотр, PENDING / BLOCKED — доступа нет. */
+  subscription: { state: SubscriptionState; paidUntil: string | null };
 }
 
 export interface AuthBranch {

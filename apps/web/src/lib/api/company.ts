@@ -19,6 +19,8 @@ export interface Branch {
 export interface StaffMember {
   id: string;
   telegramId: string | null;
+  login: string | null;
+  hasPassword: boolean;
   firstName: string;
   lastName: string | null;
   username: string | null;
@@ -36,6 +38,8 @@ export interface StaffInput {
   lastName?: string | null;
   phone?: string | null;
   telegramId?: string | null;
+  login?: string | null;
+  password?: string;
   role?: Role;
   allBranches?: boolean;
   branchIds?: string[];

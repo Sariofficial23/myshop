@@ -2,13 +2,14 @@
 
 import { Permission } from '@myshop/shared';
 import { Button, Card, ListRow, SelectField } from '@myshop/ui';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   Building2,
   CalendarClock,
   Contact,
   Globe,
   ShieldCheck,
+  ShieldUser,
   Store,
   Tags,
   Truck,
@@ -21,13 +22,20 @@ import { ErrorMessage } from '@/components/error-message';
 import { AppIcon, type IconTint } from '@/components/icons/app-icon';
 import { LocaleSwitcher } from '@/components/locale-switcher';
 import { PageHeader } from '@/components/page-header';
+import { adminApi } from '@/lib/api/admin';
 import { useAuth, useCan, useMe } from '@/lib/auth/auth-provider';
 
 export default function MorePage() {
   const t = useTranslations();
   const me = useMe();
   const can = useCan();
-  const { logout, switchCompany } = useAuth();
+  const { logout, switchCompany, inTelegram } = useAuth();
+  const isAdmin = useQuery({
+    queryKey: ['admin', 'me'],
+    queryFn: adminApi.me,
+    enabled: inTelegram,
+    retry: false,
+  });
   const switcher = useMutation({ mutationFn: switchCompany });
 
   const links = [
@@ -93,6 +101,13 @@ export default function MorePage() {
       tint: 'yellow' as IconTint,
       label: t('more.catalog'),
       visible: can(Permission.PRODUCTS_VIEW),
+    },
+    {
+      href: '/admin',
+      icon: ShieldUser,
+      tint: 'indigo' as IconTint,
+      label: t('admin.title'),
+      visible: Boolean(isAdmin.data),
     },
   ].filter((link) => link.visible);
 

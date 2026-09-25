@@ -1,7 +1,8 @@
 import { Body, Controller, Get, HttpStatus, Patch } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ErrorCode, Permission } from '@myshop/shared';
+import { companyNameKey, ErrorCode, Permission } from '@myshop/shared';
 import type { AuthContext } from '../auth/auth-context.js';
+import { AllowWithoutSubscription } from '../auth/decorators/allow-without-subscription.decorator.js';
 import { CurrentAuth } from '../auth/decorators/current-auth.decorator.js';
 import { RequirePermissions } from '../auth/decorators/require-permissions.decorator.js';
 import { AppException } from '../common/errors/app.exception.js';
@@ -25,6 +26,7 @@ export class CompaniesController {
   constructor(private readonly prisma: PrismaService) {}
 
   @Get('current')
+  @AllowWithoutSubscription()
   @ApiOperation({ summary: 'Текущая компания пользователя' })
   async current(@CurrentAuth() ctx: AuthContext) {
     const company = await this.prisma.company.findUnique({
@@ -45,9 +47,10 @@ export class CompaniesController {
   @RequirePermissions(Permission.COMPANY_MANAGE)
   @ApiOperation({ summary: 'Изменить настройки компании (только владелец)' })
   update(@CurrentAuth() ctx: AuthContext, @Body() dto: UpdateCompanyDto) {
+    // Название — ключ входа сотрудников, поэтому уникально (DUPLICATE_COMPANY_NAME)
     return this.prisma.company.update({
       where: { id: ctx.companyId },
-      data: dto,
+      data: { ...dto, ...(dto.name ? { nameKey: companyNameKey(dto.name) } : {}) },
       select: companySelect,
     });
   }

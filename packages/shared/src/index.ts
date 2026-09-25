@@ -11,3 +11,4 @@ export * from './finance.js';
 export * from './product.js';
 export * from './roles.js';
 export * from './stock-movement-type.js';
+export * from './subscription.js';

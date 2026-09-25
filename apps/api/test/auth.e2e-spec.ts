@@ -80,31 +80,6 @@ describe('Auth (e2e)', () => {
     });
   });
 
-  describe('POST /api/auth/telegram/register', () => {
-    it('creates company, first branch and owner in one step', async () => {
-      const telegramId = nextTelegramId();
-      const res = await http()
-        .post('/api/auth/telegram/register')
-        .send({
-          initData: initDataFor(telegramId),
-          companyName: 'Techno House',
-          branchName: 'Chilanzar',
-        })
-        .expect(201);
-      const body = res.body as AuthResponse;
-      expect(body.me.company.name).toBe('Techno House');
-      expect(body.me.role).toBe('OWNER');
-      expect(body.me.allBranches).toBe(true);
-      expect(body.me.branches.map((b) => b.name)).toEqual(['Chilanzar']);
-
-      const again = await http()
-        .post('/api/auth/telegram/register')
-        .send({ initData: initDataFor(telegramId), companyName: 'Second' })
-        .expect(409);
-      expect(again.body.error.code).toBe('ALREADY_REGISTERED');
-    });
-  });
-
   describe('protected endpoints', () => {
     it('require a valid bearer token', async () => {
       const noToken = await http().get('/api/auth/me').expect(401);

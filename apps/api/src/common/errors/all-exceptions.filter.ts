@@ -43,6 +43,9 @@ const UNIQUE_CONSTRAINT_CODES: Record<string, ErrorCode> = {
   suppliers_company_id_name_key: ErrorCode.DUPLICATE_SUPPLIER,
   customers_company_id_phone_key: ErrorCode.DUPLICATE_CUSTOMER_PHONE,
   users_telegram_id_key: ErrorCode.TELEGRAM_ID_TAKEN,
+  users_email_key: ErrorCode.EMAIL_TAKEN,
+  companies_name_key_key: ErrorCode.DUPLICATE_COMPANY_NAME,
+  memberships_company_id_login_key: ErrorCode.LOGIN_TAKEN,
 };
 
 /** Имя нарушенного unique-индекса (driver adapter) или список полей (классический движок). */
