@@ -32,6 +32,10 @@ const saleInclude = {
   customer: { select: { id: true, name: true, phone: true } },
   seller: person,
   payments: { orderBy: { createdAt: 'asc' } },
+  returns: {
+    orderBy: { createdAt: 'asc' },
+    select: { id: true, number: true, date: true, refundTotal: true },
+  },
   items: {
     orderBy: { createdAt: 'asc' },
     include: {
@@ -43,7 +47,9 @@ const saleInclude = {
           product: { select: { id: true, name: true, serialType: true, warrantyMonths: true } },
         },
       },
-      serialNumbers: { select: { id: true, number: true, type: true, warrantyEnd: true } },
+      serialNumbers: {
+        select: { id: true, number: true, type: true, status: true, warrantyEnd: true },
+      },
     },
   },
 } satisfies Prisma.SaleInclude;
@@ -63,11 +69,17 @@ function toResponse(sale: SaleWithRelations, ctx: AuthContext) {
     costTotal: showCost ? sale.costTotal.toFixed(2) : undefined,
     grossProfit: showCost ? sale.total.sub(sale.costTotal).toFixed(2) : undefined,
     payments: sale.payments.map((p) => ({ ...p, amount: p.amount.toFixed(2) })),
+    returns: sale.returns.map((r) => ({
+      ...r,
+      displayNumber: formatDocumentNumber(DocumentPrefix.RETURN, r.number),
+      refundTotal: r.refundTotal.toFixed(2),
+    })),
     items: sale.items.map(({ unitCost, ...item }) => ({
       ...item,
       price: item.price.toFixed(2),
       discount: item.discount.toFixed(2),
       total: item.total.toFixed(2),
+      refundedAmount: item.refundedAmount.toFixed(2),
       unitCost: showCost ? unitCost.toFixed(2) : undefined,
     })),
   };

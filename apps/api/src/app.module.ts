@@ -10,12 +10,16 @@ import { CompaniesModule } from './companies/companies.module.js';
 import { CustomersModule } from './customers/customers.js';
 import { type Env, validateEnv } from './config/env.js';
 import { HealthModule } from './health/health.module.js';
+import { InventoriesModule } from './inventories/inventories.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { PurchasesModule } from './purchases/purchases.module.js';
+import { ReturnsModule } from './returns/returns.js';
 import { SalesModule } from './sales/sales.module.js';
 import { StockModule } from './stock/stock.module.js';
 import { SuppliersModule } from './suppliers/suppliers.js';
+import { TransfersModule } from './transfers/transfers.js';
 import { UsersModule } from './users/users.module.js';
+import { WriteOffsModule } from './write-offs/write-offs.js';
 
 @Module({
   imports: [
@@ -53,6 +57,10 @@ import { UsersModule } from './users/users.module.js';
     PurchasesModule,
     CustomersModule,
     SalesModule,
+    ReturnsModule,
+    TransfersModule,
+    WriteOffsModule,
+    InventoriesModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

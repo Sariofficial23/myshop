@@ -427,6 +427,14 @@
     "PRICE_REQUIRED": "Mahsulotning sotuv narxi yo'q — narxni kiriting.",
     "PRICE_CHANGE_FORBIDDEN": "Narxni faqat menejer yoki egasi o'zgartira oladi.",
     "DISCOUNT_TOO_LARGE": "Chegirma mahsulot summasidan katta bo‘lishi mumkin emas.",
-    "INSTALLMENT_NOT_AVAILABLE": "Muddatli to'lov hozircha mavjud emas."
+    "INSTALLMENT_NOT_AVAILABLE": "Muddatli to'lov hozircha mavjud emas.",
+    "RETURN_NOT_FOUND": "Qaytarish topilmadi.",
+    "SALE_ITEM_NOT_FOUND": "Bu chekda bunday mahsulot yo'q.",
+    "TRANSFER_NOT_FOUND": "Ko'chirish topilmadi.",
+    "SAME_BRANCH_TRANSFER": "Boshqa qabul qiluvchi filialni tanlang.",
+    "WRITE_OFF_NOT_FOUND": "Hisobdan chiqarish topilmadi.",
+    "INVENTORY_NOT_FOUND": "Inventarizatsiya topilmadi.",
+    "SERIAL_NOT_IN_STOCK": "IMEI / seriya raqami bu filialda mavjud deb hisoblanmaydi.",
+    "DUPLICATE_DOCUMENT_ITEM": "Mahsulot hujjatga ikki marta qo'shilgan."
   }
 }

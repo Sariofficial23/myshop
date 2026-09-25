@@ -20,9 +20,13 @@ export interface MovementInput {
   unitCost?: Prisma.Decimal | string;
   purchaseId?: string;
   saleId?: string;
+  returnId?: string;
+  transferId?: string;
+  writeOffId?: string;
+  inventoryId?: string;
 }
 
-interface LockedBalance {
+export interface LockedBalance {
   quantity: number;
   avg_cost: Prisma.Decimal;
 }
@@ -40,16 +44,7 @@ export class StockService {
       throw new Error('Movement quantity must be a non-zero integer');
     }
 
-    // Строка остатка создаётся при необходимости и блокируется до конца транзакции
-    await tx.$executeRaw`
-      INSERT INTO stock_balances (company_id, branch_id, variant_id, quantity, avg_cost, updated_at)
-      VALUES (${ctx.companyId}::uuid, ${input.branchId}::uuid, ${input.variantId}::uuid, 0, 0, now())
-      ON CONFLICT (branch_id, variant_id) DO NOTHING`;
-    const [locked] = await tx.$queryRaw<LockedBalance[]>`
-      SELECT quantity, avg_cost FROM stock_balances
-      WHERE branch_id = ${input.branchId}::uuid AND variant_id = ${input.variantId}::uuid
-      FOR UPDATE`;
-    if (!locked) throw new Error('Stock balance row was not created');
+    const locked = await this.lockBalance(tx, ctx, input.branchId, input.variantId);
 
     const balanceAfter = nextBalance(locked.quantity, input.quantity);
     if (balanceAfter === null) {
@@ -86,9 +81,35 @@ export class StockService {
         unitCost: input.unitCost ?? (input.quantity < 0 ? locked.avg_cost : undefined),
         purchaseId: input.purchaseId,
         saleId: input.saleId,
+        returnId: input.returnId,
+        transferId: input.transferId,
+        writeOffId: input.writeOffId,
+        inventoryId: input.inventoryId,
         createdById: ctx.userId,
       },
     });
+  }
+
+  /**
+   * Блокирует строку остатка до конца транзакции (создаёт её при необходимости).
+   * Инвентаризация читает остаток под блокировкой, чтобы посчитать расхождение без гонок.
+   */
+  async lockBalance(
+    tx: Prisma.TransactionClient,
+    ctx: AuthContext,
+    branchId: string,
+    variantId: string,
+  ): Promise<LockedBalance> {
+    await tx.$executeRaw`
+      INSERT INTO stock_balances (company_id, branch_id, variant_id, quantity, avg_cost, updated_at)
+      VALUES (${ctx.companyId}::uuid, ${branchId}::uuid, ${variantId}::uuid, 0, 0, now())
+      ON CONFLICT (branch_id, variant_id) DO NOTHING`;
+    const [locked] = await tx.$queryRaw<LockedBalance[]>`
+      SELECT quantity, avg_cost FROM stock_balances
+      WHERE branch_id = ${branchId}::uuid AND variant_id = ${variantId}::uuid
+      FOR UPDATE`;
+    if (!locked) throw new Error('Stock balance row was not created');
+    return locked;
   }
 
   /** Остатки в доступных филиалах. lowOnly — только "заканчивается" (≤ минимального остатка). */
@@ -164,6 +185,10 @@ export class StockService {
         createdBy: { select: { id: true, firstName: true, lastName: true } },
         purchase: { select: { id: true, number: true } },
         sale: { select: { id: true, number: true } },
+        return: { select: { id: true, number: true } },
+        transfer: { select: { id: true, number: true } },
+        writeOff: { select: { id: true, number: true } },
+        inventory: { select: { id: true, number: true } },
       },
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       take: 200,

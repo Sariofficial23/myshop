@@ -50,6 +50,11 @@ model Company {
   customers        Customer[]
   sales            Sale[]
   payments         Payment[]
+  returns          SaleReturn[]
+  refunds          Refund[]
+  transfers        Transfer[]
+  writeOffs        WriteOff[]
+  inventories      Inventory[]
 
   @@index([createdAt])
   @@map("companies")
@@ -73,6 +78,11 @@ model Branch {
   stockMovements     StockMovement[]
   stockBalances      StockBalance[]
   sales              Sale[]
+  returns            SaleReturn[]
+  transfersOut       Transfer[]         @relation("TransferFrom")
+  transfersIn        Transfer[]         @relation("TransferTo")
+  writeOffs          WriteOff[]
+  inventories        Inventory[]
 
   @@unique([companyId, name])
   @@index([companyId, isActive])
@@ -101,14 +111,20 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  memberships        Membership[]
-  sessions           Session[]
-  purchasesCreated   Purchase[]      @relation("PurchaseCreatedBy")
-  purchasesConfirmed Purchase[]      @relation("PurchaseConfirmedBy")
-  stockMovements     StockMovement[]
-  auditLogs          AuditLog[]
-  sales              Sale[]          @relation("SaleSeller")
-  paymentsReceived   Payment[]
+  memberships          Membership[]
+  sessions             Session[]
+  purchasesCreated     Purchase[]      @relation("PurchaseCreatedBy")
+  purchasesConfirmed   Purchase[]      @relation("PurchaseConfirmedBy")
+  stockMovements       StockMovement[]
+  auditLogs            AuditLog[]
+  sales                Sale[]          @relation("SaleSeller")
+  paymentsReceived     Payment[]
+  returnsCreated       SaleReturn[]    @relation("ReturnCreatedBy")
+  refundsPaid          Refund[]        @relation("RefundPaidBy")
+  transfersCreated     Transfer[]      @relation("TransferCreatedBy")
+  writeOffsCreated     WriteOff[]      @relation("WriteOffCreatedBy")
+  inventoriesCreated   Inventory[]     @relation("InventoryCreatedBy")
+  inventoriesConfirmed Inventory[]     @relation("InventoryConfirmedBy")
 
   @@index([phone])
   @@map("users")
@@ -298,6 +314,10 @@ model ProductVariant {
   stockMovements StockMovement[]
   stockBalances  StockBalance[]
   saleItems      SaleItem[]
+  returnItems    ReturnItem[]
+  transferItems  TransferItem[]
+  writeOffItems  WriteOffItem[]
+  inventoryItems InventoryItem[]
 
   @@unique([companyId, sku])
   @@index([productId])
@@ -480,6 +500,10 @@ model StockMovement {
   unitCost     Decimal?          @map("unit_cost") @db.Decimal(14, 2)
   purchaseId   String?           @map("purchase_id") @db.Uuid
   saleId       String?           @map("sale_id") @db.Uuid
+  returnId     String?           @map("return_id") @db.Uuid
+  transferId   String?           @map("transfer_id") @db.Uuid
+  writeOffId   String?           @map("write_off_id") @db.Uuid
+  inventoryId  String?           @map("inventory_id") @db.Uuid
   createdById  String            @map("created_by_id") @db.Uuid
   createdAt    DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
 
@@ -488,12 +512,20 @@ model StockMovement {
   variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
   purchase  Purchase?      @relation(fields: [purchaseId], references: [id], onDelete: Restrict)
   sale      Sale?          @relation(fields: [saleId], references: [id], onDelete: Restrict)
+  return    SaleReturn?    @relation(fields: [returnId], references: [id], onDelete: Restrict)
+  transfer  Transfer?      @relation(fields: [transferId], references: [id], onDelete: Restrict)
+  writeOff  WriteOff?      @relation(fields: [writeOffId], references: [id], onDelete: Restrict)
+  inventory Inventory?     @relation(fields: [inventoryId], references: [id], onDelete: Restrict)
   createdBy User           @relation(fields: [createdById], references: [id], onDelete: Restrict)
 
   @@index([companyId, createdAt])
   @@index([variantId, branchId, createdAt])
   @@index([purchaseId])
   @@index([saleId])
+  @@index([returnId])
+  @@index([transferId])
+  @@index([writeOffId])
+  @@index([inventoryId])
   @@map("stock_movements")
 }
 
@@ -626,6 +658,7 @@ model Sale {
   payments       Payment[]
   serialNumbers  SerialNumber[]
   stockMovements StockMovement[]
+  returns        SaleReturn[]
 
   @@unique([companyId, number])
   @@index([companyId, date])
@@ -636,23 +669,28 @@ model Sale {
 }
 
 model SaleItem {
-  id        String   @id @default(uuid()) @db.Uuid
-  saleId    String   @map("sale_id") @db.Uuid
-  variantId String   @map("variant_id") @db.Uuid
-  quantity  Int
+  id               String   @id @default(uuid()) @db.Uuid
+  saleId           String   @map("sale_id") @db.Uuid
+  variantId        String   @map("variant_id") @db.Uuid
+  quantity         Int
   /// Цена за единицу до скидки.
-  price     Decimal  @db.Decimal(14, 2)
+  price            Decimal  @db.Decimal(14, 2)
   /// Скидка на строку (сумма).
-  discount  Decimal  @default(0) @db.Decimal(14, 2)
+  discount         Decimal  @default(0) @db.Decimal(14, 2)
   /// quantity × price − discount.
-  total     Decimal  @db.Decimal(14, 2)
+  total            Decimal  @db.Decimal(14, 2)
   /// Себестоимость единицы на момент продажи.
-  unitCost  Decimal  @map("unit_cost") @db.Decimal(14, 2)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  unitCost         Decimal  @map("unit_cost") @db.Decimal(14, 2)
+  /// Сколько единиц уже возвращено (не больше quantity — CHECK в БД).
+  returnedQuantity Int      @default(0) @map("returned_quantity")
+  /// Сколько денег уже возвращено по строке (не больше total).
+  refundedAmount   Decimal  @default(0) @map("refunded_amount") @db.Decimal(14, 2)
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
   sale          Sale           @relation(fields: [saleId], references: [id], onDelete: Restrict)
   variant       ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
   serialNumbers SerialNumber[]
+  returnItems   ReturnItem[]
 
   @@index([saleId])
   @@index([variantId])
@@ -675,4 +713,212 @@ model Payment {
   @@index([companyId, createdAt])
   @@index([saleId])
   @@map("payments")
+}
+
+// ─────────────── Возвраты, перемещения, списания, инвентаризация (этап 6) ───────────────
+
+/// Возврат по продаже. Создаётся сразу проведённым: товар возвращается на склад филиала продажи.
+model SaleReturn {
+  id          String   @id @default(uuid()) @db.Uuid
+  companyId   String   @map("company_id") @db.Uuid
+  branchId    String   @map("branch_id") @db.Uuid
+  saleId      String   @map("sale_id") @db.Uuid
+  number      Int
+  date        DateTime @default(now()) @db.Timestamptz(3)
+  reason      String?  @db.Text
+  /// Сумма, возвращённая клиенту.
+  refundTotal Decimal  @map("refund_total") @db.Decimal(14, 2)
+  /// Себестоимость возвращённого товара (уменьшает себестоимость продаж в отчётах).
+  costTotal   Decimal  @map("cost_total") @db.Decimal(14, 2)
+  createdById String   @map("created_by_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company        Company         @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  branch         Branch          @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  sale           Sale            @relation(fields: [saleId], references: [id], onDelete: Restrict)
+  createdBy      User            @relation("ReturnCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  items          ReturnItem[]
+  refunds        Refund[]
+  stockMovements StockMovement[]
+
+  @@unique([companyId, number])
+  @@index([companyId, date])
+  @@index([saleId])
+  @@map("returns")
+}
+
+model ReturnItem {
+  id            String   @id @default(uuid()) @db.Uuid
+  returnId      String   @map("return_id") @db.Uuid
+  saleItemId    String   @map("sale_item_id") @db.Uuid
+  variantId     String   @map("variant_id") @db.Uuid
+  quantity      Int
+  /// Сумма возврата по строке.
+  amount        Decimal  @db.Decimal(14, 2)
+  unitCost      Decimal  @map("unit_cost") @db.Decimal(14, 2)
+  serialNumbers String[] @default([]) @map("serial_numbers")
+
+  return   SaleReturn     @relation(fields: [returnId], references: [id], onDelete: Restrict)
+  saleItem SaleItem       @relation(fields: [saleItemId], references: [id], onDelete: Restrict)
+  variant  ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+
+  @@index([returnId])
+  @@index([saleItemId])
+  @@map("return_items")
+}
+
+/// Выплата клиенту при возврате.
+model Refund {
+  id        String        @id @default(uuid()) @db.Uuid
+  companyId String        @map("company_id") @db.Uuid
+  returnId  String        @map("return_id") @db.Uuid
+  method    PaymentMethod
+  amount    Decimal       @db.Decimal(14, 2)
+  paidById  String        @map("paid_by_id") @db.Uuid
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company Company    @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  return  SaleReturn @relation(fields: [returnId], references: [id], onDelete: Restrict)
+  paidBy  User       @relation("RefundPaidBy", fields: [paidById], references: [id], onDelete: Restrict)
+
+  @@index([companyId, createdAt])
+  @@index([returnId])
+  @@map("refunds")
+}
+
+/// Перемещение между филиалами. Проводится сразу: TRANSFER_OUT из одного, TRANSFER_IN в другой.
+model Transfer {
+  id           String   @id @default(uuid()) @db.Uuid
+  companyId    String   @map("company_id") @db.Uuid
+  fromBranchId String   @map("from_branch_id") @db.Uuid
+  toBranchId   String   @map("to_branch_id") @db.Uuid
+  number       Int
+  date         DateTime @default(now()) @db.Timestamptz(3)
+  notes        String?  @db.Text
+  createdById  String   @map("created_by_id") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company        Company         @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  fromBranch     Branch          @relation("TransferFrom", fields: [fromBranchId], references: [id], onDelete: Restrict)
+  toBranch       Branch          @relation("TransferTo", fields: [toBranchId], references: [id], onDelete: Restrict)
+  createdBy      User            @relation("TransferCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  items          TransferItem[]
+  stockMovements StockMovement[]
+
+  @@unique([companyId, number])
+  @@index([companyId, date])
+  @@index([fromBranchId])
+  @@index([toBranchId])
+  @@map("transfers")
+}
+
+model TransferItem {
+  id            String   @id @default(uuid()) @db.Uuid
+  transferId    String   @map("transfer_id") @db.Uuid
+  variantId     String   @map("variant_id") @db.Uuid
+  quantity      Int
+  /// Себестоимость единицы на момент перемещения.
+  unitCost      Decimal  @map("unit_cost") @db.Decimal(14, 2)
+  serialNumbers String[] @default([]) @map("serial_numbers")
+
+  transfer Transfer       @relation(fields: [transferId], references: [id], onDelete: Restrict)
+  variant  ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+
+  @@index([transferId])
+  @@map("transfer_items")
+}
+
+/// Причина списания.
+enum WriteOffReason {
+  DEFECT
+  DAMAGE
+  LOSS
+  OTHER
+}
+
+/// Списание (брак, порча, утеря). Проводится сразу.
+model WriteOff {
+  id          String         @id @default(uuid()) @db.Uuid
+  companyId   String         @map("company_id") @db.Uuid
+  branchId    String         @map("branch_id") @db.Uuid
+  number      Int
+  date        DateTime       @default(now()) @db.Timestamptz(3)
+  reason      WriteOffReason
+  notes       String?        @db.Text
+  costTotal   Decimal        @map("cost_total") @db.Decimal(14, 2)
+  createdById String         @map("created_by_id") @db.Uuid
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company        Company         @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  branch         Branch          @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  createdBy      User            @relation("WriteOffCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  items          WriteOffItem[]
+  stockMovements StockMovement[]
+
+  @@unique([companyId, number])
+  @@index([companyId, date])
+  @@map("write_offs")
+}
+
+model WriteOffItem {
+  id            String   @id @default(uuid()) @db.Uuid
+  writeOffId    String   @map("write_off_id") @db.Uuid
+  variantId     String   @map("variant_id") @db.Uuid
+  quantity      Int
+  unitCost      Decimal  @map("unit_cost") @db.Decimal(14, 2)
+  serialNumbers String[] @default([]) @map("serial_numbers")
+
+  writeOff WriteOff       @relation(fields: [writeOffId], references: [id], onDelete: Restrict)
+  variant  ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+
+  @@index([writeOffId])
+  @@map("write_off_items")
+}
+
+/// Инвентаризация: черновик с подсчётом → проведение (корректировка остатков до факта).
+model Inventory {
+  id            String         @id @default(uuid()) @db.Uuid
+  companyId     String         @map("company_id") @db.Uuid
+  branchId      String         @map("branch_id") @db.Uuid
+  number        Int
+  status        DocumentStatus @default(DRAFT)
+  notes         String?        @db.Text
+  createdById   String         @map("created_by_id") @db.Uuid
+  confirmedById String?        @map("confirmed_by_id") @db.Uuid
+  confirmedAt   DateTime?      @map("confirmed_at") @db.Timestamptz(3)
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  company        Company         @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  branch         Branch          @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  createdBy      User            @relation("InventoryCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  confirmedBy    User?           @relation("InventoryConfirmedBy", fields: [confirmedById], references: [id], onDelete: Restrict)
+  items          InventoryItem[]
+  stockMovements StockMovement[]
+
+  @@unique([companyId, number])
+  @@index([companyId, createdAt])
+  @@index([branchId, status])
+  @@map("inventories")
+}
+
+model InventoryItem {
+  id               String   @id @default(uuid()) @db.Uuid
+  inventoryId      String   @map("inventory_id") @db.Uuid
+  variantId        String   @map("variant_id") @db.Uuid
+  /// Фактическое количество (для товаров с IMEI = число отсканированных номеров).
+  countedQuantity  Int      @map("counted_quantity")
+  /// Отсканированные IMEI / серийные номера.
+  serialNumbers    String[] @default([]) @map("serial_numbers")
+  /// Учётный остаток на момент проведения.
+  expectedQuantity Int?     @map("expected_quantity")
+  /// Номера, которые числились, но не найдены (списываются при проведении).
+  missingSerials   String[] @default([]) @map("missing_serials")
+  unitCost         Decimal? @map("unit_cost") @db.Decimal(14, 2)
+
+  inventory Inventory      @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+
+  @@unique([inventoryId, variantId])
+  @@map("inventory_items")
 }

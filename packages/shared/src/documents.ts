@@ -13,7 +13,23 @@ export const DOCUMENT_STATUSES: readonly DocumentStatus[] = Object.values(Docume
 export const DocumentPrefix = {
   PURCHASE: 'ПР',
   SALE: 'ПД',
+  RETURN: 'ВЗ',
+  TRANSFER: 'ПМ',
+  WRITE_OFF: 'СП',
+  INVENTORY: 'ИН',
 } as const;
+
+/** Причина списания. */
+export const WriteOffReason = {
+  DEFECT: 'DEFECT',
+  DAMAGE: 'DAMAGE',
+  LOSS: 'LOSS',
+  OTHER: 'OTHER',
+} as const;
+
+export type WriteOffReason = (typeof WriteOffReason)[keyof typeof WriteOffReason];
+
+export const WRITE_OFF_REASONS: readonly WriteOffReason[] = Object.values(WriteOffReason);
 
 export function formatDocumentNumber(prefix: string, number: number): string {
   return `${prefix}-${number}`;

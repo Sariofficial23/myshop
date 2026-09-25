@@ -427,6 +427,14 @@
     "PRICE_REQUIRED": "У товара нет цены продажи — укажите цену.",
     "PRICE_CHANGE_FORBIDDEN": "Изменять цену может только менеджер или владелец.",
     "DISCOUNT_TOO_LARGE": "Скидка не может быть больше суммы товара.",
-    "INSTALLMENT_NOT_AVAILABLE": "Рассрочка пока недоступна."
+    "INSTALLMENT_NOT_AVAILABLE": "Рассрочка пока недоступна.",
+    "RETURN_NOT_FOUND": "Возврат не найден.",
+    "SALE_ITEM_NOT_FOUND": "Такого товара нет в этом чеке.",
+    "TRANSFER_NOT_FOUND": "Перемещение не найдено.",
+    "SAME_BRANCH_TRANSFER": "Выберите другой филиал-получатель.",
+    "WRITE_OFF_NOT_FOUND": "Списание не найдено.",
+    "INVENTORY_NOT_FOUND": "Инвентаризация не найдена.",
+    "SERIAL_NOT_IN_STOCK": "IMEI / серийный номер не числится в наличии этого филиала.",
+    "DUPLICATE_DOCUMENT_ITEM": "Товар добавлен в документ дважды."
   }
 }
