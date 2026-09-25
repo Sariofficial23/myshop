@@ -64,6 +64,22 @@ export const envSchema = z.object({
         .filter(Boolean),
     )
     .pipe(z.array(z.string().regex(/^\d{1,20}$/, 'PLATFORM_ADMIN_TELEGRAM_IDS: only digits'))),
+  // ── Keep-alive ──────────────────────────────────────────────
+  /**
+   * Бесплатный Render усыпляет сервис после 15 минут без входящих запросов.
+   * Сервер сам обращается к своему публичному адресу, чтобы не засыпать.
+   * Адрес: KEEP_ALIVE_URL, иначе RENDER_EXTERNAL_URL (Render задаёт его сам).
+   */
+  KEEP_ALIVE_ENABLED: booleanString.default(true),
+  KEEP_ALIVE_URL: z
+    .url()
+    .optional()
+    .or(z.literal('').transform(() => undefined)),
+  RENDER_EXTERNAL_URL: z
+    .url()
+    .optional()
+    .or(z.literal('').transform(() => undefined)),
+  KEEP_ALIVE_INTERVAL_MINUTES: z.coerce.number().int().min(1).max(14).default(10),
   /** Вход без Telegram по демо-пользователям. Только для локальной разработки. */
   AUTH_DEV_LOGIN_ENABLED: booleanString.default(false),
 });
