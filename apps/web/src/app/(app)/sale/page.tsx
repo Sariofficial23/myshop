@@ -17,6 +17,7 @@ import { useCan, useMe } from '@/lib/auth/auth-provider';
 import { parseMoneyInput } from '@/lib/format/money';
 import { useMoney } from '@/lib/hooks/use-money';
 import {
+  buildInstallment,
   buildPayments,
   cartTotals,
   fromCents,
@@ -34,7 +35,8 @@ interface Line extends PickedVariant {
   serials: string[];
 }
 
-const PAYMENT_MODES: readonly PaymentMode[] = [...PAYMENT_METHODS, 'MIXED'];
+type SaleMode = PaymentMode | 'INSTALLMENT';
+const PAYMENT_MODES: readonly SaleMode[] = [...PAYMENT_METHODS, 'MIXED', 'INSTALLMENT'];
 
 function lineQuantity(line: Line): number {
   return line.product.serialType ? line.serials.length : Math.max(0, Number(line.quantity) || 0);
@@ -69,7 +71,11 @@ export default function SalePage() {
   const [branchId, setBranchId] = useState(me.branches[0]?.id ?? '');
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [lines, setLines] = useState<Line[]>([]);
-  const [mode, setMode] = useState<PaymentMode>('CASH');
+  const [mode, setMode] = useState<SaleMode>('CASH');
+  const [months, setMonths] = useState('6');
+  const [downPayment, setDownPayment] = useState('');
+  const [downMethod, setDownMethod] = useState<PaymentMethod>('CASH');
+  const [firstDueDate, setFirstDueDate] = useState('');
   const [mixed, setMixed] = useState<Partial<Record<PaymentMethod, string>>>({});
   const [showErrors, setShowErrors] = useState(false);
 
@@ -99,10 +105,20 @@ export default function SalePage() {
   );
 
   const totals = cartTotals(lines.map(lineAmounts));
-  const payments = buildPayments(mode, totals.total, mixed);
+  const installment =
+    mode === 'INSTALLMENT' ? buildInstallment(totals.total, downPayment, downMethod, months) : null;
+  const payments =
+    mode === 'INSTALLMENT'
+      ? (installment?.payments ?? null)
+      : buildPayments(mode, totals.total, mixed);
   const remainder = mixedRemainder(totals.total, mixed);
+  const installmentOk = mode !== 'INSTALLMENT' || (!!installment && !!customer);
   const valid =
-    branchId !== '' && lines.length > 0 && lines.every((l) => !lineProblem(l)) && !!payments;
+    branchId !== '' &&
+    lines.length > 0 &&
+    lines.every((l) => !lineProblem(l)) &&
+    !!payments &&
+    installmentOk;
 
   const sell = useMutation({
     mutationFn: () =>
@@ -123,6 +139,14 @@ export default function SalePage() {
           };
         }),
         payments: payments ?? [],
+        ...(installment
+          ? {
+              installment: {
+                months: installment.months,
+                ...(firstDueDate ? { firstDueDate } : {}),
+              },
+            }
+          : {}),
       }),
     onSuccess: async (sale) => {
       await Promise.all(
@@ -237,6 +261,59 @@ export default function SalePage() {
                       ? t('sale.mixedLeft', { value: money(fromCents(remainder)) })
                       : t('sale.mixedOver', { value: money(fromCents(-remainder)) })}
                 </p>
+              </div>
+            ) : null}
+            {mode === 'INSTALLMENT' ? (
+              <div className="mt-3 flex flex-col gap-3">
+                {!customer ? (
+                  <p className="text-sm font-medium text-red-600">
+                    {t('sale.installmentCustomer')}
+                  </p>
+                ) : null}
+                <div className="grid grid-cols-2 gap-3">
+                  <TextField
+                    label={t('sale.months')}
+                    type="number"
+                    min={1}
+                    max={60}
+                    inputMode="numeric"
+                    value={months}
+                    onChange={(e) => setMonths(e.target.value)}
+                  />
+                  <TextField
+                    label={t('sale.firstDueDate')}
+                    type="date"
+                    value={firstDueDate}
+                    onChange={(e) => setFirstDueDate(e.target.value)}
+                  />
+                </div>
+                <TextField
+                  label={t('sale.downPayment')}
+                  inputMode="decimal"
+                  placeholder="0"
+                  value={downPayment}
+                  onChange={(e) => setDownPayment(e.target.value)}
+                />
+                <SelectField
+                  label={t('sale.downPaymentMethod')}
+                  value={downMethod}
+                  onChange={(e) => setDownMethod(e.target.value as PaymentMethod)}
+                  options={PAYMENT_METHODS.map((m) => ({
+                    value: m,
+                    label: t(`paymentMethod.${m}`),
+                  }))}
+                />
+                {installment ? (
+                  <p className="rounded-2xl bg-brand-50 p-3 text-sm text-brand-800">
+                    {t('sale.installmentPlan', {
+                      debt: money(fromCents(installment.debtCents)),
+                      months: installment.months,
+                      monthly: money(fromCents(installment.monthlyCents)),
+                    })}
+                  </p>
+                ) : (
+                  <p className="text-sm text-red-600">{t('sale.installmentInvalid')}</p>
+                )}
               </div>
             ) : null}
           </Card>

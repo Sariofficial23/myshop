@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildInstallment,
   buildPayments,
   cartTotals,
   fromCents,
@@ -49,5 +50,20 @@ describe('cart math', () => {
     expect(buildPayments('MIXED', 100_000, { CASH: 'abc' })).toBeNull();
     expect(mixedRemainder(100_000, { CASH: '600', CARD: '300' })).toBe(10_000);
     expect(mixedRemainder(100_000, { CASH: '1100' })).toBe(-10_000);
+  });
+
+  it('installment: down payment below the total, monthly amount rounded up', () => {
+    expect(buildInstallment(1_000_00, '', 'CASH', '3')).toEqual({
+      payments: [],
+      debtCents: 1_000_00,
+      monthlyCents: 33_334,
+      months: 3,
+    });
+    expect(buildInstallment(1_000_00, '200', 'CARD', '4')?.payments).toEqual([
+      { method: 'CARD', amount: '200' },
+    ]);
+    expect(buildInstallment(1_000_00, '1000', 'CASH', '4')).toBeNull();
+    expect(buildInstallment(1_000_00, '', 'CASH', '0')).toBeNull();
+    expect(buildInstallment(1_000_00, 'abc', 'CASH', '6')).toBeNull();
   });
 });

@@ -46,11 +46,12 @@
     "roleIn": "{role} · {company}",
     "yourBranches": "Filiallaringiz",
     "allBranches": "Kompaniyaning barcha filiallari",
-    "stageNotice": "Tayyor: kirish, xodimlar, katalog, kirimlar, qoldiqlar, sotuvlar, qaytarishlar, ko'chirishlar, hisobdan chiqarish va inventarizatsiya. Kassa, muddatli to'lov va kafolatlar — keyingi bosqichda.",
+    "stageNotice": "Tayyor: sotuvlar, ombor, qaytarishlar, ko'chirishlar, inventarizatsiya, kassa, muddatli to'lov va kafolat. Dashbord va hisobotlar — keyingi bosqichda.",
     "quickActions": "Tezkor amallar",
     "newPurchase": "Kirim",
     "lowStock": "Tugayapti: {count}",
-    "newSale": "Sotuv"
+    "newSale": "Sotuv",
+    "overdueInstallments": "Muddati o'tgan: {count}"
   },
   "system": {
     "title": "Tizim holati",
@@ -72,7 +73,10 @@
     "telegramId": "Telegram ID: {id}",
     "catalog": "Kategoriyalar va brendlar",
     "suppliers": "Yetkazib beruvchilar",
-    "customers": "Mijozlar"
+    "customers": "Mijozlar",
+    "cash": "Kassa",
+    "installments": "Muddatli to'lovlar",
+    "warranty": "Kafolat"
   },
   "company": {
     "title": "Kompaniya",
@@ -231,7 +235,10 @@
     "name": "Nomi",
     "phone": "Telefon",
     "contact": "Aloqa uchun shaxs",
-    "empty": "Hozircha yetkazib beruvchilar yo‘q"
+    "empty": "Hozircha yetkazib beruvchilar yo‘q",
+    "purchasesCount": "Kirimlar",
+    "totalPurchased": "Summa",
+    "lastPurchase": "Oxirgi kirim: {date}"
   },
   "catalog": {
     "title": "Kategoriyalar va brendlar",
@@ -327,7 +334,14 @@
     "warrantyUntil": "kafolat {date} gacha",
     "paid": "To'landi",
     "profit": "Yalpi foyda",
-    "newSale": "Yangi sotuv"
+    "newSale": "Yangi sotuv",
+    "installmentCustomer": "Muddatli to'lov uchun yuqorida mijozni tanlang yoki yarating",
+    "months": "Muddat, oy",
+    "firstDueDate": "Birinchi to'lov",
+    "downPayment": "Boshlang'ich to'lov",
+    "downPaymentMethod": "Boshlang'ich to'lov usuli",
+    "installmentPlan": "{months} oyga {debt} — oyiga taxminan {monthly}",
+    "installmentInvalid": "Boshlang'ich to'lov summadan kam, muddat 1 dan 60 oygacha bo'lishi kerak"
   },
   "sales": {
     "title": "Sotuvlar",
@@ -347,7 +361,15 @@
     "cancel": "Bekor qilish",
     "save": "Saqlash",
     "notFound": "Mijoz topilmadi",
-    "add": "+ Yangi mijoz"
+    "add": "+ Yangi mijoz",
+    "debt": "qarz {value}",
+    "purchases": "Xaridlar",
+    "totalSpent": "Xaridlar summasi",
+    "debtTitle": "Qarz",
+    "overdue": "Muddati o'tgan",
+    "lastPurchase": "Oxirgi xarid: {date}",
+    "history": "Xaridlar tarixi",
+    "noPurchases": "Hozircha xaridlar yo'q"
   },
   "paymentMethod": {
     "CASH": "Naqd",
@@ -451,6 +473,100 @@
     "returnedCount": "Qaytarildi: {count}",
     "returned": "qaytarilgan",
     "refundedTotal": "Mijozga qaytarildi"
+  },
+  "installments": {
+    "title": "Muddatli to'lovlar",
+    "filter_active": "Faol",
+    "filter_overdue": "Muddati o'tgan",
+    "filter_paid": "Yopilgan",
+    "totalDebt": "Mijozlar qarzi",
+    "totalOverdue": "Muddati o'tgan",
+    "empty": "Muddatli to'lovlar yo'q",
+    "nextDue": "keyingi to'lov {date}",
+    "overdueShort": "muddati o'tgan {value}",
+    "remaining": "To'lash qoldi",
+    "overdue": "Muddati o'tgan: {value}",
+    "forSale": "Chek {number}",
+    "terms": "{months} oyga {total}, oyiga {monthly}",
+    "reduced": "Qaytarish bilan kamaytirildi: {value}",
+    "acceptPayment": "To'lov qabul qilish",
+    "amount": "Summa",
+    "payNext": "Navbatdagi: {value}",
+    "payAll": "To'liq qoldiq",
+    "branch": "Filial kassasi",
+    "accept": "To'lovni qabul qilish",
+    "schedule": "To'lov jadvali",
+    "rowPaid": "to'langan",
+    "rowPartial": "{value} to'langan",
+    "rowLate": "muddati o'tgan",
+    "rowUpcoming": "kutilmoqda",
+    "payments": "To'lovlar",
+    "inSale": "{months} oyga muddatli to'lov",
+    "remainingShort": "Qoldi: {value}"
+  },
+  "installmentStatus": {
+    "ACTIVE": "Faol",
+    "PAID": "Yopilgan"
+  },
+  "cash": {
+    "title": "Kassa",
+    "date": "Kun",
+    "balance": "Kassadagi naqd pul",
+    "balanceHint": "Naqd sotuvlar va to'lovlar minus qaytarishlar, olib qo'yishlar va xarajatlar — butun davr uchun.",
+    "day": "Kunlik tushum",
+    "salesCash": "Sotuv — naqd",
+    "salesCard": "Sotuv — karta",
+    "salesTransfer": "Sotuv — o'tkazma",
+    "installments": "Muddatli to'lov to'lovlari",
+    "refunds": "Mijozlarga qaytarilgan",
+    "revenue": "Jami tushum",
+    "cashFlow": "Kunlik naqd pul",
+    "cashIn": "Kirgan naqd",
+    "cashOut": "Chiqqan naqd",
+    "newOperation": "Kassa operatsiyasi",
+    "amount": "Summa",
+    "reason": "Asos",
+    "reasonHint_DEPOSIT": "Masalan: mayda pul",
+    "reasonHint_WITHDRAWAL": "Masalan: inkassatsiya",
+    "reasonHint_EXPENSE": "Masalan: yetkazib berish, ijara",
+    "save": "O'tkazish",
+    "operations": "Kunlik operatsiyalar"
+  },
+  "cashOperationType": {
+    "DEPOSIT": "Kiritish",
+    "WITHDRAWAL": "Olib qo'yish",
+    "EXPENSE": "Xarajat"
+  },
+  "warranty": {
+    "title": "Kafolat",
+    "search": "IMEI yoki seriya raqami",
+    "check": "Tekshirish",
+    "active": "Kafolatda",
+    "expired": "Kafolat tugagan",
+    "notSold": "Sotilmagan",
+    "soldBy": "Sotilgan: {number}, {date}, {branch}",
+    "until": "Kafolat {date} gacha",
+    "noWarranty": "Kafolatsiz",
+    "paidRepairHint": "Kafolat tugagan — murojaat pullik ta'mir sifatida rasmiylashtiriladi.",
+    "problem": "Mijoz aytgan nosozlik",
+    "accept": "Qurilmani qabul qilish",
+    "openClaims": "Ishdagi qurilmalar",
+    "noOpenClaims": "Ochiq murojaatlar yo'q",
+    "claimInWarranty": "Kafolat holati",
+    "claimPaid": "Kafolatdan tashqari (pullik ta'mir)",
+    "resolution": "Natija",
+    "changeStatus": "Holat",
+    "to_IN_REPAIR": "Ta'mirga yuborish",
+    "to_READY": "Berishga tayyor",
+    "to_RETURNED": "Mijozga berish",
+    "to_REJECTED": "Kafolatni rad etish"
+  },
+  "warrantyStatus": {
+    "RECEIVED": "Qabul qilindi",
+    "IN_REPAIR": "Ta'mirda",
+    "READY": "Tayyor",
+    "RETURNED": "Berildi",
+    "REJECTED": "Rad etildi"
   },
   "errors": {
     "VALIDATION_ERROR": "Maydonlar to‘g‘ri to‘ldirilganini tekshiring.",

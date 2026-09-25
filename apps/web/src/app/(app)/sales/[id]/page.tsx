@@ -149,6 +149,22 @@ export default function SaleReceiptPage() {
             </dl>
           </Card>
 
+          {s.installment ? (
+            <Link
+              href={`/installments/${s.installment.id}`}
+              className="block rounded-3xl bg-brand-50 p-4 text-brand-800 active:bg-brand-100"
+            >
+              <p className="font-semibold">
+                {t('installments.inSale', { months: s.installment.months })}
+              </p>
+              <p className="text-sm">
+                {s.installment.status === 'PAID'
+                  ? t('installmentStatus.PAID')
+                  : t('installments.remainingShort', { value: money(s.installment.remaining) })}
+              </p>
+            </Link>
+          ) : null}
+
           {s.returns.length ? (
             <Card title={t('returns.title')} className="p-0">
               <ul className="divide-y divide-slate-100">

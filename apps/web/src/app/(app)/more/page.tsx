@@ -27,6 +27,24 @@ export default function MorePage() {
     },
     { href: '/users', icon: '👥', label: t('more.users'), visible: can(Permission.USERS_VIEW) },
     {
+      href: '/cash',
+      icon: '💵',
+      label: t('more.cash'),
+      visible: can(Permission.CASH_MANAGE),
+    },
+    {
+      href: '/installments',
+      icon: '📅',
+      label: t('more.installments'),
+      visible: can(Permission.SALES_VIEW),
+    },
+    {
+      href: '/warranty',
+      icon: '🛡️',
+      label: t('more.warranty'),
+      visible: can(Permission.SALES_VIEW),
+    },
+    {
       href: '/customers',
       icon: '🧑‍🤝‍🧑',
       label: t('more.customers'),

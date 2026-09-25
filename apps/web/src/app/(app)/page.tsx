@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { SystemStatus } from '@/components/system-status';
+import { installmentsApi } from '@/lib/api/finance';
 import { stockApi } from '@/lib/api/stock';
 import { useCan, useMe } from '@/lib/auth/auth-provider';
 
@@ -17,6 +18,11 @@ export default function HomePage() {
     queryKey: ['stock', { lowOnly: true }],
     queryFn: () => stockApi.balances({ lowOnly: true }),
     enabled: can(Permission.STOCK_VIEW),
+  });
+  const overdue = useQuery({
+    queryKey: ['installments', 'overdue'],
+    queryFn: () => installmentsApi.list({ status: 'ACTIVE', overdue: true }),
+    enabled: can(Permission.SALES_VIEW),
   });
   return (
     <>
@@ -66,6 +72,18 @@ export default function HomePage() {
             </Link>
           ) : null}
         </div>
+      ) : null}
+
+      {overdue.data && overdue.data.total > 0 ? (
+        <Link
+          href="/installments"
+          className="flex min-h-16 items-center justify-center gap-2 rounded-3xl bg-red-50 font-semibold text-red-700 ring-1 ring-red-200 active:bg-red-100"
+        >
+          <span aria-hidden className="text-xl">
+            📅
+          </span>
+          {t('home.overdueInstallments', { count: overdue.data.total })}
+        </Link>
       ) : null}
 
       <Card title={me.allBranches ? t('home.allBranches') : t('home.yourBranches')}>
