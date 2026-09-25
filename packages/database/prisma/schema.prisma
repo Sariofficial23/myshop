@@ -9,6 +9,8 @@
 // ЭТАП 1: Company, Branch.
 // ЭТАП 2: User, Membership (роль в компании), MembershipBranch (доступ к филиалам), Session.
 // ЭТАП 3: Category, Brand, Product, ProductVariant, Barcode, SerialNumber (IMEI / серийные номера).
+// ЭТАП 4: Supplier, Purchase, PurchaseItem, StockMovement, StockBalance, DocumentCounter, AuditLog.
+// ЭТАП 5: Customer (минимально), Sale, SaleItem, Payment; продажа по IMEI.
 
 generator client {
   provider     = "prisma-client"
@@ -31,14 +33,23 @@ model Company {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  branches      Branch[]
-  memberships   Membership[]
-  categories    Category[]
-  brands        Brand[]
-  products      Product[]
-  variants      ProductVariant[]
-  barcodes      Barcode[]
-  serialNumbers SerialNumber[]
+  branches         Branch[]
+  memberships      Membership[]
+  categories       Category[]
+  brands           Brand[]
+  products         Product[]
+  variants         ProductVariant[]
+  barcodes         Barcode[]
+  serialNumbers    SerialNumber[]
+  suppliers        Supplier[]
+  documentCounters DocumentCounter[]
+  purchases        Purchase[]
+  stockMovements   StockMovement[]
+  stockBalances    StockBalance[]
+  auditLogs        AuditLog[]
+  customers        Customer[]
+  sales            Sale[]
+  payments         Payment[]
 
   @@index([createdAt])
   @@map("companies")
@@ -58,6 +69,10 @@ model Branch {
   company            Company            @relation(fields: [companyId], references: [id], onDelete: Restrict)
   membershipBranches MembershipBranch[]
   serialNumbers      SerialNumber[]
+  purchases          Purchase[]
+  stockMovements     StockMovement[]
+  stockBalances      StockBalance[]
+  sales              Sale[]
 
   @@unique([companyId, name])
   @@index([companyId, isActive])
@@ -86,8 +101,14 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  memberships Membership[]
-  sessions    Session[]
+  memberships        Membership[]
+  sessions           Session[]
+  purchasesCreated   Purchase[]      @relation("PurchaseCreatedBy")
+  purchasesConfirmed Purchase[]      @relation("PurchaseConfirmedBy")
+  stockMovements     StockMovement[]
+  auditLogs          AuditLog[]
+  sales              Sale[]          @relation("SaleSeller")
+  paymentsReceived   Payment[]
 
   @@index([phone])
   @@map("users")
@@ -269,10 +290,14 @@ model ProductVariant {
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  company       Company        @relation(fields: [companyId], references: [id], onDelete: Restrict)
-  product       Product        @relation(fields: [productId], references: [id], onDelete: Restrict)
-  barcodes      Barcode[]
-  serialNumbers SerialNumber[]
+  company        Company         @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  product        Product         @relation(fields: [productId], references: [id], onDelete: Restrict)
+  barcodes       Barcode[]
+  serialNumbers  SerialNumber[]
+  purchaseItems  PurchaseItem[]
+  stockMovements StockMovement[]
+  stockBalances  StockBalance[]
+  saleItems      SaleItem[]
 
   @@unique([companyId, sku])
   @@index([productId])
@@ -297,13 +322,16 @@ model Barcode {
 }
 
 /// Конкретная единица товара с IMEI / серийным номером.
-/// Создаётся только документом прихода (этап 4) — вручную добавить нельзя.
-/// Связи с приходом и продажей (purchaseId, saleId) добавляются на этапах 4–5.
+/// Создаётся только проведённым документом прихода — вручную добавить нельзя.
+/// При продаже получает статус SOLD, ссылку на продажу и срок гарантии.
 model SerialNumber {
   id            String       @id @default(uuid()) @db.Uuid
   companyId     String       @map("company_id") @db.Uuid
   variantId     String       @map("variant_id") @db.Uuid
   branchId      String       @map("branch_id") @db.Uuid
+  purchaseId    String?      @map("purchase_id") @db.Uuid
+  saleId        String?      @map("sale_id") @db.Uuid
+  saleItemId    String?      @map("sale_item_id") @db.Uuid
   type          SerialType
   number        String       @db.VarChar(64)
   status        SerialStatus @default(IN_STOCK)
@@ -312,13 +340,339 @@ model SerialNumber {
   createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt     DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  company Company        @relation(fields: [companyId], references: [id], onDelete: Restrict)
-  variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
-  branch  Branch         @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  company  Company        @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  variant  ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  branch   Branch         @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  purchase Purchase?      @relation(fields: [purchaseId], references: [id], onDelete: Restrict)
+  sale     Sale?          @relation(fields: [saleId], references: [id], onDelete: Restrict)
+  saleItem SaleItem?      @relation(fields: [saleItemId], references: [id], onDelete: Restrict)
 
   /// Нельзя дважды добавить один и тот же IMEI в компании.
   @@unique([companyId, number])
   @@index([variantId, status])
   @@index([branchId, status])
+  @@index([purchaseId])
+  @@index([saleId])
   @@map("serial_numbers")
+}
+
+// ─────────────────────── Приход и склад (этап 4) ───────────────────────
+
+/// Поставщик. Полная карточка и история — этап 7.
+model Supplier {
+  id        String   @id @default(uuid()) @db.Uuid
+  companyId String   @map("company_id") @db.Uuid
+  name      String   @db.VarChar(200)
+  phone     String?  @db.VarChar(32)
+  contact   String?  @db.VarChar(200)
+  notes     String?  @db.Text
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  purchases Purchase[]
+
+  @@unique([companyId, name])
+  @@map("suppliers")
+}
+
+enum DocumentStatus {
+  DRAFT
+  CONFIRMED
+  CANCELLED
+}
+
+/// Сквозная нумерация документов внутри компании (ПР-1, ПР-2, …).
+model DocumentCounter {
+  companyId String   @map("company_id") @db.Uuid
+  type      String   @db.VarChar(32)
+  value     Int      @default(0)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@id([companyId, type])
+  @@map("document_counters")
+}
+
+/// Приход товара. Остатки меняются только при проведении (CONFIRMED).
+model Purchase {
+  id             String         @id @default(uuid()) @db.Uuid
+  companyId      String         @map("company_id") @db.Uuid
+  branchId       String         @map("branch_id") @db.Uuid
+  supplierId     String?        @map("supplier_id") @db.Uuid
+  /// Внутренний номер документа в компании.
+  number         Int
+  /// Номер накладной поставщика.
+  documentNumber String?        @map("document_number") @db.VarChar(64)
+  date           DateTime       @default(now()) @db.Timestamptz(3)
+  status         DocumentStatus @default(DRAFT)
+  total          Decimal        @default(0) @db.Decimal(14, 2)
+  notes          String?        @db.Text
+  createdById    String         @map("created_by_id") @db.Uuid
+  confirmedById  String?        @map("confirmed_by_id") @db.Uuid
+  confirmedAt    DateTime?      @map("confirmed_at") @db.Timestamptz(3)
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  company        Company         @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  branch         Branch          @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  supplier       Supplier?       @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  createdBy      User            @relation("PurchaseCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  confirmedBy    User?           @relation("PurchaseConfirmedBy", fields: [confirmedById], references: [id], onDelete: Restrict)
+  items          PurchaseItem[]
+  serialNumbers  SerialNumber[]
+  stockMovements StockMovement[]
+
+  @@unique([companyId, number])
+  @@index([companyId, status, date])
+  @@index([companyId, branchId, date])
+  @@index([supplierId])
+  @@map("purchases")
+}
+
+model PurchaseItem {
+  id            String   @id @default(uuid()) @db.Uuid
+  purchaseId    String   @map("purchase_id") @db.Uuid
+  variantId     String   @map("variant_id") @db.Uuid
+  quantity      Int
+  purchasePrice Decimal  @map("purchase_price") @db.Decimal(14, 2)
+  /// Новая цена продажи варианта (применяется при проведении).
+  salePrice     Decimal? @map("sale_price") @db.Decimal(14, 2)
+  total         Decimal  @db.Decimal(14, 2)
+  /// IMEI / серийные номера (для товаров с учётом по номеру). Становятся SerialNumber при проведении.
+  serialNumbers String[] @default([]) @map("serial_numbers")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  purchase Purchase       @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  variant  ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+
+  @@index([purchaseId])
+  @@index([variantId])
+  @@map("purchase_items")
+}
+
+/// Тип движения товара. Остаток меняется ТОЛЬКО через движения с документом-источником.
+enum StockMovementType {
+  PURCHASE
+  SALE
+  RETURN
+  TRANSFER_IN
+  TRANSFER_OUT
+  WRITE_OFF
+  INVENTORY_ADJUSTMENT
+}
+
+/// Движение товара: +приход / −расход в филиале. Неизменяемая история.
+model StockMovement {
+  id           String            @id @default(uuid()) @db.Uuid
+  companyId    String            @map("company_id") @db.Uuid
+  branchId     String            @map("branch_id") @db.Uuid
+  variantId    String            @map("variant_id") @db.Uuid
+  type         StockMovementType
+  /// Со знаком: + поступление, − расход.
+  quantity     Int
+  /// Остаток в филиале после движения — для истории без пересчёта.
+  balanceAfter Int               @map("balance_after")
+  /// Себестоимость единицы в этом движении.
+  unitCost     Decimal?          @map("unit_cost") @db.Decimal(14, 2)
+  purchaseId   String?           @map("purchase_id") @db.Uuid
+  saleId       String?           @map("sale_id") @db.Uuid
+  createdById  String            @map("created_by_id") @db.Uuid
+  createdAt    DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company   Company        @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  branch    Branch         @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  purchase  Purchase?      @relation(fields: [purchaseId], references: [id], onDelete: Restrict)
+  sale      Sale?          @relation(fields: [saleId], references: [id], onDelete: Restrict)
+  createdBy User           @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([companyId, createdAt])
+  @@index([variantId, branchId, createdAt])
+  @@index([purchaseId])
+  @@index([saleId])
+  @@map("stock_movements")
+}
+
+/// Текущий остаток варианта в филиале. Поддерживается в той же транзакции, что и движения.
+model StockBalance {
+  companyId String   @map("company_id") @db.Uuid
+  branchId  String   @map("branch_id") @db.Uuid
+  variantId String   @map("variant_id") @db.Uuid
+  quantity  Int      @default(0)
+  /// Средневзвешенная себестоимость единицы (для валовой прибыли и стоимости склада).
+  avgCost   Decimal  @default(0) @map("avg_cost") @db.Decimal(14, 2)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  company Company        @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  branch  Branch         @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+
+  @@id([branchId, variantId])
+  @@index([companyId, variantId])
+  @@map("stock_balances")
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  SALE
+  PURCHASE
+  RETURN
+  TRANSFER
+  WRITE_OFF
+  INVENTORY_ADJUSTMENT
+  PAYMENT
+}
+
+/// Журнал критических операций. Просмотр и отчёты — этап 8.
+model AuditLog {
+  id        String      @id @default(uuid()) @db.Uuid
+  companyId String      @map("company_id") @db.Uuid
+  userId    String?     @map("user_id") @db.Uuid
+  action    AuditAction
+  entity    String      @db.VarChar(64)
+  entityId  String?     @map("entity_id") @db.Uuid
+  oldValue  Json?       @map("old_value")
+  newValue  Json?       @map("new_value")
+  ip        String?     @db.VarChar(64)
+  userAgent String?     @map("user_agent") @db.VarChar(500)
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, createdAt])
+  @@index([companyId, entity, entityId])
+  @@map("audit_logs")
+}
+
+// ───────────────────────────── Продажи (этап 5) ─────────────────────────────
+
+/// Клиент. Полная карточка, долги, рассрочки и гарантии — этап 7.
+model Customer {
+  id         String   @id @default(uuid()) @db.Uuid
+  companyId  String   @map("company_id") @db.Uuid
+  name       String   @db.VarChar(200)
+  phone      String?  @db.VarChar(32)
+  telegramId BigInt?  @map("telegram_id")
+  notes      String?  @db.Text
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  sales   Sale[]
+
+  @@unique([companyId, phone])
+  @@index([companyId, name])
+  @@map("customers")
+}
+
+/// Способ оплаты продажи (ТЗ, раздел 9).
+enum SalePaymentType {
+  CASH
+  CARD
+  TRANSFER
+  MIXED
+  INSTALLMENT
+}
+
+/// Способ конкретного платежа.
+enum PaymentMethod {
+  CASH
+  CARD
+  TRANSFER
+}
+
+enum SaleStatus {
+  COMPLETED
+  PARTIALLY_RETURNED
+  RETURNED
+}
+
+/// Продажа (чек). Создаётся сразу проведённой: остаток и IMEI меняются в той же транзакции.
+model Sale {
+  id            String          @id @default(uuid()) @db.Uuid
+  companyId     String          @map("company_id") @db.Uuid
+  branchId      String          @map("branch_id") @db.Uuid
+  customerId    String?         @map("customer_id") @db.Uuid
+  sellerId      String          @map("seller_id") @db.Uuid
+  number        Int
+  date          DateTime        @default(now()) @db.Timestamptz(3)
+  status        SaleStatus      @default(COMPLETED)
+  paymentType   SalePaymentType @map("payment_type")
+  /// Сумма по ценам до скидок.
+  subtotal      Decimal         @db.Decimal(14, 2)
+  discountTotal Decimal         @default(0) @map("discount_total") @db.Decimal(14, 2)
+  /// К оплате = subtotal − discountTotal.
+  total         Decimal         @db.Decimal(14, 2)
+  paidTotal     Decimal         @default(0) @map("paid_total") @db.Decimal(14, 2)
+  /// Себестоимость проданного (для валовой прибыли).
+  costTotal     Decimal         @default(0) @map("cost_total") @db.Decimal(14, 2)
+  notes         String?         @db.Text
+  createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  company        Company         @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  branch         Branch          @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  customer       Customer?       @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  seller         User            @relation("SaleSeller", fields: [sellerId], references: [id], onDelete: Restrict)
+  items          SaleItem[]
+  payments       Payment[]
+  serialNumbers  SerialNumber[]
+  stockMovements StockMovement[]
+
+  @@unique([companyId, number])
+  @@index([companyId, date])
+  @@index([companyId, branchId, date])
+  @@index([companyId, sellerId, date])
+  @@index([customerId])
+  @@map("sales")
+}
+
+model SaleItem {
+  id        String   @id @default(uuid()) @db.Uuid
+  saleId    String   @map("sale_id") @db.Uuid
+  variantId String   @map("variant_id") @db.Uuid
+  quantity  Int
+  /// Цена за единицу до скидки.
+  price     Decimal  @db.Decimal(14, 2)
+  /// Скидка на строку (сумма).
+  discount  Decimal  @default(0) @db.Decimal(14, 2)
+  /// quantity × price − discount.
+  total     Decimal  @db.Decimal(14, 2)
+  /// Себестоимость единицы на момент продажи.
+  unitCost  Decimal  @map("unit_cost") @db.Decimal(14, 2)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  sale          Sale           @relation(fields: [saleId], references: [id], onDelete: Restrict)
+  variant       ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  serialNumbers SerialNumber[]
+
+  @@index([saleId])
+  @@index([variantId])
+  @@map("sale_items")
+}
+
+model Payment {
+  id           String        @id @default(uuid()) @db.Uuid
+  companyId    String        @map("company_id") @db.Uuid
+  saleId       String        @map("sale_id") @db.Uuid
+  method       PaymentMethod
+  amount       Decimal       @db.Decimal(14, 2)
+  receivedById String        @map("received_by_id") @db.Uuid
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  company    Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  sale       Sale    @relation(fields: [saleId], references: [id], onDelete: Restrict)
+  receivedBy User    @relation(fields: [receivedById], references: [id], onDelete: Restrict)
+
+  @@index([companyId, createdAt])
+  @@index([saleId])
+  @@map("payments")
 }

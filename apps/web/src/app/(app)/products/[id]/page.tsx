@@ -20,6 +20,7 @@ import {
 } from '@/components/catalog/variant-fields';
 import { ErrorMessage } from '@/components/error-message';
 import { PageHeader } from '@/components/page-header';
+import { ProductStock } from '@/components/stock/product-stock';
 import { catalogApi, type Product, type Variant } from '@/lib/api/catalog';
 import { useCan } from '@/lib/auth/auth-provider';
 import { useMoney } from '@/lib/hooks/use-money';
@@ -51,10 +52,14 @@ function useProductCache() {
 
 function ProductDetails({ product }: { product: Product }) {
   const t = useTranslations();
-  const canManage = useCan()(Permission.PRODUCTS_MANAGE);
+  const can = useCan();
+  const canManage = can(Permission.PRODUCTS_MANAGE);
   const [addingVariant, setAddingVariant] = useState(false);
   return (
     <>
+      {can(Permission.STOCK_VIEW) ? (
+        <ProductStock variantIds={product.variants.map((v) => v.id)} />
+      ) : null}
       <ProductInfo product={product} canManage={canManage} />
       <h2 className="mt-2 text-lg font-semibold">{t('products.variants')}</h2>
       {product.variants.map((variant) => (

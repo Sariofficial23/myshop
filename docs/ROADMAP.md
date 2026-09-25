@@ -8,8 +8,8 @@
 | 1    | Repository, monorepo, frontend, backend, database, Docker, environment, health checks | ✅ Готово |
 | 2    | Authentication (JWT), Company, Branch, Users, Roles (RBAC)                            | ✅ Готово |
 | 3    | Products, Categories, Brands, Variants, Barcode, IMEI/Serial numbers                  | ✅ Готово |
-| 4    | Purchase, StockMovement, stock balances                                               | ⏳        |
-| 5    | Sales, Payments, продажа по IMEI                                                      | ⏳        |
+| 4    | Purchase, StockMovement, stock balances                                               | ✅ Готово |
+| 5    | Sales, Payments, продажа по IMEI                                                      | ✅ Готово |
 | 6    | Returns, Transfers, Inventory                                                         | ⏳        |
 | 7    | Customers, Suppliers, Cash, Installments, Warranties                                  | ⏳        |
 | 8    | Dashboard, Reports, Audit log                                                         | ⏳        |
@@ -69,18 +69,55 @@
   создание/редактирование товара, варианты, штрихкоды, «Категории и бренды», RU/UZ
 - Seed: 5 товаров из ТЗ с категориями, брендами, ценами и штрихкодами
 
+## Этап 4 — что сделано
+
+- Приход: черновик → проведение (или сразу `confirm: true`) → отмена черновика; сквозная
+  нумерация ПР-1, ПР-2…; поставщик, номер накладной
+- Проведение атомарно: движения PURCHASE, остатки, средневзвешенная себестоимость, IMEI /
+  серийные номера (IN_STOCK), новая цена продажи, запись в журнал аудита
+- Проверки IMEI: количество = количеству товара, формат (Луна), дубли в документе и в базе
+- `StockService.applyMovement` — единственное место изменения остатка: блокирует строку
+  остатка (`SELECT … FOR UPDATE`), не допускает отрицательного остатка (+ CHECK в БД),
+  хранит остаток после движения; повторное/параллельное проведение невозможно
+- API только на чтение остатков (`/stock`, `/stock/movements`) — изменить остаток напрямую нельзя
+- Поставщики (минимально), журнал аудита (запись; просмотр — этап 8)
+- Frontend: «Склад» → Товары / Остатки / Приходы, новый приход с поиском/сканером товара и
+  вводом/сканированием IMEI, проведение, история движений в карточке товара, «Заканчиваются»
+  и «+ Приход» на главной, поставщики
+- Демо-данные: `pnpm demo:data` — 2 проведённых прихода демо-компании через те же сервисы
+
+## Этап 5 — что сделано
+
+- Продажа — одна транзакция: проверка филиала, клиента, товаров, цен и скидок → `StockMovement SALE`
+  (остаток не уходит в минус) → IMEI `IN_STOCK → SOLD` условным обновлением (параллельная продажа
+  одного IMEI невозможна) → гарантия по IMEI (срок из товара) → платежи → журнал аудита
+- Нумерация ПД-1, ПД-2…; себестоимость строки фиксируется на момент продажи (средневзвешенная)
+- Оплата: наличные, карта, перевод, смешанная (несколько платежей); сумма платежей должна точно
+  совпадать с суммой к оплате (`PAYMENT_MISMATCH`). Рассрочка и долги — этап 7
+- Цена: продавец продаёт по цене из карточки, изменить её может только роль с `products.manage`
+  (`PRICE_CHANGE_FORBIDDEN`); скидка суммой на строку, не больше суммы строки (`DISCOUNT_TOO_LARGE`)
+- Себестоимость и валовая прибыль в ответах API — только при праве `reports.view`
+- Клиенты (минимально): поиск по имени/телефону, создание, изменение, скрытие; телефон уникален
+  в компании (`DUPLICATE_CUSTOMER_PHONE`)
+- API: `GET/POST /sales`, `GET /sales/:id`, `GET /payments`, `GET/POST/PATCH /customers`,
+  `GET /serial-numbers?variantId&branchId` (IMEI в наличии)
+- CHECK-ограничения БД на суммы продаж, строк и платежей
+- Frontend: вкладка «Продажа» (корзина, выбор/скан IMEI из наличия, скидка, клиент, способы оплаты,
+  контроль распределения смешанной оплаты), чек с IMEI и сроком гарантии, история продаж,
+  «+ Продажа» на главной, «Ещё» → Клиенты / Поставщики, RU/UZ
+
 ## Модели БД по этапам
 
-| Этап | Модели                                                                                  |
-| ---- | --------------------------------------------------------------------------------------- |
-| 1    | Company, Branch                                                                         |
-| 2    | ✅ User, Membership (роль, права), MembershipBranch (доступ к филиалам), Session        |
-| 3    | ✅ Category, Brand, Product, ProductVariant, Barcode, SerialNumber                      |
-| 4    | Supplier (минимум), Purchase, PurchaseItem, StockMovement, StockBalance                 |
-| 5    | Customer (минимум), Sale, SaleItem, Payment                                             |
-| 6    | Return, ReturnItem, Transfer, TransferItem, Inventory, InventoryItem, WriteOff          |
-| 7    | Customer/Supplier (полностью), CashOperation, Installment, InstallmentPayment, Warranty |
-| 8    | AuditLog (+ отчёты поверх существующих моделей)                                         |
+| Этап | Модели                                                                                      |
+| ---- | ------------------------------------------------------------------------------------------- |
+| 1    | Company, Branch                                                                             |
+| 2    | ✅ User, Membership (роль, права), MembershipBranch (доступ к филиалам), Session            |
+| 3    | ✅ Category, Brand, Product, ProductVariant, Barcode, SerialNumber                          |
+| 4    | ✅ Supplier, Purchase, PurchaseItem, StockMovement, StockBalance, DocumentCounter, AuditLog |
+| 5    | ✅ Customer (минимум), Sale, SaleItem, Payment                                              |
+| 6    | Return, ReturnItem, Transfer, TransferItem, Inventory, InventoryItem, WriteOff              |
+| 7    | Customer/Supplier (полностью), CashOperation, Installment, InstallmentPayment, Warranty     |
+| 8    | AuditLog (+ отчёты поверх существующих моделей)                                             |
 
 Seed будет расширяться на каждом этапе: пользователи Owner/Manager/Seller/Warehouse (этап 2),
 товары iPhone 15 128GB Black, Samsung Galaxy A56, Redmi Note, LG TV 55, AirPods (этап 3),
