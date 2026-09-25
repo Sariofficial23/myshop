@@ -159,6 +159,11 @@ DATABASE_URL='<Session pooler URI>?sslmode=no-verify' pnpm db:seed
 ### 2.6 Особенности Render
 
 - **Free-тариф засыпает** после ~15 минут без запросов; первый запрос после сна идёт 30–60 секунд.
+  Чтобы этого не было, API сам запрашивает свой `/api/health` через публичный адрес раз в 10 минут
+  (keep-alive, включён по умолчанию в `production`). Адрес Render подставляет сам (`RENDER_EXTERNAL_URL`);
+  настройки: `KEEP_ALIVE_INTERVAL_MINUTES` (по умолчанию 10), `KEEP_ALIVE_URL` (свой домен),
+  `KEEP_ALIVE_ENABLED=false` — выключить. Один постоянно работающий сервис укладывается в 750 бесплатных
+  часов Render в месяц.
   Для реального магазина используйте **Starter** или выше.
 - **Автодеплой**: каждый push в `main` пересобирает API. Чтобы не пересобирать API при изменениях
   только во фронтенде: _Settings → Build & Deploy → Build Filters → Included Paths_:
