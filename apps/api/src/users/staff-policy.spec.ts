@@ -19,6 +19,7 @@ function ctx(role: Role, overrides: Partial<AuthContext> = {}): AuthContext {
     permissions: new Set(resolvePermissions(role)),
     allBranches: true,
     branchIds: [],
+    subscription: 'ACTIVE',
     ...overrides,
   };
 }

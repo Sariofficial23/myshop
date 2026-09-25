@@ -2,7 +2,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { ErrorCode, resolvePermissions, type AuthTokens } from '@myshop/shared';
+import { ErrorCode, resolvePermissions, subscriptionState, type AuthTokens } from '@myshop/shared';
 import type { Prisma } from '@myshop/database';
 import { AppException } from '../common/errors/app.exception.js';
 import type { Env } from '../config/env.js';
@@ -153,6 +153,7 @@ export class SessionService {
       permissions: new Set(resolvePermissions(membership.role, membership.extraPermissions)),
       allBranches: membership.allBranches,
       branchIds: membership.branches.map((b) => b.branchId),
+      subscription: subscriptionState(membership.company.status, membership.company.paidUntil),
     };
   }
 

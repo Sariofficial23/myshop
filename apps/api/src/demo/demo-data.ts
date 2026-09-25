@@ -57,6 +57,7 @@ async function main(): Promise<void> {
       permissions: new Set(resolvePermissions(owner.role)),
       allBranches: true,
       branchIds: [],
+      subscription: 'ACTIVE',
       userAgent: 'demo-data script',
     };
 

@@ -23,15 +23,30 @@ datasource db {
 }
 
 /// Компания (арендатор). Корень изоляции данных.
+/// Статус компании на платформе (SaaS-подписка).
+enum CompanyStatus {
+  /// Зарегистрировалась, ждёт активации администратором платформы
+  PENDING
+  /// Работает (до paidUntil; после — только просмотр)
+  ACTIVE
+  /// Заблокирована администратором платформы
+  BLOCKED
+}
+
 model Company {
-  id        String   @id @default(uuid()) @db.Uuid
-  name      String   @db.VarChar(200)
+  id        String        @id @default(uuid()) @db.Uuid
+  name      String        @db.VarChar(200)
+  /// Название в нижнем регистре — уникально: по нему сотрудники входят в свою компанию.
+  nameKey   String?       @unique @map("name_key") @db.VarChar(200)
+  status    CompanyStatus @default(ACTIVE)
+  /// Подписка оплачена до этой даты. null — без ограничения срока.
+  paidUntil DateTime?     @map("paid_until") @db.Timestamptz(3)
   /// Код валюты ISO 4217, по умолчанию узбекский сум.
-  currency  String   @default("UZS") @db.Char(3)
-  timezone  String   @default("Asia/Tashkent") @db.VarChar(64)
-  isActive  Boolean  @default(true) @map("is_active")
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  currency  String        @default("UZS") @db.Char(3)
+  timezone  String        @default("Asia/Tashkent") @db.VarChar(64)
+  isActive  Boolean       @default(true) @map("is_active")
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   branches            Branch[]
   memberships         Membership[]
@@ -110,6 +125,10 @@ model User {
   id           String   @id @default(uuid()) @db.Uuid
   /// Telegram user id. Вход в систему — только через проверенный Telegram initData.
   telegramId   BigInt?  @unique @map("telegram_id")
+  /// Логин владельца бизнеса (вход по email и паролю).
+  email        String?  @unique @db.VarChar(254)
+  /// scrypt-хэш пароля владельца. Сам пароль не хранится.
+  passwordHash String?  @map("password_hash") @db.VarChar(255)
   firstName    String   @map("first_name") @db.VarChar(100)
   lastName     String?  @map("last_name") @db.VarChar(100)
   username     String?  @db.VarChar(64)
@@ -153,6 +172,10 @@ model Membership {
   allBranches      Boolean   @default(false) @map("all_branches")
   isActive         Boolean   @default(true) @map("is_active")
   lastLoginAt      DateTime? @map("last_login_at") @db.Timestamptz(3)
+  /// Логин сотрудника в компании (вход: название компании + логин + пароль).
+  login            String?   @db.VarChar(64)
+  /// scrypt-хэш пароля сотрудника.
+  passwordHash     String?   @map("password_hash") @db.VarChar(255)
   createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
 
@@ -161,6 +184,7 @@ model Membership {
   branches MembershipBranch[]
   sessions Session[]
 
+  @@unique([companyId, login])
   @@unique([companyId, userId])
   @@index([userId])
   @@index([companyId, role])

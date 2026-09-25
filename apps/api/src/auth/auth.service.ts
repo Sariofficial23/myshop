@@ -2,10 +2,13 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   type AuthResponse,
+  companyNameKey,
   ErrorCode,
   isLocale,
   type MeResponse,
+  normalizeLogin,
   resolvePermissions,
+  subscriptionState,
 } from '@myshop/shared';
 import type { Membership } from '@myshop/database';
 import { AppException } from '../common/errors/app.exception.js';
@@ -13,7 +16,8 @@ import type { Env } from '../config/env.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { AuthContext } from './auth-context.js';
 import { toAuthUser } from './auth.mappers.js';
-import type { TelegramRegisterDto } from './dto/auth.dto.js';
+import type { PasswordLoginDto, RegisterDto, StaffLoginDto } from './dto/auth.dto.js';
+import { hashPassword, verifyAgainstDummy, verifyPassword } from './password.js';
 import { type ClientMeta, SessionService } from './session.service.js';
 import {
   InitDataError,
@@ -46,45 +50,95 @@ export class AuthService {
   }
 
   /**
-   * Регистрация нового магазина (SaaS-онбординг): создаёт компанию, первый филиал
-   * и делает пользователя владельцем. Всё в одной транзакции.
+   * Регистрация владельца бизнеса: бренд → email → пароль. Создаются компания (ждёт активации
+   * администратором платформы), первый филиал и владелец — в одной транзакции.
    */
-  async registerWithTelegram(dto: TelegramRegisterDto, meta: ClientMeta): Promise<AuthResponse> {
-    const tgUser = this.verifyInitData(dto.initData);
-    const telegramId = BigInt(tgUser.id);
+  async register(dto: RegisterDto, meta: ClientMeta): Promise<AuthResponse> {
+    const nameKey = companyNameKey(dto.companyName);
+    const email = normalizeLogin(dto.email);
+    const tgUser = this.tryInitData(dto.initData);
+    const passwordHash = await hashPassword(dto.password);
 
     const membership = await this.prisma.$transaction(async (tx) => {
-      const existing = await tx.user.findUnique({
-        where: { telegramId },
-        include: { memberships: { select: { id: true } } },
-      });
-      if (existing && !existing.isActive) {
+      if (await tx.company.findUnique({ where: { nameKey }, select: { id: true } })) {
         throw new AppException(
-          ErrorCode.ACCOUNT_DISABLED,
-          HttpStatus.FORBIDDEN,
-          'Account is disabled',
-        );
-      }
-      if (existing?.memberships.length) {
-        throw new AppException(
-          ErrorCode.ALREADY_REGISTERED,
+          ErrorCode.DUPLICATE_COMPANY_NAME,
           HttpStatus.CONFLICT,
-          'User already belongs to a company',
+          'Company name is taken',
         );
       }
-      const user = existing
-        ? await tx.user.update({ where: { id: existing.id }, data: profileFromTelegram(tgUser) })
-        : await tx.user.create({ data: { telegramId, ...profileFromTelegram(tgUser) } });
+      if (await tx.user.findUnique({ where: { email }, select: { id: true } })) {
+        throw new AppException(ErrorCode.EMAIL_TAKEN, HttpStatus.CONFLICT, 'Email is taken');
+      }
+      // Тот же человек в Telegram без email — дописываем ему логин, иначе — новый пользователь
+      const tgExisting = tgUser
+        ? await tx.user.findUnique({ where: { telegramId: BigInt(tgUser.id) } })
+        : null;
+      const profile = tgUser ? profileFromTelegram(tgUser) : null;
+      const user =
+        tgExisting && !tgExisting.email
+          ? await tx.user.update({
+              where: { id: tgExisting.id },
+              data: { email, passwordHash, ...profile },
+            })
+          : await tx.user.create({
+              data: {
+                email,
+                passwordHash,
+                firstName: dto.firstName ?? profile?.firstName ?? dto.companyName.slice(0, 100),
+                lastName: profile?.lastName ?? null,
+                username: profile?.username ?? null,
+                languageCode: profile?.languageCode,
+                telegramId: tgUser && !tgExisting ? BigInt(tgUser.id) : null,
+              },
+            });
 
-      const company = await tx.company.create({ data: { name: dto.companyName } });
-      await tx.branch.create({
-        data: { companyId: company.id, name: dto.branchName ?? DEFAULT_BRANCH_NAME },
+      const company = await tx.company.create({
+        data: { name: dto.companyName, nameKey, status: 'PENDING' },
       });
+      await tx.branch.create({ data: { companyId: company.id, name: DEFAULT_BRANCH_NAME } });
       return tx.membership.create({
         data: { companyId: company.id, userId: user.id, role: 'OWNER', allBranches: true },
       });
     });
 
+    return this.issueFor(membership, meta);
+  }
+
+  /** Вход владельца по email и паролю. */
+  async loginWithPassword(dto: PasswordLoginDto, meta: ClientMeta): Promise<AuthResponse> {
+    const user = await this.prisma.user.findUnique({
+      where: { email: normalizeLogin(dto.email) },
+    });
+    const ok = user?.passwordHash
+      ? await verifyPassword(dto.password, user.passwordHash)
+      : await verifyAgainstDummy(dto.password);
+    if (!user || !ok) throw invalidCredentials();
+    await this.linkTelegram(user.id, dto.initData);
+    return this.loginUser(user.id, undefined, meta);
+  }
+
+  /** Вход сотрудника: название компании + логин + пароль (их выдаёт владелец). */
+  async loginStaff(dto: StaffLoginDto, meta: ClientMeta): Promise<AuthResponse> {
+    const membership = await this.prisma.membership.findFirst({
+      where: {
+        login: normalizeLogin(dto.login),
+        company: { nameKey: companyNameKey(dto.companyName), isActive: true },
+      },
+      include: { user: true },
+    });
+    const ok = membership?.passwordHash
+      ? await verifyPassword(dto.password, membership.passwordHash)
+      : await verifyAgainstDummy(dto.password);
+    if (!membership || !ok) throw invalidCredentials();
+    if (!membership.isActive || !membership.user.isActive) {
+      throw new AppException(
+        ErrorCode.ACCOUNT_DISABLED,
+        HttpStatus.FORBIDDEN,
+        'Account is disabled',
+      );
+    }
+    await this.linkTelegram(membership.userId, dto.initData);
     return this.issueFor(membership, meta);
   }
 
@@ -180,6 +234,10 @@ export class AuthService {
         name: membership.company.name,
         currency: membership.company.currency,
         timezone: membership.company.timezone,
+        subscription: {
+          state: subscriptionState(membership.company.status, membership.company.paidUntil),
+          paidUntil: membership.company.paidUntil?.toISOString() ?? null,
+        },
       },
       role: membership.role,
       permissions: resolvePermissions(membership.role, membership.extraPermissions),
@@ -257,6 +315,35 @@ export class AuthService {
     }
   }
 
+  /** initData, если он есть и подпись верна; иначе null (вход по паролю работает и вне Telegram). */
+  private tryInitData(initData?: string): TelegramUser | null {
+    if (!initData) return null;
+    try {
+      return this.verifyInitData(initData);
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * После входа по паролю в Telegram запоминаем Telegram аккаунт, чтобы в следующий раз
+   * Mini App открывался без ввода пароля. Чужой (уже привязанный) Telegram не перепривязываем.
+   */
+  private async linkTelegram(userId: string, initData?: string): Promise<void> {
+    const tgUser = this.tryInitData(initData);
+    if (!tgUser) return;
+    const telegramId = BigInt(tgUser.id);
+    const owner = await this.prisma.user.findUnique({
+      where: { telegramId },
+      select: { id: true },
+    });
+    if (owner && owner.id !== userId) return;
+    await this.prisma.user.updateMany({
+      where: { id: userId, OR: [{ telegramId: null }, { telegramId }] },
+      data: { telegramId, ...profileFromTelegram(tgUser) },
+    });
+  }
+
   private assertDevLoginEnabled(): void {
     if (!this.config.get('AUTH_DEV_LOGIN_ENABLED', { infer: true })) {
       throw new AppException(
@@ -276,6 +363,14 @@ export class AuthService {
       telegramId ? { telegramId: String(telegramId) } : undefined,
     );
   }
+}
+
+function invalidCredentials(): AppException {
+  return new AppException(
+    ErrorCode.INVALID_CREDENTIALS,
+    HttpStatus.UNAUTHORIZED,
+    'Invalid login or password',
+  );
 }
 
 interface TelegramProfile {

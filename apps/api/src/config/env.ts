@@ -50,6 +50,20 @@ export const envSchema = z.object({
     .or(z.literal('').transform(() => undefined)),
   /** Максимальный возраст initData (auth_date) в секундах. */
   TELEGRAM_INIT_DATA_MAX_AGE_SECONDS: z.coerce.number().int().min(60).default(86_400),
+  /**
+   * Администраторы платформы (владелец SaaS): Telegram ID через запятую.
+   * Видят все компании, активируют их и продлевают подписку.
+   */
+  PLATFORM_ADMIN_TELEGRAM_IDS: z
+    .string()
+    .default('')
+    .transform((value) =>
+      value
+        .split(',')
+        .map((id) => id.trim())
+        .filter(Boolean),
+    )
+    .pipe(z.array(z.string().regex(/^\d{1,20}$/, 'PLATFORM_ADMIN_TELEGRAM_IDS: only digits'))),
   /** Вход без Telegram по демо-пользователям. Только для локальной разработки. */
   AUTH_DEV_LOGIN_ENABLED: booleanString.default(false),
 });

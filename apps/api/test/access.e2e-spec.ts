@@ -50,12 +50,10 @@ describe('Access control (e2e)', () => {
 
     it('owner manages company and branches; duplicate branch names are rejected', async () => {
       const owner = await as(app, fx.users.OWNER.telegramId);
-      await owner
-        .patch('/api/companies/current')
-        .send({ name: 'Techno House', currency: 'usd' })
-        .expect(200);
+      const name = `Techno House ${fx.companyId.slice(0, 8)}`;
+      await owner.patch('/api/companies/current').send({ name, currency: 'usd' }).expect(200);
       const company = await owner.get('/api/companies/current').expect(200);
-      expect(company.body).toMatchObject({ name: 'Techno House', currency: 'USD' });
+      expect(company.body).toMatchObject({ name, currency: 'USD' });
 
       await owner.post('/api/branches').send({ name: 'Sergeli' }).expect(201);
       const dup = await owner.post('/api/branches').send({ name: 'Sergeli' }).expect(409);

@@ -6,4 +6,5 @@ Object.assign(process.env, {
   TELEGRAM_BOT_TOKEN: '123456:TEST_TOKEN_abcdefghijklmnopqrstuvwxyz',
   AUTH_DEV_LOGIN_ENABLED: 'true',
   THROTTLE_ENABLED: 'false',
+  PLATFORM_ADMIN_TELEGRAM_IDS: '777000111',
 });
