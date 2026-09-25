@@ -3,13 +3,17 @@
 import { Permission } from '@myshop/shared';
 import { Card, ListRow, StatusBadge } from '@myshop/ui';
 import { useQuery } from '@tanstack/react-query';
+import { Printer } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
+import { useEffect } from 'react';
 import { ErrorMessage } from '@/components/error-message';
 import { PageHeader } from '@/components/page-header';
+import { PrintableReceipt } from '@/components/sales/printable-receipt';
+import { companyApi } from '@/lib/api/company';
 import { salesApi } from '@/lib/api/sales';
-import { useCan } from '@/lib/auth/auth-provider';
+import { useAuth, useCan } from '@/lib/auth/auth-provider';
 import { useMoney } from '@/lib/hooks/use-money';
 
 const fullName = (u: { firstName: string; lastName: string | null }) =>
@@ -21,9 +25,24 @@ export default function SaleReceiptPage() {
   const format = useFormatter();
   const money = useMoney();
   const can = useCan();
+  // Внутри Telegram печать из WebView недоступна — кнопку показываем только в браузере.
+  const { inTelegram } = useAuth();
   const { id } = useParams<{ id: string }>();
   const sale = useQuery({ queryKey: ['sales', id], queryFn: () => salesApi.get(id) });
   const s = sale.data;
+  // Реквизиты для шапки и текста внизу чека — загружаем заранее, чтобы печать не ждала.
+  const company = useQuery({ queryKey: ['company'], queryFn: companyApi.current });
+  const ready = Boolean(s && company.isFetched);
+
+  // Сразу после продажи на компьютере (?print=1) чек отправляется на печать автоматически.
+  useEffect(() => {
+    if (!ready) return;
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('print') !== '1') return;
+    url.searchParams.delete('print');
+    window.history.replaceState(null, '', url);
+    if (window.matchMedia('(min-width: 1024px)').matches) window.print();
+  }, [ready]);
 
   return (
     <>
@@ -31,10 +50,24 @@ export default function SaleReceiptPage() {
         title={s ? t('sale.receiptTitle', { number: s.displayNumber }) : t('sales.title')}
         backHref={can(Permission.SALES_VIEW) ? '/sales' : '/sale'}
         backLabel={t('common.back')}
+        action={
+          s && !inTelegram ? (
+            <button
+              type="button"
+              onClick={() => window.print()}
+              disabled={!ready}
+              className="flex min-h-11 items-center gap-2 rounded-2xl bg-white px-4 font-semibold ring-1 ring-slate-200 active:bg-slate-50 disabled:opacity-50"
+            >
+              <Printer aria-hidden size={18} />
+              {t('receipt.print')}
+            </button>
+          ) : null
+        }
       />
       <ErrorMessage error={sale.error} />
       {s ? (
         <>
+          <PrintableReceipt sale={s} />
           <Card>
             <div className="flex items-start justify-between gap-3">
               <div className="flex flex-col gap-1 text-slate-700">

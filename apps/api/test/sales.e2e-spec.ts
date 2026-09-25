@@ -124,6 +124,8 @@ describe('Sales (e2e)', () => {
       customer: { id: customer.body.id },
       displayNumber: `ПД-${res.body.number}`,
     });
+    // Для шапки печатного чека — адрес и телефон филиала
+    expect(Object.keys(res.body.branch).sort()).toEqual(['address', 'id', 'name', 'phone']);
     // Продавец не видит себестоимость и прибыль
     expect(res.body.costTotal).toBeUndefined();
     expect(res.body.items[0].unitCost).toBeUndefined();

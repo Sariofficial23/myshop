@@ -31,6 +31,7 @@ function CompanyForm({ company }: { company: Company }) {
     name: company.name,
     currency: company.currency,
     timezone: company.timezone,
+    receiptFooter: company.receiptFooter ?? '',
   });
   const save = useMutation({
     mutationFn: () => companyApi.update(form),
@@ -73,6 +74,18 @@ function CompanyForm({ company }: { company: Company }) {
           disabled={!canEdit}
           required
         />
+        <label className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-slate-700">{t('company.receiptFooter')}</span>
+          <textarea
+            className="min-h-24 rounded-2xl bg-white px-4 py-3 text-base ring-1 ring-slate-200 outline-none focus:ring-2 focus:ring-brand-600 disabled:bg-slate-50"
+            value={form.receiptFooter}
+            onChange={(e) => setForm({ ...form, receiptFooter: e.target.value })}
+            placeholder={t('receipt.thanks')}
+            disabled={!canEdit}
+            maxLength={500}
+          />
+          <span className="text-sm text-slate-500">{t('company.receiptFooterHint')}</span>
+        </label>
         <ErrorMessage error={save.error} />
         {canEdit ? (
           <Button type="submit" block disabled={save.isPending}>

@@ -154,7 +154,7 @@ export default function SalePage() {
           queryClient.invalidateQueries({ queryKey: [key] }),
         ),
       );
-      router.replace(`/sales/${sale.id}`);
+      router.replace(`/sales/${sale.id}?print=1`);
     },
   });
 
