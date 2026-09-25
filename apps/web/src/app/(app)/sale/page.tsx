@@ -185,168 +185,172 @@ export default function SalePage() {
         }
       />
 
-      {me.branches.length > 1 ? (
-        <Card>
-          <SelectField
-            label={t('sale.branch')}
-            value={branchId}
-            onChange={(e) => changeBranch(e.target.value)}
-            options={me.branches.map((b) => ({ value: b.id, label: b.name }))}
-          />
-        </Card>
-      ) : null}
+      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-6">
+        <div className="flex min-w-0 flex-col gap-4">
+          {me.branches.length > 1 ? (
+            <Card>
+              <SelectField
+                label={t('sale.branch')}
+                value={branchId}
+                onChange={(e) => changeBranch(e.target.value)}
+                options={me.branches.map((b) => ({ value: b.id, label: b.name }))}
+              />
+            </Card>
+          ) : null}
 
-      <VariantPicker onPick={addLine} />
+          <VariantPicker onPick={addLine} />
 
-      {lines.length === 0 ? (
-        <p className="py-6 text-center text-slate-500">{t('sale.emptyCart')}</p>
-      ) : null}
-      {lines.map((line) => (
-        <LineCard
-          key={line.key}
-          line={line}
-          branchId={branchId}
-          canChangePrice={canChangePrice}
-          showErrors={showErrors}
-          onChange={updateLine}
-          onRemove={() => setLines((current) => current.filter((l) => l.key !== line.key))}
-        />
-      ))}
+          {lines.length === 0 ? (
+            <p className="py-6 text-center text-slate-500">{t('sale.emptyCart')}</p>
+          ) : null}
+          {lines.map((line) => (
+            <LineCard
+              key={line.key}
+              line={line}
+              branchId={branchId}
+              canChangePrice={canChangePrice}
+              showErrors={showErrors}
+              onChange={updateLine}
+              onRemove={() => setLines((current) => current.filter((l) => l.key !== line.key))}
+            />
+          ))}
+        </div>
 
-      {lines.length ? (
-        <>
-          <Card title={t('sale.customer')}>
-            <CustomerSelect value={customer} onChange={setCustomer} />
-          </Card>
+        {lines.length ? (
+          <div className="flex flex-col gap-4 lg:sticky lg:top-8">
+            <Card title={t('sale.customer')}>
+              <CustomerSelect value={customer} onChange={setCustomer} />
+            </Card>
 
-          <Card title={t('sale.payment')}>
-            <div className="grid grid-cols-2 gap-2">
-              {PAYMENT_MODES.map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  aria-pressed={mode === m}
-                  onClick={() => setMode(m)}
-                  className={cn(
-                    'min-h-12 rounded-2xl font-semibold ring-1',
-                    mode === m
-                      ? 'bg-brand-600 text-white ring-brand-600'
-                      : 'bg-white text-slate-700 ring-slate-200 active:bg-slate-50',
-                  )}
-                >
-                  {t(`paymentMethod.${m}`)}
-                </button>
-              ))}
-            </div>
-            {mode === 'MIXED' ? (
-              <div className="mt-3 flex flex-col gap-3">
-                {PAYMENT_METHODS.map((method) => (
-                  <TextField
-                    key={method}
-                    label={t(`paymentMethod.${method}`)}
-                    inputMode="decimal"
-                    value={mixed[method] ?? ''}
-                    onChange={(e) => setMixed((cur) => ({ ...cur, [method]: e.target.value }))}
-                  />
+            <Card title={t('sale.payment')}>
+              <div className="grid grid-cols-2 gap-2">
+                {PAYMENT_MODES.map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    aria-pressed={mode === m}
+                    onClick={() => setMode(m)}
+                    className={cn(
+                      'min-h-12 rounded-2xl font-semibold ring-1',
+                      mode === m
+                        ? 'bg-brand-600 text-white ring-brand-600'
+                        : 'bg-white text-slate-700 ring-slate-200 active:bg-slate-50',
+                    )}
+                  >
+                    {t(`paymentMethod.${m}`)}
+                  </button>
                 ))}
-                <p
-                  className={cn(
-                    'text-sm font-medium',
-                    remainder === 0 ? 'text-emerald-700' : 'text-red-600',
+              </div>
+              {mode === 'MIXED' ? (
+                <div className="mt-3 flex flex-col gap-3">
+                  {PAYMENT_METHODS.map((method) => (
+                    <TextField
+                      key={method}
+                      label={t(`paymentMethod.${method}`)}
+                      inputMode="decimal"
+                      value={mixed[method] ?? ''}
+                      onChange={(e) => setMixed((cur) => ({ ...cur, [method]: e.target.value }))}
+                    />
+                  ))}
+                  <p
+                    className={cn(
+                      'text-sm font-medium',
+                      remainder === 0 ? 'text-emerald-700' : 'text-red-600',
+                    )}
+                  >
+                    {remainder === 0
+                      ? t('sale.mixedOk')
+                      : remainder > 0
+                        ? t('sale.mixedLeft', { value: money(fromCents(remainder)) })
+                        : t('sale.mixedOver', { value: money(fromCents(-remainder)) })}
+                  </p>
+                </div>
+              ) : null}
+              {mode === 'INSTALLMENT' ? (
+                <div className="mt-3 flex flex-col gap-3">
+                  {!customer ? (
+                    <p className="text-sm font-medium text-red-600">
+                      {t('sale.installmentCustomer')}
+                    </p>
+                  ) : null}
+                  <div className="grid grid-cols-2 gap-3">
+                    <TextField
+                      label={t('sale.months')}
+                      type="number"
+                      min={1}
+                      max={60}
+                      inputMode="numeric"
+                      value={months}
+                      onChange={(e) => setMonths(e.target.value)}
+                    />
+                    <TextField
+                      label={t('sale.firstDueDate')}
+                      type="date"
+                      value={firstDueDate}
+                      onChange={(e) => setFirstDueDate(e.target.value)}
+                    />
+                  </div>
+                  <TextField
+                    label={t('sale.downPayment')}
+                    inputMode="decimal"
+                    placeholder="0"
+                    value={downPayment}
+                    onChange={(e) => setDownPayment(e.target.value)}
+                  />
+                  <SelectField
+                    label={t('sale.downPaymentMethod')}
+                    value={downMethod}
+                    onChange={(e) => setDownMethod(e.target.value as PaymentMethod)}
+                    options={PAYMENT_METHODS.map((m) => ({
+                      value: m,
+                      label: t(`paymentMethod.${m}`),
+                    }))}
+                  />
+                  {installment ? (
+                    <p className="rounded-2xl bg-brand-50 p-3 text-sm text-brand-800">
+                      {t('sale.installmentPlan', {
+                        debt: money(fromCents(installment.debtCents)),
+                        months: installment.months,
+                        monthly: money(fromCents(installment.monthlyCents)),
+                      })}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-red-600">{t('sale.installmentInvalid')}</p>
                   )}
-                >
-                  {remainder === 0
-                    ? t('sale.mixedOk')
-                    : remainder > 0
-                      ? t('sale.mixedLeft', { value: money(fromCents(remainder)) })
-                      : t('sale.mixedOver', { value: money(fromCents(-remainder)) })}
-                </p>
-              </div>
-            ) : null}
-            {mode === 'INSTALLMENT' ? (
-              <div className="mt-3 flex flex-col gap-3">
-                {!customer ? (
-                  <p className="text-sm font-medium text-red-600">
-                    {t('sale.installmentCustomer')}
-                  </p>
-                ) : null}
-                <div className="grid grid-cols-2 gap-3">
-                  <TextField
-                    label={t('sale.months')}
-                    type="number"
-                    min={1}
-                    max={60}
-                    inputMode="numeric"
-                    value={months}
-                    onChange={(e) => setMonths(e.target.value)}
-                  />
-                  <TextField
-                    label={t('sale.firstDueDate')}
-                    type="date"
-                    value={firstDueDate}
-                    onChange={(e) => setFirstDueDate(e.target.value)}
-                  />
                 </div>
-                <TextField
-                  label={t('sale.downPayment')}
-                  inputMode="decimal"
-                  placeholder="0"
-                  value={downPayment}
-                  onChange={(e) => setDownPayment(e.target.value)}
-                />
-                <SelectField
-                  label={t('sale.downPaymentMethod')}
-                  value={downMethod}
-                  onChange={(e) => setDownMethod(e.target.value as PaymentMethod)}
-                  options={PAYMENT_METHODS.map((m) => ({
-                    value: m,
-                    label: t(`paymentMethod.${m}`),
-                  }))}
-                />
-                {installment ? (
-                  <p className="rounded-2xl bg-brand-50 p-3 text-sm text-brand-800">
-                    {t('sale.installmentPlan', {
-                      debt: money(fromCents(installment.debtCents)),
-                      months: installment.months,
-                      monthly: money(fromCents(installment.monthlyCents)),
-                    })}
-                  </p>
-                ) : (
-                  <p className="text-sm text-red-600">{t('sale.installmentInvalid')}</p>
-                )}
-              </div>
-            ) : null}
-          </Card>
+              ) : null}
+            </Card>
 
-          <Card>
-            <dl className="flex flex-col gap-1 text-slate-600">
-              <div className="flex justify-between">
-                <dt>{t('sale.subtotal')}</dt>
-                <dd>{money(fromCents(totals.subtotal))}</dd>
-              </div>
-              {totals.discount ? (
+            <Card>
+              <dl className="flex flex-col gap-1 text-slate-600">
                 <div className="flex justify-between">
-                  <dt>{t('sale.discount')}</dt>
-                  <dd>−{money(fromCents(totals.discount))}</dd>
+                  <dt>{t('sale.subtotal')}</dt>
+                  <dd>{money(fromCents(totals.subtotal))}</dd>
                 </div>
-              ) : null}
-              <div className="flex justify-between text-xl font-bold text-slate-900">
-                <dt>{t('sale.toPay')}</dt>
-                <dd>{money(fromCents(totals.total))}</dd>
+                {totals.discount ? (
+                  <div className="flex justify-between">
+                    <dt>{t('sale.discount')}</dt>
+                    <dd>−{money(fromCents(totals.discount))}</dd>
+                  </div>
+                ) : null}
+                <div className="flex justify-between text-xl font-bold text-slate-900">
+                  <dt>{t('sale.toPay')}</dt>
+                  <dd>{money(fromCents(totals.total))}</dd>
+                </div>
+              </dl>
+              <div className="mt-3 flex flex-col gap-2">
+                <ErrorMessage error={sell.error} />
+                {showErrors && !valid ? (
+                  <p className="text-sm text-red-600">{t('sale.fixErrors')}</p>
+                ) : null}
+                <Button block disabled={sell.isPending} onClick={submit}>
+                  {sell.isPending ? t('sale.selling') : t('sale.sell')}
+                </Button>
               </div>
-            </dl>
-            <div className="mt-3 flex flex-col gap-2">
-              <ErrorMessage error={sell.error} />
-              {showErrors && !valid ? (
-                <p className="text-sm text-red-600">{t('sale.fixErrors')}</p>
-              ) : null}
-              <Button block disabled={sell.isPending} onClick={submit}>
-                {sell.isPending ? t('sale.selling') : t('sale.sell')}
-              </Button>
-            </div>
-          </Card>
-        </>
-      ) : null}
+            </Card>
+          </div>
+        ) : null}
+      </div>
     </>
   );
 }

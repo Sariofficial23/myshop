@@ -769,5 +769,12 @@
     "SUBSCRIPTION_EXPIRED": "Подписка закончилась — доступен только просмотр.",
     "NOT_PLATFORM_ADMIN": "Доступ только для администратора MyShop.",
     "CREDENTIALS_REQUIRED": "Укажите логин и пароль сотрудника."
+  },
+  "sideNav": {
+    "salesHistory": "История продаж",
+    "stock": "Склад",
+    "money": "Деньги",
+    "people": "Контрагенты",
+    "settings": "Настройки"
   }
 }

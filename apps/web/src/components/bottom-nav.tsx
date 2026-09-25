@@ -58,7 +58,7 @@ export function BottomNav() {
   ];
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-black/10 bg-white/80 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl backdrop-saturate-150">
+    <nav className="fixed inset-x-0 bottom-0 z-10 border-t lg:hidden border-black/10 bg-white/80 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl backdrop-saturate-150">
       <ul className="mx-auto flex max-w-md">
         {items
           .filter((item) => item.visible)

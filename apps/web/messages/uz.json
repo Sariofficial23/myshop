@@ -769,5 +769,12 @@
     "SUBSCRIPTION_EXPIRED": "Obuna tugadi — faqat ko'rish mumkin.",
     "NOT_PLATFORM_ADMIN": "Faqat MyShop administratori uchun.",
     "CREDENTIALS_REQUIRED": "Xodimning login va parolini kiriting."
+  },
+  "sideNav": {
+    "salesHistory": "Sotuvlar tarixi",
+    "stock": "Ombor",
+    "money": "Pul",
+    "people": "Hamkorlar",
+    "settings": "Sozlamalar"
   }
 }

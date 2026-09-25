@@ -19,7 +19,7 @@ export function BranchFilter({
   const t = useTranslations('stock');
   const me = useMe();
   if (me.branches.length < 2 && allowAll) return null;
-  return (
+  const field = (
     <SelectField
       label={label ?? t('branch')}
       value={value}
@@ -30,4 +30,6 @@ export function BranchFilter({
       ]}
     />
   );
+  // Как фильтр списка на широком экране поле не растягивается на всю ширину.
+  return allowAll ? <div className="lg:max-w-xs">{field}</div> : field;
 }
